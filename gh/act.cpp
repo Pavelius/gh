@@ -1,7 +1,7 @@
 #include "main.h"
 
 bool acti::iscondition() const {
-	switch(action) {
+	switch(action.value) {
 	case AnyElement:
 	case Air:
 	case Fire:

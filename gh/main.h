@@ -7,20 +7,49 @@
 const unsigned short Blocked = 0xFFFF;
 
 enum action_s : unsigned char {
-	Move, Jump, Fly,
-	Attack, AttackJumped,
-	Range, Target, Shield, Retaliate, Heal, Loot, Experience,
-	Bless, Curse, Disarm, Immobilize, Wound, Muddle, Poison, Push, Pull, Pierce,
-	Invisibility, Stun, Strenght,
+	Move, Jump, AttackJump, Fly, MoveX, Attack, AttackX, Heal, Push, Pull, Shield, Retaliate, Loot,
+	Pierce,
+	Bonus, Range, Target, TargetYou, Experience, ExperienceUse,
+	Cone, Ray, HalfCircle, AllEnemyAround,
+	Bless, Curse, 
 	Discard, Use, Round,
+};
+enum state_s : unsigned char {
+	Disarm, Immobilize, Wound, Muddle, Poison, Invisibility, Stun, Strenght,
+};
+enum element_s : unsigned char {
 	AnyElement, Fire, Ice, Air, Earth, Light, Dark,
+};
+enum monster_s : unsigned char {
+	AnimatedBones, AnimatedBodies, FireDemon,
+};
+enum class_s : unsigned char {
+	Brute,
 };
 enum res_s : unsigned char {
 	MONSTERS, PLAYERS,
 	LastResource = PLAYERS
 };
-enum class_s : unsigned char {
-	Brute,
+enum variant_s : unsigned char {
+	NoVariant, Action, Class, Element, Monster, State,
+};
+struct variant {
+	variant_s			type;
+	union {
+		action_s		action;
+		class_s			cless;
+		element_s		element;
+		monster_s		monster;
+		state_s			state;
+		unsigned char	value;
+	};
+	constexpr variant() : type(NoVariant), value(0) {}
+	constexpr variant(action_s v) : type(Action), value(v) {}
+	constexpr variant(class_s v) : type(Class), value(v) {}
+	constexpr variant(element_s v) : type(Element), value(v) {}
+	constexpr variant(monster_s v) : type(Monster), value(v) {}
+	constexpr variant(state_s v) : type(State), value(v) {}
+	void				clear() { type = NoVariant; value = 0; }
 };
 struct drawable : point {
 	res_s				res;
@@ -30,6 +59,7 @@ struct drawable : point {
 	void				paint() const { paint(x, y); };
 	static void			slide(int x, int y);
 };
+typedef cflags<state_s, unsigned char> actiona;
 class deck : adat<unsigned char, 44> {
 public:
 	void				add(unsigned char v) { adat::add(v); }
@@ -40,11 +70,11 @@ public:
 	void				discard(unsigned char v) { adat::add(v); }
 };
 struct acti {
-	action_s			action;
+	variant				action;
 	char				bonus;
 	constexpr acti() : action(Move), bonus(1) {}
-	constexpr acti(action_s action) : action(action), bonus(1) {}
-	constexpr acti(action_s action, char bonus) : action(action), bonus(bonus) {}
+	template<class T> constexpr acti(const T v) : action(v), bonus(1) {}
+	template<class T> constexpr acti(const T v, char bonus) : action(v), bonus(bonus) {}
 	bool				iscondition() const;
 };
 typedef adat<acti, 8> acta;
@@ -66,7 +96,7 @@ public:
 	void				operator+=(const action& e);
 	void				operator-=(const action& e);
 	const acti*			add(const acti* pb, const acti* pe);
-	void				add(const acti& e) { data[e.action] = e.bonus; }
+	void				add(const acti& e) { data[e.action.value] = e.bonus; }
 	constexpr int		get(action_s i) const { return data[i]; }
 	void				set(action_s i, int v) { data[i] = v; }
 };
@@ -96,9 +126,16 @@ public:
 	void				sethp(short unsigned v) { hp = v; }
 	void				sethpmax(short unsigned v) { hp_max = v; }
 };
-class board {
-	adat<creature,32>	enemies;
-public:
-	creature*			addenemy() { return enemies.add(); }
-	void				paint() const;
+struct monsteri {
+	struct info {
+		char			hits;
+		char			movement;
+		char			attack;
+		char			range;
+		acta			abilities;
+		actiona			immunities;
+	};
+	const char*			name;
+	action_s			move;
+	info				levels[8][2];
 };
