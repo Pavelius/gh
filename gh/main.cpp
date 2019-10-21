@@ -1,15 +1,18 @@
-#include "main.h"
+#include "view.h"
 
 int main() {
-	creature c1;
-	c1.set(Wound, 1);
-	c1.setname("Äóõ");
-	c1.set(Shield, 3);
-	c1.set(Attack, 2);
-	c1.set(Move, 3);
-	c1.sethpmax(3);
+	board b;
+	auto p = b.addenemy();
+	p->set(Wound, 1);
+	p->setname("Äóõ");
+	p->set(Shield, 3);
+	p->set(Attack, 2);
+	p->set(Move, 3);
+	p->sethpmax(3);
 	for(auto& e : bsmeta<ability>()) {
 	}
+	draw::initialize();
+	draw::create(-1, -1, 900, 600, 0, 32);
 	return 0;
 }
 
