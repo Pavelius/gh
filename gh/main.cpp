@@ -6,6 +6,7 @@ int main() {
 	c1.setname("ƒух");
 	c1.set(Shield, 3);
 	c1.set(Attack, 2);
+	c1.set(Move, 3);
 	c1.sethpmax(3);
 	for(auto& e : bsmeta<ability>()) {
 	}

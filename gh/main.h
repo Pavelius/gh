@@ -30,8 +30,15 @@ struct ability {
 	acta			upper;
 	acta			lower;
 };
-struct action {
+struct monsterability {
+	char			initiative;
+	acta			actions[4];
+};
+class action {
 	char			data[Round + 1];
+public:
+	void			operator+=(const action& e);
+	void			operator-=(const action& e);
 	const acti*		add(const acti* pb, const acti* pe);
 	void			add(const acti& e) { data[e.action] = e.bonus; }
 	constexpr int	get(action_s i) const { return data[i]; }
