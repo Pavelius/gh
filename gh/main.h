@@ -6,13 +6,40 @@
 
 const unsigned short Blocked = 0xFFFF;
 
+enum command_s : unsigned char {
+	NoCommand,
+	// Actions
+	Attack1, Attack2, Attack3, Attack4, Attack5, Attack6, Attack7, Attack8, AttackXMove,
+	AttackBoost1, AttackBoost2, AttackBoost3,
+	Loot1, Loot2, Loot3,
+	Move1, Move2, Move3, Move4, Move5, Move6, MoveXAttack,
+	Jump1, Jump2, Jump3, Jump4, Jump5, Jump6, Jump4Attack2,
+	Fly1, Fly2, Fly3, Fly4, Fly5, Fly6, Fly7, Fly8,
+	Retaliate1, Retaliate2, Retaliate3,
+	Shield1, Shield2, Shield3, Shield4, Shield5,
+	Push1, Push2, Push3, Push4,
+	Pull1, Pull2, Pull3, Pull4,
+	Heal1, Heal2, Heal3, Heal4, Heal5,
+	// Modifier
+	Bonus1, Bonus2, Bonus3,
+	Exp1, Exp2, Exp3, Exp1Use, Exp2Use, Exp3Use,
+	Slash2, Slash3, Ray2, Ray3,
+	Pierce1, Pierce2, Pierce3,
+	Target2, Target3, AllEnemyAround, HitYou,
+	Range1, Range2, Range3, Range4, Range5,
+	AddDisarm, AddImmoblize, AddPoison, AddStun, AddWound,
+	AddAir, AddDark, AddEarth, AddFire, AddIce, AddLight,
+	Use2, Use3, Use4, Use6, Use8,
+	// Conditions
+	IfAir, IfDark, IfEarth, IfFire, IfIce, IfLight,
+	// After action
+	Discard, Use, Round,
+};
 enum action_s : unsigned char {
 	Move, Jump, AttackJump, Fly, MoveX, Attack, AttackX, Heal, Push, Pull, Shield, Retaliate, Loot,
 	Pierce,
-	Bonus, Range, Target, TargetYou, Experience, ExperienceUse,
-	Cone, Ray, HalfCircle, AllEnemyAround,
-	Bless, Curse, 
-	Discard, Use, Round,
+	Bonus, Range, Target,
+	Bless, Curse,
 };
 enum state_s : unsigned char {
 	Disarm, Immobilize, Wound, Muddle, Poison, Invisibility, Stun, Strenght,
@@ -77,18 +104,21 @@ struct acti {
 	template<class T> constexpr acti(const T v, char bonus) : action(v), bonus(bonus) {}
 	bool				iscondition() const;
 };
-typedef adat<acti, 8> acta;
+struct commanda {
+	command_s			data[8];
+	bool				is(command_s i) const;
+};
 struct ability {
 	class_s				type;
 	char				level;
 	const char*			name;
 	char				initiative;
-	acta				upper;
-	acta				lower;
+	commanda			upper;
+	commanda			lower;
 };
 struct monsterability {
 	char				initiative;
-	acta				actions[4];
+	commanda			action;
 };
 class action {
 	char				data[Round + 1];
@@ -132,7 +162,7 @@ struct monsteri {
 		char			movement;
 		char			attack;
 		char			range;
-		acta			abilities;
+		commanda		abilities;
 		actiona			immunities;
 	};
 	const char*			name;

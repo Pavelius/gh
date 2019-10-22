@@ -1,8 +1,8 @@
 #include "main.h"
 
 monsteri bsmeta<monsteri>::elements[] = {{"ќжившие кости", Move,
-{{{5, 2, 1, 0, {{Target, 2}}}, {6, 4, 2, 0, {{Target, 2}}}},
-{{5, 3, 1, 0, {{Target, 2}, {Shield, 1}}}, {6, 4, 2, 0, {{Target, 3}, {Shield, 1}}}},
+{{{5, 2, 1, 0, {Target2}}, {6, 4, 2, 0, {Target2}}},
+{{5, 3, 1, 0, {Target2, Shield1}}, {6, 4, 2, 0, {Target3, Shield1}}},
 }},
 {"ќжившие труп", Move,
 {{{5, 1, 3, 0}, {10, 1, 3}},
@@ -11,7 +11,7 @@ monsteri bsmeta<monsteri>::elements[] = {{"ќжившие кости", Move,
 {{10, 1, 4}, {13, 2, 5}},
 }},
 {"ќгненный демон", Fly,
-{{{2, 3, 2, 3, {{Shield, 2}}}, {3, 3, 2, 3, {{Shield, 3}}}},
-{{2, 3, 2, 3, {{Shield, 3}}}, {3, 3, 2, 4, {{Retaliate, 2}, {Range, 2}, {Shield, 4}}}},
+{{{2, 3, 2, 3, {Shield2}}, {3, 3, 2, 3, {Shield3}}},
+{{2, 3, 2, 3, {Shield3}}, {3, 3, 2, 4, {Retaliate2, Range2, Shield4}}},
 }},
 };

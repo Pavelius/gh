@@ -72,6 +72,9 @@
     <ClCompile Include="monster.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="command.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">
