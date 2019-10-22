@@ -31,7 +31,8 @@ enum command_s : unsigned char {
 	AddAir, AddDark, AddEarth, AddFire, AddIce, AddLight,
 	Use2, Use3, Use4, Use6, Use8,
 	// Conditions
-	IfAir, IfDark, IfEarth, IfFire, IfIce, IfLight,
+	IfAir, IfEarth, IfFire, IfIce, IfLight, IfDark, IfAnyElement,
+	IfAllyNearTarget, IfEnemyNearTarget,
 	// After action
 	Discard, Use, Round,
 };
@@ -57,7 +58,8 @@ enum res_s : unsigned char {
 	LastResource = PLAYERS
 };
 enum variant_s : unsigned char {
-	NoVariant, Action, Class, Element, Monster, State,
+	NoVariant,
+	Action, Class, Condition, Element, Modifier, Monster, State,
 };
 struct variant {
 	variant_s			type;
@@ -95,9 +97,15 @@ public:
 	void				shuffle() { zshuffle(data, count); }
 	void				discard(unsigned char v) { adat::add(v); }
 };
+struct commandi {
+	variant_s			type;
+	variant				action;
+	char				bonus;
+};
 struct commanda {
 	command_s			data[8];
 	bool				is(command_s i) const;
+	static bool			ismodifier(command_s i);
 };
 struct ability {
 	class_s				type;
