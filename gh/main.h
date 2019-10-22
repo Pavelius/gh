@@ -136,13 +136,13 @@ struct monsterability {
 };
 struct action {
 	action_s				id;
-	char					bonus, range, pierce, experience, target;
+	char					bonus, range, pierce, experience, target, use;
 	elementa				elements;
 	statea					states;
 };
 struct actiona {
 	action					data[4];
-	void					parse(const commanda& source, const board& b);
+	void					parse(const commanda& source, board& b);
 };
 class figure : public drawable {
 	short unsigned			index;

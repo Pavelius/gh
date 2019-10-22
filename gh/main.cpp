@@ -5,7 +5,8 @@ int main() {
 	draw::create(-1, -1, 900, 600, 0, 32);
 	actiona actions;
 	board pb;
-	actions.parse(bsmeta<ability>::elements[2].upper, pb);
+	pb.set(Air, 2);
+	actions.parse(bsmeta<ability>::elements[7].upper, pb);
 	return 0;
 }
 
