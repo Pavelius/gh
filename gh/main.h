@@ -25,7 +25,7 @@ enum command_s : unsigned char {
 	Exp1, Exp2, Exp3, Exp1Use, Exp2Use, Exp3Use,
 	Range1, Range2, Range3, Range4, Range5,
 	Pierce1, Pierce2, Pierce3,
-	Target2, Target3, HitYou,
+	Target2, Target3, AttractAttacks,
 	AddDisarm, AddImmoblize, AddWound, AddMuddle, AddPoison, AddInvisibility, AddStun, AddStrenght,
 	AddAnyElement, AddFire, AddIce, AddAir, AddEarth, AddDark, AddLight,
 	Use2, Use3, Use4, Use6, Use8,
@@ -40,10 +40,11 @@ enum condition_s : unsigned char {
 	AllyNearTarget, EnemyNearTarget,
 };
 enum area_s : unsigned char {
+	NoArea,
 	Slash, Circle, Ray
 };
 enum action_s : unsigned char {
-	Move, Jump, Fly, Attack, Heal, Push, Pull, Shield, Retaliate, Loot,
+	Move, Jump, Fly, Attack, AttackBoost, Heal, Push, Pull, Shield, Retaliate, Loot, Guard,
 	Bless, Curse,
 };
 enum modifier_s : unsigned char {
@@ -69,7 +70,12 @@ enum variant_s : unsigned char {
 	NoVariant,
 	Action, Area, Class, Condition, Element, Modifier, Monster, State,
 };
+enum special_s : unsigned char {
+	NoSpecial,
+	ActionForEachMoved, BonusForSecondonary
+};
 class board;
+class creature;
 typedef cflags<element_s, unsigned char> elementa;
 typedef cflags<state_s, unsigned char> statea;
 struct variant {
@@ -117,6 +123,9 @@ struct commandi {
 	variant_s				type;
 	variant					id;
 	char					bonus;
+	special_s				special;
+	variant					id_second;
+	char					bonus_second;
 };
 struct commanda {
 	command_s				data[8];
@@ -129,6 +138,7 @@ struct ability {
 	char					initiative;
 	commanda				upper;
 	commanda				lower;
+	constexpr operator bool() const { return upper.data[0] != NoCommand; }
 };
 struct monsterability {
 	char					initiative;
@@ -136,13 +146,14 @@ struct monsterability {
 };
 struct action {
 	action_s				id;
-	char					bonus, range, pierce, experience, target, use;
+	char					bonus, range, pierce, experience, target, use, area_size;
+	area_s					area;
 	elementa				elements;
 	statea					states;
 };
 struct actiona {
 	action					data[4];
-	void					parse(const commanda& source, board& b);
+	void					parse(const commanda& source, board& b, creature& player);
 };
 class figure : public drawable {
 	short unsigned			index;
@@ -162,14 +173,19 @@ public:
 };
 class creature : public figure {
 	unsigned short			hp, hp_max;
+	char					attacked, moved;
 	monster_s				monster;
 public:
-	constexpr creature() : figure(), monster(), hp(0), hp_max(0) {}
+	constexpr creature() : figure(), monster(), hp(0), hp_max(0), moved(0), attacked(0) {}
 	short unsigned			gethp() const { return hp; }
+	int						getattacked() const { return attacked; }
+	int						getmoved() const { return moved; }
 	short unsigned			gethpmax() const { return hp; }
 	void					set(action_s i, int v) {}
+	void					setattacked(int v) { attacked = v; }
 	void					sethp(short unsigned v) { hp = v; }
 	void					sethpmax(short unsigned v) { hp_max = v; }
+	void					setmoved(int v) { moved = v; }
 };
 struct monsteri {
 	struct info {

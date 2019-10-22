@@ -11,8 +11,8 @@ ability bsmeta<ability>::elements[] = {{},
 {Brute, 1, "Взвешенный подход", 77, {AttackXMove, Exp1}, {MoveXAttack}},
 {Brute, 1, "Мастерство отражения", 32, {Attack3, Push2}, {Shield1, Use6, Exp3Use, Discard}},
 {Brute, 1, "Беги и бери", 87, {Loot1}, {Move4}},
-{Brute, 1, "Сметающий удар", 64, {Attack2, Slash3}, {Move3, Push1, HitYou}},
-{Brute, 1, "Угрожающий рык", 10, {Attack2, AddDisarm}, {HitYou}},
+{Brute, 1, "Сметающий удар", 64, {Attack2, Slash3}, {Move3, Push1, AttractAttacks}},
+{Brute, 1, "Угрожающий рык", 10, {Attack2, AddDisarm}, {AttractAttacks}},
 {Brute, 1, "Стена рока", 20, {Retaliate2, Shield2, Exp2, UseRound, Discard}, {AttackBoost1, UseRound}},
 };
 DECLBASE(ability);
