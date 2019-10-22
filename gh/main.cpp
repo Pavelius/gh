@@ -1,12 +1,20 @@
 #include "view.h"
 
+static bool test_abilities() {
+	board pb;
+	pb.set(Air, 2);
+	for(auto& e : bsmeta<ability>()) {
+		actiona actions;
+		actions.parse(e.upper, pb);
+		actions.parse(e.lower, pb);
+	}
+	return true;
+}
+
 int main() {
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);
-	actiona actions;
-	board pb;
-	pb.set(Air, 2);
-	actions.parse(bsmeta<ability>::elements[7].upper, pb);
+	test_abilities();
 	return 0;
 }
 
