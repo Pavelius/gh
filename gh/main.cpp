@@ -3,7 +3,9 @@
 int main() {
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);
-	creature c1;
+	actiona actions;
+	board pb;
+	actions.parse(bsmeta<ability>::elements[2].upper, pb);
 	return 0;
 }
 
