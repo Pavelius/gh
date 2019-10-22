@@ -36,9 +36,8 @@ enum command_s : unsigned char {
 	Discard, Use, Round,
 };
 enum action_s : unsigned char {
-	Move, Jump, AttackJump, Fly, MoveX, Attack, AttackX, Heal, Push, Pull, Shield, Retaliate, Loot,
-	Pierce,
-	Bonus, Range, Target,
+	Move, Jump, Fly, Attack, Heal, Push, Pull, Shield, Retaliate, Loot,
+	Pierce, Range, Target,
 	Bless, Curse,
 };
 enum state_s : unsigned char {
@@ -96,14 +95,6 @@ public:
 	void				shuffle() { zshuffle(data, count); }
 	void				discard(unsigned char v) { adat::add(v); }
 };
-struct acti {
-	variant				action;
-	char				bonus;
-	constexpr acti() : action(Move), bonus(1) {}
-	template<class T> constexpr acti(const T v) : action(v), bonus(1) {}
-	template<class T> constexpr acti(const T v, char bonus) : action(v), bonus(bonus) {}
-	bool				iscondition() const;
-};
 struct commanda {
 	command_s			data[8];
 	bool				is(command_s i) const;
@@ -121,12 +112,10 @@ struct monsterability {
 	commanda			action;
 };
 class action {
-	char				data[Round + 1];
+	char				data[Curse + 1];
 public:
 	void				operator+=(const action& e);
 	void				operator-=(const action& e);
-	const acti*			add(const acti* pb, const acti* pe);
-	void				add(const acti& e) { data[e.action.value] = e.bonus; }
 	constexpr int		get(action_s i) const { return data[i]; }
 	void				set(action_s i, int v) { data[i] = v; }
 };

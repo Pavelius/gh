@@ -118,9 +118,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ability.cpp" />
-    <ClCompile Include="act.cpp" />
-    <ClCompile Include="action.cpp" />
-    <ClCompile Include="board.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="command.cpp" />
     <ClCompile Include="crt.cpp" />
