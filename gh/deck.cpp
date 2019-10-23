@@ -1,6 +1,6 @@
 #include "main.h"
 
-void deck::add(unsigned char v, int count) {
+void deck::add(unsigned short v, int count) {
 	for(auto i = 0; i < count; i++)
 		add(v);
 }
@@ -19,4 +19,17 @@ void deck::create() {
 		add(i, e.count);
 	}
 	shuffle();
+}
+
+void deck::modify(action& e) {
+	while(true) {
+		auto i = get();
+		auto& ce = bsmeta<battlecardi>::elements[i];
+		e.bonus += ce.bonus;
+		if(ce.cless.type == Action && (ce.cless.action==Bless || ce.cless.action == Curse)) {
+			// Do Nothing
+		} else
+			discard(i);
+		break;
+	}
 }

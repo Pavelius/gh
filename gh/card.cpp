@@ -10,5 +10,7 @@ battlecardi bsmeta<battlecardi>::elements[] = {{0, 6},
 {-2, 1},
 {10, 1},
 {-10, 1},
+{10, 20, Bless},
+{-10, 20, Curse},
 };
 DECLBASE(battlecardi);

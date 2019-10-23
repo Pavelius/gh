@@ -80,6 +80,7 @@ enum special_s : unsigned char {
 };
 class board;
 class creature;
+struct action;
 typedef cflags<element_s, unsigned char> elementa;
 typedef cflags<state_s, unsigned char> statea;
 typedef cflags<card_s, unsigned char> carda;
@@ -120,13 +121,14 @@ struct drawable : point {
 };
 class deck : adat<unsigned short, 46> {
 public:
-	void						add(unsigned char v) { adat::add(v); }
-	void						add(unsigned char v, int count);
+	void						add(unsigned short v) { adat::add(v); }
+	void						add(unsigned short v, int count);
 	void						create();
 	void						clear() { adat::clear(); }
-	void						discard(unsigned char v) { adat::add(v); }
+	void						discard(unsigned short v) { adat::add(v); }
 	unsigned short				get();
 	unsigned					getcount() { return adat::getcount(); }
+	void						modify(action& e);
 	void						shuffle() { zshuffle(data, count); }
 };
 struct commandi {
@@ -185,17 +187,21 @@ public:
 class creature : public figure {
 	monster_s					monster;
 	unsigned short				hp, hp_max;
-	char						actions[Guard+1];
+	char						actions[Guard + 1];
+	statea						states;
 public:
 	constexpr creature() : figure(), actions(), monster(), hp(0), hp_max(0) {}
-	void						attack(creature& enemy, const action& ac);
+	void						attack(creature& enemy, const action& ac, deck& cards);
+	void						damage(int v);
 	void						droploot() const;
+	bool						is(state_s v) const { return states.is(v); }
+	bool						isalive() const { return hp > 0; }
 	int							get(action_s i) const;
 	short unsigned				gethp() const { return hp; }
 	short unsigned				gethpmax() const { return hp; }
 	void						set(action_s i, int v);
 	void						sethp(short unsigned v) { hp = v; }
-	void						sethpmax(short unsigned v) { hp_max = v; }
+	void						sethpmax(short unsigned v) { hp_max = v; hp = v; }
 };
 struct monsteri {
 	struct info {
