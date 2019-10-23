@@ -119,8 +119,11 @@
   <ItemGroup>
     <ClCompile Include="ability.cpp" />
     <ClCompile Include="action.cpp" />
+    <ClCompile Include="answer.cpp" />
+    <ClCompile Include="card.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="command.cpp" />
+    <ClCompile Include="creature.cpp" />
     <ClCompile Include="crt.cpp" />
     <ClCompile Include="deck.cpp" />
     <ClCompile Include="draw.cpp" />

@@ -34,17 +34,21 @@ enum command_s : unsigned char {
 	IfAir, IfEarth, IfFire, IfIce, IfLight, IfDark, IfAnyElement,
 	IfAllyNearTarget, IfEnemyNearTarget,
 	// After action
-	Discard, UseRound,
+	DiscardCard
 };
 enum condition_s : unsigned char {
 	AllyNearTarget, EnemyNearTarget,
+};
+enum card_s : unsigned char {
+	Discard, Exhause,
 };
 enum area_s : unsigned char {
 	NoArea,
 	Slash, Circle, Ray
 };
 enum action_s : unsigned char {
-	Move, Jump, Fly, Attack, AttackBoost, Heal, Push, Pull, Shield, Retaliate, Loot, Guard,
+	Moved, Attacked, Shield, Retaliate, Guard,
+	Move, Jump, Fly, Attack, AttackBoost, Push, Pull, Heal, Loot,
 	Bless, Curse,
 };
 enum modifier_s : unsigned char {
@@ -68,7 +72,7 @@ enum res_s : unsigned char {
 };
 enum variant_s : unsigned char {
 	NoVariant,
-	Action, Area, Class, Condition, Element, Modifier, Monster, State,
+	Action, Area, Class, Card, Condition, Element, Modifier, Monster, State,
 };
 enum special_s : unsigned char {
 	NoSpecial,
@@ -78,133 +82,163 @@ class board;
 class creature;
 typedef cflags<element_s, unsigned char> elementa;
 typedef cflags<state_s, unsigned char> statea;
+typedef cflags<card_s, unsigned char> carda;
 struct variant {
-	variant_s				type;
+	variant_s					type;
 	union {
-		action_s			action;
-		area_s				area;
-		class_s				cless;
-		condition_s			condition;
-		element_s			element;
-		monster_s			monster;
-		modifier_s			modifier;
-		state_s				state;
-		unsigned char		value;
+		action_s				action;
+		area_s					area;
+		card_s					card;
+		class_s					cless;
+		condition_s				condition;
+		element_s				element;
+		monster_s				monster;
+		modifier_s				modifier;
+		state_s					state;
+		unsigned char			value;
 	};
 	constexpr variant() : type(NoVariant), value(0) {}
 	constexpr variant(action_s v) : type(Action), value(v) {}
 	constexpr variant(area_s v) : type(Area), value(v) {}
+	constexpr variant(card_s v) : type(Card), value(v) {}
 	constexpr variant(class_s v) : type(Class), value(v) {}
 	constexpr variant(condition_s v) : type(Condition), value(v) {}
 	constexpr variant(element_s v) : type(Element), value(v) {}
 	constexpr variant(modifier_s v) : type(Modifier), value(v) {}
 	constexpr variant(monster_s v) : type(Monster), value(v) {}
 	constexpr variant(state_s v) : type(State), value(v) {}
-	void					clear() { type = NoVariant; value = 0; }
+	constexpr operator bool() const { return type != NoVariant; }
+	void						clear() { type = NoVariant; value = 0; }
 };
 struct drawable : point {
-	res_s					res;
-	unsigned char			frame;
-	short unsigned			flags;
-	void					paint(int x, int y) const;
-	void					paint() const { paint(x, y); };
-	static void				slide(int x, int y);
+	res_s						res;
+	unsigned char				frame;
+	short unsigned				flags;
+	void						paint(int x, int y) const;
+	void						paint() const { paint(x, y); };
+	static void					slide(int x, int y);
 };
-class deck : adat<unsigned char, 44> {
+class deck : adat<unsigned short, 46> {
 public:
-	void					add(unsigned char v) { adat::add(v); }
-	void					add(unsigned char v, int count);
-	unsigned char			get();
-	void					clear() { adat::clear(); }
-	void					shuffle() { zshuffle(data, count); }
-	void					discard(unsigned char v) { adat::add(v); }
+	void						add(unsigned char v) { adat::add(v); }
+	void						add(unsigned char v, int count);
+	void						create();
+	void						clear() { adat::clear(); }
+	void						discard(unsigned char v) { adat::add(v); }
+	unsigned short				get();
+	unsigned					getcount() { return adat::getcount(); }
+	void						shuffle() { zshuffle(data, count); }
 };
 struct commandi {
-	variant_s				type;
-	variant					id;
-	char					bonus;
-	special_s				special;
-	variant					id_second;
-	char					bonus_second;
+	variant_s					type;
+	variant						id;
+	char						bonus;
+	special_s					special;
+	variant						id_second;
+	char						bonus_second;
 };
 struct commanda {
-	command_s				data[8];
-	bool					is(command_s i) const;
+	command_s					data[8];
+	bool						is(command_s i) const;
 };
 struct ability {
-	class_s					type;
-	char					level;
-	const char*				name;
-	char					initiative;
-	commanda				upper;
-	commanda				lower;
+	class_s						type;
+	char						level;
+	const char*					name;
+	char						initiative;
+	commanda					upper;
+	commanda					lower;
 	constexpr operator bool() const { return upper.data[0] != NoCommand; }
 };
 struct monsterability {
-	char					initiative;
-	commanda				action;
+	char						initiative;
+	commanda					action;
 };
 struct action {
-	action_s				id;
-	char					bonus, range, pierce, experience, target, use, area_size;
-	area_s					area;
-	elementa				elements;
-	statea					states;
+	action_s					id;
+	char						bonus, range, pierce, experience, target, use, area_size;
+	area_s						area;
+	elementa					elements;
+	statea						states;
+	carda						cards;
 };
 struct actiona {
-	action					data[4];
-	void					parse(const commanda& source, board& b, creature& player);
+	action						data[4];
+	void						parse(const commanda& source, board& b, creature& player);
 };
 class figure : public drawable {
-	short unsigned			index;
+	short unsigned				index;
 public:
 	constexpr figure() : drawable(), index(Blocked) {}
 	explicit constexpr operator bool() const { return index != Blocked; }
-	short unsigned			getindex() const { return index; }
-	void					setindex(short unsigned v) { index = v; }
-	void					setpos(int x, int y) { this->x = x; this->y = y; }
+	short unsigned				getindex() const { return index; }
+	void						setindex(short unsigned v) { index = v; }
+	void						setpos(int x, int y) { this->x = x; this->y = y; }
 };
 class nameable {
-	const char*				name;
+	const char*					name;
 public:
 	constexpr nameable() : name() {}
-	const char*				getname() const { return name; }
-	void					setname(const char* v) { name = v; }
+	const char*					getname() const { return name; }
+	void						setname(const char* v) { name = v; }
 };
 class creature : public figure {
-	unsigned short			hp, hp_max;
-	char					attacked, moved;
-	monster_s				monster;
+	monster_s					monster;
+	unsigned short				hp, hp_max;
+	char						actions[Guard+1];
 public:
-	constexpr creature() : figure(), monster(), hp(0), hp_max(0), moved(0), attacked(0) {}
-	short unsigned			gethp() const { return hp; }
-	int						getattacked() const { return attacked; }
-	int						getmoved() const { return moved; }
-	short unsigned			gethpmax() const { return hp; }
-	void					set(action_s i, int v) {}
-	void					setattacked(int v) { attacked = v; }
-	void					sethp(short unsigned v) { hp = v; }
-	void					sethpmax(short unsigned v) { hp_max = v; }
-	void					setmoved(int v) { moved = v; }
+	constexpr creature() : figure(), actions(), monster(), hp(0), hp_max(0) {}
+	void						attack(creature& enemy, const action& ac);
+	void						droploot() const;
+	int							get(action_s i) const;
+	short unsigned				gethp() const { return hp; }
+	short unsigned				gethpmax() const { return hp; }
+	void						set(action_s i, int v);
+	void						sethp(short unsigned v) { hp = v; }
+	void						sethpmax(short unsigned v) { hp_max = v; }
 };
 struct monsteri {
 	struct info {
-		char				hits;
-		char				movement;
-		char				attack;
-		char				range;
-		commanda			abilities;
-		actiona				immunities;
+		char					hits;
+		char					movement;
+		char					attack;
+		char					range;
+		commanda				abilities;
+		actiona					immunities;
 	};
-	const char*				name;
-	action_s				move;
-	info					levels[8][2];
+	const char*					name;
+	action_s					move;
+	info						levels[8][2];
 };
 class board {
-	char					counter;
-	char					elements[Dark + 1];
+	char						counter;
+	char						elements[Dark + 1];
 public:
-	constexpr int			get(element_s i) const { return elements[i]; }
-	constexpr bool			is(element_s i) const { return elements[i] > 0; }
-	constexpr void			set(element_s i, int v) { elements[i] = v; }
+	constexpr int				get(element_s i) const { return elements[i]; }
+	constexpr bool				is(element_s i) const { return elements[i] > 0; }
+	void						paint() const;
+	constexpr void				set(element_s i, int v) { elements[i] = v; }
+};
+class answeri : stringbuilder {
+	struct element {
+		int						param;
+		const char*				text;
+		const char*				getname() const { return text; }
+	};
+	char						buffer[4096];
+	adat<element, 8>			elements;
+public:
+	constexpr explicit operator bool() const { return elements.count != 0; }
+	answeri();
+	void						add(int param, const char* format, ...);
+	void						addv(int param, const char* format, const char* format_param);
+	int							choose(bool cancel_button, bool random_choose, const char* picture, const char* format) const;
+	void						clear() { stringbuilder::clear(); elements.clear(); }
+	static int					compare(const void* p1, const void* p2);
+	void						sort();
+};
+struct battlecardi {
+	char						bonus, count;
+	variant						cless;
+	statea						states;
 };

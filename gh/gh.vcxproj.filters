@@ -69,6 +69,15 @@
     <ClCompile Include="action.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="creature.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="answer.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="card.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">

@@ -10,7 +10,7 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Action, Attack, 6},
 {Action, Attack, 7},
 {Action, Attack, 8},
-{Action, Attack, 0, BonusForSecondonary, Move},
+{Action, Attack, 0, BonusForSecondonary, Moved},
 {Action, AttackBoost, 1},
 {Action, AttackBoost, 2},
 {Action, AttackBoost, 3},
@@ -25,7 +25,7 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Action, Move, 4},
 {Action, Move, 5},
 {Action, Move, 6},
-{Action, Move, 0, BonusForSecondonary, Attack},
+{Action, Move, 0, BonusForSecondonary, Attacked},
 // Прыжки
 {Action, Jump, 1},
 {Action, Jump, 2},
@@ -130,10 +130,9 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Condition, AllyNearTarget},
 {Condition, EnemyNearTarget},
 // Действия с картами
-{Modifier, {}, Discard},
-{Modifier, {}, UseRound}
+{Modifier, Discard},
 };
-assert_enum(command, UseRound);
+assert_enum(command, DiscardCard);
 
 bool commanda::is(command_s i) const {
 	for(auto e : data) {

@@ -11,15 +11,18 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 			break;
 		if(run) {
 			switch(ce.id.type) {
+			case Area:
+				pa->area = ce.id.area;
+				pa->area_size = ce.bonus;
+				break;
+			case Card:
+				pa->cards.add(ce.id.card);
+				break;
 			case Element:
 				pa->elements.add(ce.id.element);
 				break;
 			case State:
 				pa->states.add(ce.id.state);
-				break;
-			case Area:
-				pa->area = ce.id.area;
-				pa->area_size = ce.bonus;
 				break;
 			case Modifier:
 				switch(ce.id.modifier) {
@@ -72,12 +75,8 @@ void actiona::parse(const commanda& source, board& b, creature& player) {
 		if(ce.id.type == Action) {
 			pa->id = ce.id.action;
 			pa->bonus = ce.bonus;
-			if(ce.special == BonusForSecondonary) {
-				switch(ce.id_second.action) {
-				case Attack: pa->bonus += player.getattacked(); break;
-				case Move: pa->bonus += player.getmoved(); break;
-				}
-			}
+			if(ce.special == BonusForSecondonary)
+				pa->bonus += player.get(ce.id_second.action);
 		}
 		pb = conditions(pb + 1, pe, pa, b);
 		pb = modifiers(pb, pe, pa, true);
