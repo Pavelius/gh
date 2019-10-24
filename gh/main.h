@@ -78,6 +78,12 @@ enum special_s : unsigned char {
 	NoSpecial,
 	ActionForEachMoved, BonusForSecondonary
 };
+enum direction_s : unsigned char {
+	Left, LeftUp, RightUp, Right, RightDown, LeftDown,
+};
+enum map_tile_s : unsigned char {
+	HasTrap, HasLoot, HasCreature, HasWall, HasDanger, HasBlock,
+};
 class board;
 class creature;
 struct action;
@@ -220,13 +226,24 @@ struct monsteri {
 	info						levels[8][2];
 };
 class board {
+	static constexpr int		mx = 32;
+	static constexpr int		my = 24;
+	unsigned char				map_flags[mx*my];
 	char						counter;
 	char						elements[Dark + 1];
 public:
 	constexpr int				get(element_s i) const { return elements[i]; }
+	constexpr unsigned			getsize() const { return mx*my; }
 	constexpr bool				is(element_s i) const { return elements[i] > 0; }
+	constexpr bool				is(short unsigned i, map_tile_s v) const { return (map_flags[i] & (1 << v)) != 0; }
 	void						paint() const;
+	static unsigned short		p2i(point pt) { return pt.y*mx + pt.x; }
+	static short				i2x(short unsigned i) { return i % mx; }
+	static short				i2y(short unsigned i) { return i / my; }
+	constexpr void				remove(short unsigned i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
+	constexpr void				set(short unsigned i, map_tile_s v) { map_flags[i] |= (1 << v); }
 	constexpr void				set(element_s i, int v) { elements[i] = v; }
+	static unsigned short		to(direction_s v);
 };
 class answeri : stringbuilder {
 	struct element {
@@ -251,3 +268,4 @@ struct battlecardi {
 	variant						cless;
 	statea						states;
 };
+extern board					map;

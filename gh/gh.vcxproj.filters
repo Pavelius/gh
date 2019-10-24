@@ -78,6 +78,9 @@
     <ClCompile Include="card.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="board.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">

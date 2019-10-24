@@ -49,6 +49,7 @@ int main() {
 		return 0;
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);
+	map.paint();
 	return 0;
 }
 
