@@ -125,10 +125,10 @@ public:
 	void						add(unsigned short v, int count);
 	void						create();
 	void						clear() { adat::clear(); }
-	void						discard(unsigned short v) { adat::add(v); }
+	void						dropdown(unsigned short v) { adat::add(v); }
 	unsigned short				get();
 	unsigned					getcount() { return adat::getcount(); }
-	void						modify(action& e);
+	int							nextbonus(int& pierce, statea& states);
 	void						shuffle() { zshuffle(data, count); }
 };
 struct commandi {
@@ -191,7 +191,7 @@ class creature : public figure {
 	statea						states;
 public:
 	constexpr creature() : figure(), actions(), monster(), hp(0), hp_max(0) {}
-	void						attack(creature& enemy, const action& ac, deck& cards);
+	void						attack(creature& enemy, int bonus, int pierce, statea states, deck& cards);
 	void						damage(int v);
 	void						droploot() const;
 	bool						is(state_s v) const { return states.is(v); }
@@ -200,6 +200,9 @@ public:
 	short unsigned				gethp() const { return hp; }
 	short unsigned				gethpmax() const { return hp; }
 	void						set(action_s i, int v);
+	void						set(state_s v) { states.add(v); }
+	void						setfriendly(const statea v);
+	void						sethostile(const statea v);
 	void						sethp(short unsigned v) { hp = v; }
 	void						sethpmax(short unsigned v) { hp_max = v; hp = v; }
 };

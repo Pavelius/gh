@@ -36,7 +36,7 @@ static bool test_battle() {
 	actiona actions;
 	actions.parse(bsmeta<ability>::elements[2].upper, b, p1);
 	m1.sethpmax(10); p1.sethpmax(10);
-	p1.attack(m1, actions.data[0], d1);
+	p1.attack(m1, 3, 0, {}, d1);
 	return true;
 }
 

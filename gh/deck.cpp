@@ -21,15 +21,17 @@ void deck::create() {
 	shuffle();
 }
 
-void deck::modify(action& e) {
+int deck::nextbonus(int& pierce, statea& states) {
+	auto r = 0;
 	while(true) {
 		auto i = get();
 		auto& ce = bsmeta<battlecardi>::elements[i];
-		e.bonus += ce.bonus;
+		r += ce.bonus;
 		if(ce.cless.type == Action && (ce.cless.action==Bless || ce.cless.action == Curse)) {
-			// Do Nothing
+			// Discard by default
 		} else
-			discard(i);
+			dropdown(i);
 		break;
 	}
+	return r;
 }

@@ -1,8 +1,25 @@
 #include "main.h"
 
+static state_s state_hostile[] = {Disarm, Immobilize, Wound, Muddle, Poison, Stun};
+static state_s state_friendly[] = {Invisibility, Strenght};
+
 void creature::set(action_s i, int v) {
 	if(i <= Guard)
 		actions[i] = v;
+}
+
+void creature::sethostile(const statea v) {
+	for(auto e : state_hostile) {
+		if(v.is(e))
+			set(e);
+	}
+}
+
+void creature::setfriendly(const statea v) {
+	for(auto e : state_friendly) {
+		if(v.is(e))
+			set(e);
+	}
 }
 
 int creature::get(action_s i) const {
@@ -20,14 +37,19 @@ void creature::damage(int v) {
 		hp -= v;
 }
 
-void creature::attack(creature& enemy, const action& ac_origin, deck& cards) {
-	auto ac = ac_origin;
-	cards.modify(ac);
-	auto s = enemy.get(Shield) - ac.pierce;
+void creature::attack(creature& enemy, int bonus, int pierce, statea states, deck& cards) {
+	auto d = cards.nextbonus(pierce, states);
+	auto s = enemy.get(Shield) - pierce;
 	if(s < 0)
 		s = 0;
-	auto v = ac.bonus - s;
+	auto v = bonus - s;
 	if(enemy.is(Poison))
 		v++;
 	enemy.damage(v);
+	if(!enemy.isalive())
+		return;
+	enemy.sethostile(states);
+	setfriendly(states);
+	if(enemy.get(Retaliate)>0)
+		damage(enemy.get(Retaliate));
 }
