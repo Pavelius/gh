@@ -2,7 +2,8 @@
 
 using namespace draw;
 
-resi bsmeta<resi>::elements[] = {{"monsters", "art"},
+resi bsmeta<resi>::elements[] = {{"bench", "art/furniture"},
+{"monsters", "art"},
 {"players", "art"},
 };
 assert_enum(res, LastResource);

@@ -13,6 +13,9 @@
     <Filter Include="Платформа">
       <UniqueIdentifier>{0bb2aae2-2eb4-4f60-9a2b-71860e9799f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Утилиты">
+      <UniqueIdentifier>{6a031dc3-44be-4969-840b-b133e5e83dea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="crt.cpp">
@@ -81,6 +84,27 @@
     <ClCompile Include="board.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="sprite_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="main_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="png_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="converter.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="surface_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="zip_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="bstream.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">
@@ -112,6 +136,12 @@
     </ClInclude>
     <ClInclude Include="win.h">
       <Filter>Платформа</Filter>
+    </ClInclude>
+    <ClInclude Include="converter.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="bstream.h">
+      <Filter>Поддержка</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

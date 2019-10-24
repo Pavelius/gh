@@ -191,7 +191,7 @@ static void before_render() {
 	if(hot.mouse.x < 0 || hot.mouse.y < 0)
 		sys_static_area.clear();
 	else
-		sys_static_area = { 0, 0, draw::getwidth(), draw::getheight() };
+		sys_static_area = {0, 0, draw::getwidth(), draw::getheight()};
 }
 
 bool draw::ismodal() {
@@ -244,7 +244,7 @@ static int render_text(int x, int y, int width, const char* string) {
 }
 
 static int windowf(int x, int y, int width, const char* string) {
-	rect rc = { x, y, x + width, y };
+	rect rc = {x, y, x + width, y};
 	draw::state push;
 	draw::font = metrics::font;
 	auto height = textf(rc, string);
@@ -256,7 +256,7 @@ static int windowf(int x, int y, int width, const char* string) {
 
 static int window(int x, int y, int width, const char* string, int right_width = 0, areas* pa = 0, bool only_height = false) {
 	auto right_side = (right_width != 0);
-	rect rc = { x, y, x + width, y };
+	rect rc = {x, y, x + width, y};
 	draw::state push;
 	draw::font = metrics::font;
 	auto height = textf(rc, string);
@@ -278,15 +278,15 @@ static int window(int x, int y, int width, const char* string, int right_width =
 static int window(int x, int y, int width_picture, int width_text, const char* picture, const char* string, areas* pa = 0, bool only_height = false) {
 	x -= width_picture;
 	auto width = width_picture + width_text;
-	rect rc = { x, y, x + width, y };
-	rect rc1 = { x + width_picture + gui.padding, y, x + width, y };
+	rect rc = {x, y, x + width, y};
+	rect rc1 = {x + width_picture + gui.padding, y, x + width, y};
 	draw::state push;
 	draw::font = metrics::font;
 	auto height = textf(rc1, string);
 	if(height < width_picture)
 		height = width_picture;
 	if(!only_height) {
-		auto a = window({ x, y, x + width, y + height }, false, false);
+		auto a = window({x, y, x + width, y + height}, false, false);
 		if(pa)
 			*pa = a;
 		//render_picture(x, y, picture);
@@ -298,7 +298,7 @@ static int window(int x, int y, int width_picture, int width_text, const char* p
 static int windowb(int x, int y, int width, const char* string, bool& result, bool disabled, int border = 0, unsigned key = 0, const char* tips = 0) {
 	draw::state push;
 	draw::font = metrics::font;
-	rect rc = { x, y, x + width, y + draw::texth() };
+	rect rc = {x, y, x + width, y + draw::texth()};
 	auto ra = window(rc, disabled, true, border);
 	draw::text(rc, string, AlignCenterCenter);
 	if((ra == AreaHilited || ra == AreaHilitedPressed) && tips)
@@ -324,13 +324,13 @@ static int windowb(int x, int y, int width, const char* string, callback proc, b
 static point getscreen(const rect& rc, point pt) {
 	auto x = pt.x - camera.x + rc.x1 + rc.width() / 2;
 	auto y = pt.y - camera.y + rc.y1 + rc.height() / 2;
-	return { (short)x, (short)y };
+	return {(short)x, (short)y};
 }
 
 static point getmappos(const rect& rc, point pt) {
 	auto x = pt.x + camera.x - rc.x1 - rc.width() / 2;
 	auto y = pt.y + camera.y - rc.y1 - rc.height() / 2;
-	return { (short)x, (short)y };
+	return {(short)x, (short)y};
 }
 
 static void breakparam() {
@@ -531,7 +531,7 @@ static const point hexagon_offset[6] = {{(short)(size * cos_30), -(short)(size /
 {0, -size},
 };
 
-static point h2p(point hex) {
+point board::h2p(point hex) {
 	short x = short(size * sqrt_3) * hex.x + (short(size * sqrt_3) / 2) * hex.y;
 	short y = size * 3 / 2 * hex.y;
 	return {x, y};
@@ -579,7 +579,7 @@ static point cube_to_axial(cube c) {
 	return {0, 0};
 }
 
-static point p2h(point pt) {
+point board::p2h(point pt) {
 	auto q = ((sqrt_3 / 3.0) * (double)pt.x - (1.0 / 3.0) * (double)pt.y) / (double)size;
 	auto r = ((2.0 / 3.0) * (double)pt.y) / (double)size;
 	return cube_to_oddr(cube_round(axial_to_cube({(short)q, (short)r})));
@@ -591,19 +591,30 @@ static void hexagon(point pt) {
 	line(pt + hexagon_offset[5], pt + hexagon_offset[0], colors::border);
 }
 
+static void hexagon(short unsigned i) {
+	auto px = board::i2x(i);
+	auto py = board::i2y(i);
+	auto pt = board::h2p({px, py});
+	hexagon(pt);
+	char temp[32]; stringbuilder sb(temp);
+	sb.add("%1i", i);
+	text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
+}
+
 static void paint_grid() {
 	auto pf = font;
 	font = metrics::font;
 	for(short unsigned i = 0; i < map.getsize(); i++) {
-		auto px = board::i2x(i);
-		auto py = board::i2y(i);
-		auto pt = h2p({px, py});
-		hexagon(pt);
-		char temp[32]; stringbuilder sb(temp);
-		sb.add("%1i", i);
-		text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
+		if(map.is(i, HasWall))
+			continue;
+		hexagon(i);
 	}
 	font = pf;
+}
+
+void board::paint_furnitures() const {
+	for(auto& e : furnitures)
+		e.paint();
 }
 
 static void paint_screen() {
@@ -615,6 +626,7 @@ static void paint_screen() {
 void board::paint() const {
 	while(ismodal()) {
 		paint_screen();
+		paint_furnitures();
 		domodal();
 	}
 }

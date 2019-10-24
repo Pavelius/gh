@@ -1,5 +1,7 @@
 #include "view.h"
 
+void unit_main();
+
 static bool test_abilities() {
 	board pb;
 	creature p1;
@@ -40,6 +42,14 @@ static bool test_battle() {
 	return true;
 }
 
+static void test_map() {
+	map.create();
+	map.set(0, HasWall);
+	map.set(1, HasWall);
+	map.set(32, HasWall);
+	map.add(BENCH, 99);
+}
+
 int main() {
 	if(!test_abilities())
 		return 0;
@@ -47,6 +57,8 @@ int main() {
 		return 0;
 	if(!test_battle())
 		return 0;
+	test_map();
+	unit_main();
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, WFResize| WFMinmax, 32);
 	map.paint();

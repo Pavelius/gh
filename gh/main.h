@@ -67,7 +67,7 @@ enum class_s : unsigned char {
 	Brute,
 };
 enum res_s : unsigned char {
-	MONSTERS, PLAYERS,
+	BENCH, MONSTERS, PLAYERS,
 	LastResource = PLAYERS
 };
 enum variant_s : unsigned char {
@@ -82,7 +82,7 @@ enum direction_s : unsigned char {
 	Left, LeftUp, RightUp, Right, RightDown, LeftDown,
 };
 enum map_tile_s : unsigned char {
-	HasTrap, HasLoot, HasCreature, HasWall, HasDanger, HasBlock,
+	HasWall, HasTrap, HasDanger, HasBlock,
 };
 class board;
 class creature;
@@ -174,11 +174,11 @@ struct actiona {
 	action						data[4];
 	void						parse(const commanda& source, board& b, creature& player);
 };
-class figure : public drawable {
+class figure : public drawable, public variant {
 	short unsigned				index;
 public:
-	constexpr figure() : drawable(), index(Blocked) {}
-	explicit constexpr operator bool() const { return index != Blocked; }
+	constexpr figure() : drawable(), variant(), index(Blocked) {}
+	explicit constexpr operator bool() const { return type!=NoVariant; }
 	short unsigned				getindex() const { return index; }
 	void						setindex(short unsigned v) { index = v; }
 	void						setpos(int x, int y) { this->x = x; this->y = y; }
@@ -191,12 +191,11 @@ public:
 	void						setname(const char* v) { name = v; }
 };
 class creature : public figure {
-	monster_s					monster;
 	unsigned short				hp, hp_max;
 	char						actions[Guard + 1];
 	statea						states;
 public:
-	constexpr creature() : figure(), actions(), monster(), hp(0), hp_max(0) {}
+	constexpr creature() : figure(), actions(), hp(0), hp_max(0) {}
 	void						attack(creature& enemy, int bonus, int pierce, statea states, deck& cards);
 	void						damage(int v);
 	void						droploot() const;
@@ -231,15 +230,22 @@ class board {
 	unsigned char				map_flags[mx*my];
 	char						counter;
 	char						elements[Dark + 1];
+	adat<figure, 24>			furnitures;
 public:
+	void						create();
+	void						add(res_s r, short unsigned i);
 	constexpr int				get(element_s i) const { return elements[i]; }
 	constexpr unsigned			getsize() const { return mx*my; }
+	static point				h2p(point v);
+	static point				h2p(short unsigned i) { return h2p({i2x(i), i2y(i)}); }
 	constexpr bool				is(element_s i) const { return elements[i] > 0; }
 	constexpr bool				is(short unsigned i, map_tile_s v) const { return (map_flags[i] & (1 << v)) != 0; }
+	static point				p2h(point pt);
 	void						paint() const;
+	void						paint_furnitures() const;
 	static unsigned short		p2i(point pt) { return pt.y*mx + pt.x; }
 	static short				i2x(short unsigned i) { return i % mx; }
-	static short				i2y(short unsigned i) { return i / my; }
+	static short				i2y(short unsigned i) { return i / mx; }
 	constexpr void				remove(short unsigned i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
 	constexpr void				set(short unsigned i, map_tile_s v) { map_flags[i] |= (1 << v); }
 	constexpr void				set(element_s i, int v) { elements[i] = v; }

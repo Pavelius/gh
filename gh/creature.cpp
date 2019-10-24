@@ -28,12 +28,16 @@ int creature::get(action_s i) const {
 	return 0;
 }
 
+void creature::droploot() const {
+}
+
 void creature::damage(int v) {
 	if(v < 0)
 		v = 0;
-	if(v > hp)
+	if(v > hp) {
 		hp = 0;
-	else
+		droploot();
+	} else
 		hp -= v;
 }
 
