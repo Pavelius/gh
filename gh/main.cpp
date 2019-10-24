@@ -47,7 +47,8 @@ static void test_map() {
 	map.set(0, HasWall);
 	map.set(1, HasWall);
 	map.set(32, HasWall);
-	map.add(BENCH, 99);
+	map.add(FURN, 0, 35);
+	map.add(FURN, 1, 96);
 }
 
 int main() {

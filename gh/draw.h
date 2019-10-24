@@ -106,7 +106,7 @@ struct sprite : pma {
 	unsigned			cicles; // count of anim structure
 	unsigned			cicles_offset;
 	frame				frames[1];
-	frame&				add();
+	frame&				add(int explicit_frame = -1);
 	void*				add(const void* data, int dsize);
 	void				create(int count, int cicles, int additional_bytes);
 	int					esize() const { return frames[0].offset - (sizeof(sprite) + sizeof(frame)*(count - 1)); }

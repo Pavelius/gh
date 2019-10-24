@@ -7,11 +7,11 @@ void board::create() {
 	set(0, HasBlock);
 }
 
-void board::add(res_s r, short unsigned i) {
+void board::add(res_s r, int frame, short unsigned i) {
 	auto pt = h2p(i);
 	auto p = furnitures.add();
 	p->res = r;
-	p->frame = 0;
+	p->frame = frame;
 	p->setpos(pt.x, pt.y);
 	p->setindex(i);
 }

@@ -67,7 +67,7 @@ enum class_s : unsigned char {
 	Brute,
 };
 enum res_s : unsigned char {
-	BENCH, MONSTERS, PLAYERS,
+	FURN, MONSTERS, PLAYERS,
 	LastResource = PLAYERS
 };
 enum variant_s : unsigned char {
@@ -233,7 +233,7 @@ class board {
 	adat<figure, 24>			furnitures;
 public:
 	void						create();
-	void						add(res_s r, short unsigned i);
+	void						add(res_s r, int frame, short unsigned i);
 	constexpr int				get(element_s i) const { return elements[i]; }
 	constexpr unsigned			getsize() const { return mx*my; }
 	static point				h2p(point v);

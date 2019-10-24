@@ -2,7 +2,7 @@
 
 using namespace draw;
 
-resi bsmeta<resi>::elements[] = {{"bench", "art/furniture"},
+resi bsmeta<resi>::elements[] = {{"furn", "art/objects"},
 {"monsters", "art"},
 {"players", "art"},
 };
