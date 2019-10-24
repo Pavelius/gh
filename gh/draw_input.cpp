@@ -592,8 +592,18 @@ static void hexagon(point pt) {
 }
 
 static void paint_grid() {
-	for(short unsigned i = 0; i < map.getsize(); i++)
-		hexagon(h2p({board::i2x(i), board::i2y(i)}));
+	auto pf = font;
+	font = metrics::font;
+	for(short unsigned i = 0; i < map.getsize(); i++) {
+		auto px = board::i2x(i);
+		auto py = board::i2y(i);
+		auto pt = h2p({px, py});
+		hexagon(pt);
+		char temp[32]; stringbuilder sb(temp);
+		sb.add("%1i", i);
+		text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
+	}
+	font = pf;
 }
 
 static void paint_screen() {

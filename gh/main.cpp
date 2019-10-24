@@ -48,7 +48,7 @@ int main() {
 	if(!test_battle())
 		return 0;
 	draw::initialize();
-	draw::create(-1, -1, 900, 600, 0, 32);
+	draw::create(-1, -1, 900, 600, WFResize| WFMinmax, 32);
 	map.paint();
 	return 0;
 }
