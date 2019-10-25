@@ -12,10 +12,10 @@ static bool test_abilities() {
 		if(!e)
 			continue;
 		actiona a1, a2;
-		a1.parse(e.upper, pb, p1);
+		a1.parse(e.upper, pb, p1, true);
 		if(!a1.data[0].id && !a1.data[0].bonus)
 			return false;
-		a2.parse(e.lower, pb, p1);
+		a2.parse(e.lower, pb, p1, true);
 		if(!a2.data[0].id && !a2.data[0].bonus)
 			return false;
 	}
@@ -36,7 +36,7 @@ static bool test_battle() {
 	board b;
 	creature p1, m1;
 	actiona actions;
-	actions.parse(bsmeta<ability>::elements[2].upper, b, p1);
+	actions.parse(bsmeta<ability>::elements[2].upper, b, p1, false);
 	m1.sethpmax(10); p1.sethpmax(10);
 	p1.attack(m1, 3, 0, {}, d1);
 	return true;
@@ -48,6 +48,18 @@ static void test_map() {
 	map.add(FURN, 1, 139);
 }
 
+static void test_answer() {
+	char temp[260]; stringbuilder sb(temp);
+	sb.add("Внезапно все потемнело и вы увидели свет в дальнем краю прохода.");
+	creature p1, m1;
+	answeri an;
+	actiona actions; actions.parse(bsmeta<ability>::elements[2].upper, map, p1, false);
+	char tem1[260]; stringbuilder sa(tem1);
+	actions.tostring(sa);
+	an.add(1, tem1);
+	an.choose(true, false, 0, sb);
+}
+
 int main() {
 	if(!test_abilities())
 		return 0;
@@ -57,9 +69,11 @@ int main() {
 		return 0;
 	test_map();
 	unit_main();
+	map.setcamera(map.h2p(79));
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, WFResize| WFMinmax, 32);
-	map.paint();
+	draw::setcaption("Gloomhaven board game");
+	test_answer();
 	return 0;
 }
 

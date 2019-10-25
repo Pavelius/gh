@@ -22,11 +22,10 @@ static bool				break_modal;
 static int				break_result;
 static point			camera;
 static point			camera_drag;
-static rect				last_board;
+static rect				last_board = {0, 0, 900, 600};
 static point			tooltips_point;
 static short			tooltips_width;
 static char				tooltips_text[4096];
-//static rect				hilite_rect;
 static short unsigned	hilite_index;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
@@ -53,7 +52,7 @@ struct guii {
 		tips_width = 200;
 		button_width = 64;
 		opacity_hilighted = 200;
-		show_index = true;
+		show_index = false;
 	}
 } gui;
 
@@ -350,21 +349,14 @@ static bool control_board() {
 	switch(hot.key) {
 	case KeyLeft: camera.x -= step; break;
 	case KeyRight: camera.x += step; break;
-	case MouseWheelUp:
-		if((hot.key&Shift) != 0)
-			camera.x -= step;
-		else
-			camera.y -= step;
-		break;
-	case MouseWheelDown:
-		if((hot.key&Shift) != 0)
-			camera.x += step;
-		else
-			camera.y += step;
-		break;
-		break;
 	case KeyUp: camera.y -= step; break;
 	case KeyDown: camera.y += step; break;
+	case MouseWheelUp:
+		camera.y -= step;
+		break;
+	case MouseWheelDown:
+		camera.y += step;
+		break;
 	case MouseLeft:
 		if(hot.pressed && last_board == hot.hilite) {
 			draw::drag::begin(last_board);
@@ -504,26 +496,14 @@ static int render_report(int x, int y, const char* picture, const char* format, 
 	return y - y0;
 }
 
-static void render_board() {
-
-}
-
-void drawable::slide(int x, int y) {
-	while(ismodal()) {
-		render_board();
-		domodal();
-	}
-}
-
 void drawable::paint(int x, int y) const {
 	x -= camera.x;
 	y -= camera.y;
 	image(x, y, gres(res), frame, flags);
 }
 
-const double			sqrt_3 = 1.732050807568877;
-const double			cos_30 = 0.86602540378;
-
+const double sqrt_3 = 1.732050807568877;
+const double cos_30 = 0.86602540378;
 const int size2 = size - 2;
 static const point hexagon_offset2[6] = {{(short)(size2 * cos_30), -(short)(size2 / 2)},
 {(short)(size2 * cos_30), (short)(size2 / 2)},
@@ -631,6 +611,8 @@ static void hexagon(short unsigned i, bool use_hilite) {
 	if(!pt.in(rc))
 		return;
 	hexagon(pt, hexagon_offset, colors::border);
+	if(map.is(i, HasBlock))
+		hexagon(pt, hexagon_offset2, colors::green);
 	if(gui.show_index) {
 		char temp[32]; stringbuilder sb(temp);
 		sb.add("%1i", i);
@@ -643,13 +625,13 @@ static void hexagon(short unsigned i, bool use_hilite) {
 	}
 }
 
-static void paint_grid() {
+static void paint_grid(bool can_choose) {
 	auto pf = font;
 	font = metrics::font;
 	for(short unsigned i = 0; i < map.getsize(); i++) {
 		if(map.is(i, HasWall))
 			continue;
-		hexagon(i, true);
+		hexagon(i, can_choose);
 	}
 	if(hilite_index != Blocked) {
 		auto pt = board::h2p(hilite_index) - camera;
@@ -663,18 +645,53 @@ void board::paint_furnitures() const {
 		e.paint();
 }
 
-static void paint_screen() {
-	const rect rc = {0, 0, draw::getwidth(), draw::getheight()};
-	rectf(rc, colors::gray);
+void board::paint_screen(bool can_choose) const {
+	last_board = {0, 0, draw::getwidth(), draw::getheight()};
+	area(last_board);
+	rectf(last_board, colors::gray);
 	hilite_index = Blocked;
-	paint_grid();
+	paint_grid(can_choose);
+	paint_furnitures();
 }
 
 void board::paint() const {
 	while(ismodal()) {
-		paint_screen();
-		paint_furnitures();
+		paint_screen(false);
 		domodal();
 		control_standart();
 	}
+}
+
+void board::setcamera(point pt) {
+	pt.x -= last_board.width() / 2;
+	pt.y -= last_board.height() / 2;
+	camera = pt;
+}
+
+int	answeri::choose(bool cancel_button, bool random_choose, const char* picture, const char* format) const {
+	int x, y;
+	if(!elements)
+		return 0;
+	if(random_choose)
+		return elements[rand() % elements.getcount()].param;
+	if(cancel_button && !elements)
+		return 0;
+	while(ismodal()) {
+		map.paint_screen(false);
+		x = getwidth() - gui.window_width - gui.border * 2;
+		y = gui.border * 2;
+		y += render_report(x, y, picture, format);
+		x = getwidth() - gui.right_width - gui.border * 2;
+		for(auto& e : elements) {
+			bool run;
+			y += windowb(x, y, gui.right_width, e.getname(), run, false);
+			if(run)
+				execute(breakparam, e.param);
+		}
+		if(cancel_button)
+			y += windowb(x, y, gui.right_width, "Отмена", buttoncancel, false, 0, KeyEscape);
+		domodal();
+		control_standart();
+	}
+	return getresult();
 }

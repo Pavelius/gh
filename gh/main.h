@@ -170,9 +170,14 @@ struct action {
 	statea						states;
 	carda						cards;
 };
+struct actioni {
+	const char*					id;
+	const char*					name;
+};
 struct actiona {
 	action						data[4];
-	void						parse(const commanda& source, board& b, creature& player);
+	void						parse(const commanda& source, board& b, creature& player, bool use_magic);
+	void						tostring(stringbuilder& sb) const;
 };
 class figure : public drawable, public variant {
 	short unsigned				index;
@@ -243,12 +248,14 @@ public:
 	static point				p2h(point pt);
 	void						paint() const;
 	void						paint_furnitures() const;
+	void						paint_screen(bool can_choose = false) const;
 	static unsigned short		p2i(point pt) { return pt.y*mx + pt.x; }
 	static short				i2x(short unsigned i) { return i % mx; }
 	static short				i2y(short unsigned i) { return i / mx; }
 	constexpr void				remove(short unsigned i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
 	constexpr void				set(short unsigned i, map_tile_s v) { map_flags[i] |= (1 << v); }
 	constexpr void				set(element_s i, int v) { elements[i] = v; }
+	static void					setcamera(point pt);
 	static unsigned short		to(direction_s v);
 };
 class answeri : stringbuilder {

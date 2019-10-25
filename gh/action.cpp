@@ -1,5 +1,24 @@
 #include "main.h"
 
+actioni bsmeta<actioni>::elements[] = {{"Moved", "Сколько двигался"},
+{"Attacked", "Сколько атаковал"},
+{"Shield", "Щит"},
+{"Retaliate", "Ответный удар"},
+{"Guard", "Принять урон на себя"},
+{"Move", "Движение"},
+{"Jump", "Прыжек"},
+{"Fly", "Полет"},
+{"Attack", "Атака"},
+{"AttackBoost", "Бонус атаки"},
+{"Push", "Оттолкнуть"},
+{"Pull", "Притянуть"},
+{"Heal", "Лечение"},
+{"Loot", "Добыча"},
+{"Bless", "Благословение"},
+{"Curse", "Проклятие"},
+};
+assert_enum(action, Curse);
+
 static const commandi& getop(const command_s* pb) {
 	return bsmeta<commandi>::elements[*pb];
 }
@@ -41,7 +60,7 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 	return pb;
 }
 
-static const command_s* conditions(const command_s* pb, const command_s* pe, action* pa, board& b) {
+static const command_s* conditions(const command_s* pb, const command_s* pe, action* pa, board& b, bool use_magic) {
 	while(*pb && pb < pe) {
 		auto& ce = getop(pb);
 		if(ce.type != Condition)
@@ -49,7 +68,7 @@ static const command_s* conditions(const command_s* pb, const command_s* pe, act
 		auto true_condition = false;
 		if(ce.id.type == Element) {
 			true_condition = b.is(ce.id.element);
-			if(true_condition)
+			if(true_condition && use_magic)
 				b.set(ce.id.element, 0);
 		}
 		pb = modifiers(pb + 1, pe, pa, true_condition);
@@ -57,7 +76,7 @@ static const command_s* conditions(const command_s* pb, const command_s* pe, act
 	return pb;
 }
 
-void actiona::parse(const commanda& source, board& b, creature& player) {
+void actiona::parse(const commanda& source, board& b, creature& player, bool use_magic) {
 	memset(this, 0, sizeof(*this));
 	action* pa = 0;
 	auto pb = source.data;
@@ -78,7 +97,40 @@ void actiona::parse(const commanda& source, board& b, creature& player) {
 			if(ce.special == BonusForSecondonary)
 				pa->bonus += player.get(ce.id_second.action);
 		}
-		pb = conditions(pb + 1, pe, pa, b);
+		pb = conditions(pb + 1, pe, pa, b, use_magic);
 		pb = modifiers(pb, pe, pa, true);
+	}
+}
+
+static void add(stringbuilder& sb, action_s e, int b) {
+	if(b) {
+		if(!*sb.begin())
+			sb.add(", ");
+		sb.add("%1 %2i", bsmeta<actioni>::elements[e].name, b);
+	}
+}
+
+static void add(stringbuilder& sb, const char* modifier, int b) {
+	if(b) {
+		if(*sb.begin())
+			sb.add(", ");
+		sb.add("%1 %2i", modifier, b);
+	}
+}
+
+static void add(stringbuilder& sb, const action& e) {
+	if(*sb.begin())
+		sb.add(", ");
+	add(sb, e.id, e.bonus);
+	add(sb, "Дистанция", e.range);
+	add(sb, "Пробой", e.pierce);
+	add(sb, "Опыт", e.experience);
+}
+
+void actiona::tostring(stringbuilder& sb) const {
+	for(auto& e : data) {
+		if(!e.id)
+			continue;
+		add(sb, e);
 	}
 }
