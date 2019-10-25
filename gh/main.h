@@ -179,6 +179,10 @@ struct actiona {
 	void						parse(const commanda& source, board& b, creature& player, bool use_magic);
 	void						tostring(stringbuilder& sb) const;
 };
+struct areai {
+	const char*					id;
+	const char*					name;
+};
 class figure : public drawable, public variant {
 	short unsigned				index;
 public:
@@ -281,4 +285,5 @@ struct battlecardi {
 	variant						cless;
 	statea						states;
 };
+DECLENUM(area);
 extern board					map;

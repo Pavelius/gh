@@ -105,6 +105,9 @@
     <ClCompile Include="bstream.cpp">
       <Filter>Поддержка</Filter>
     </ClCompile>
+    <ClCompile Include="area.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">

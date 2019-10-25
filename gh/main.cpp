@@ -54,7 +54,7 @@ static void test_answer() {
 	creature p1, m1;
 	answeri an;
 	actiona actions; actions.parse(bsmeta<ability>::elements[2].upper, map, p1, false);
-	char tem1[260]; stringbuilder sa(tem1);
+	char tem1[260]; stringbuilder sa(tem1); tem1[0] = 0;
 	actions.tostring(sa);
 	an.add(1, tem1);
 	an.choose(true, false, 0, sb);

@@ -290,5 +290,6 @@ struct bsmeta {
 	static T*				end() { return (T*)source.end(); }
 };
 #define DECLBASE(e) array bsmeta<e>::source(bsmeta<e>::elements, sizeof(bsmeta<e>::elements[0]), sizeof(bsmeta<e>::elements)/sizeof(bsmeta<e>::elements[0]))
+#define DECLENUM(e) template<> struct bsmeta<e##_s> : bsmeta<e##i> {}
 #define assert_enum(e, last) static_assert(sizeof(bsmeta<e##i>::elements) / sizeof(bsmeta<e##i>::elements[0]) == last + 1, "Invalid count of " #e " elements");\
 array bsmeta<e##i>::source(bsmeta<e##i>::elements, sizeof(bsmeta<e##i>::elements[0]), sizeof(bsmeta<e##i>::elements)/sizeof(bsmeta<e##i>::elements[0]));

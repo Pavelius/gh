@@ -120,6 +120,7 @@
     <ClCompile Include="ability.cpp" />
     <ClCompile Include="action.cpp" />
     <ClCompile Include="answer.cpp" />
+    <ClCompile Include="area.cpp" />
     <ClCompile Include="board.cpp" />
     <ClCompile Include="bstream.cpp" />
     <ClCompile Include="card.cpp" />

@@ -104,27 +104,38 @@ void actiona::parse(const commanda& source, board& b, creature& player, bool use
 
 static void add(stringbuilder& sb, action_s e, int b) {
 	if(b) {
-		if(!*sb.begin())
+		if(*sb.begin())
 			sb.add(", ");
 		sb.add("%1 %2i", bsmeta<actioni>::elements[e].name, b);
 	}
 }
 
-static void add(stringbuilder& sb, const char* modifier, int b) {
+static void add(stringbuilder& sb, const char* modifier, const char* sep, int b) {
 	if(b) {
 		if(*sb.begin())
 			sb.add(", ");
-		sb.add("%1 %2i", modifier, b);
+		sb.add("%1%3%2i", modifier, b, sep);
 	}
 }
 
-static void add(stringbuilder& sb, const action& e) {
+static void add(stringbuilder& sb, area_s a, int b) {
+	if(a == NoArea)
+		return;
 	if(*sb.begin())
 		sb.add(", ");
+	sb.add(bsmeta<areai>::elements[a].name);
+	if(b)
+		sb.add(":%1i", b);
+}
+
+static void add(stringbuilder& sb, const action& e) {
 	add(sb, e.id, e.bonus);
-	add(sb, "Дистанция", e.range);
-	add(sb, "Пробой", e.pierce);
-	add(sb, "Опыт", e.experience);
+	add(sb, "Дистанция", " ", e.range);
+	add(sb, "Пробой", " ", e.pierce);
+	add(sb, "Опыт", " ", e.experience);
+	add(sb, "Цели", ":", e.target);
+	add(sb, "Использований", ":", e.use);
+	add(sb, e.area, e.area_size);
 }
 
 void actiona::tostring(stringbuilder& sb) const {
