@@ -189,7 +189,7 @@ public:
 	constexpr figure() : drawable(), variant(), index(Blocked) {}
 	explicit constexpr operator bool() const { return type!=NoVariant; }
 	short unsigned				getindex() const { return index; }
-	void						setindex(short unsigned v) { index = v; }
+	void						setpos(short unsigned v);
 	void						setpos(int x, int y) { this->x = x; this->y = y; }
 };
 class nameable {
@@ -253,6 +253,7 @@ public:
 	static point				p2h(point pt);
 	void						paint() const;
 	void						paint_furnitures() const;
+	void						paint_players() const;
 	void						paint_screen(bool can_choose = false) const;
 	static unsigned short		p2i(point pt) { return pt.y*mx + pt.x; }
 	static short				i2x(short unsigned i) { return i % mx; }

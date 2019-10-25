@@ -53,7 +53,7 @@ struct guii {
 		tips_width = 200;
 		button_width = 64;
 		opacity_hilighted = 200;
-		show_index = false;
+		show_index = true;
 	}
 } gui;
 
@@ -643,6 +643,7 @@ void board::paint_screen(bool can_choose) const {
 	hilite_index = Blocked;
 	paint_grid(can_choose);
 	paint_furnitures();
+	paint_players();
 }
 
 void board::paint() const {

@@ -21,8 +21,7 @@ void board::add(res_s r, int frame, short unsigned i) {
 	auto p = furnitures.add();
 	p->res = r;
 	p->frame = frame;
-	p->setpos(pt.x, pt.y);
-	p->setindex(i);
+	p->setpos(i);
 	map.set(i, HasBlock);
 }
 
@@ -79,4 +78,11 @@ void board::wave(unsigned char start_index) {
 	for(auto& e : movement_rate)
 		e = DefaultCost;
 	make_wave(start_index, movement_rate, false);
+}
+
+void board::paint_players() const {
+	for(auto& e : bsmeta<player>()) {
+		if(e)
+			e.paint();
+	}
 }

@@ -3,6 +3,12 @@
 static state_s state_hostile[] = {Disarm, Immobilize, Wound, Muddle, Poison, Stun};
 static state_s state_friendly[] = {Invisibility, Strenght};
 
+void figure::setpos(short unsigned v) {
+	auto pt = board::h2p(v);
+	x = pt.x; y = pt.y;
+	index = v;
+}
+
 void creature::set(action_s i, int v) {
 	if(i <= Guard)
 		actions[i] = v;

@@ -52,6 +52,11 @@ static void test_answer() {
 	char temp[260]; stringbuilder sb(temp);
 	sb.add("Внезапно все потемнело и вы увидели свет в дальнем краю прохода.");
 	creature p1, m1;
+	auto p2 = bsmeta<player>::add();
+	p2->type = Action;
+	p2->res = FURN;
+	p2->frame = 0;
+	p2->setpos(142);
 	answeri an;
 	actiona actions; actions.parse(bsmeta<ability>::elements[2].upper, map, p1, false);
 	char tem1[260]; stringbuilder sa(tem1); tem1[0] = 0;
