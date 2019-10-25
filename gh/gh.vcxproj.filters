@@ -108,6 +108,12 @@
     <ClCompile Include="area.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="class.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">

@@ -237,6 +237,7 @@ class board {
 	static constexpr int		mx = 32;
 	static constexpr int		my = 24;
 	unsigned char				map_flags[mx*my];
+	static unsigned short		movement_rate[mx*my];
 	char						counter;
 	char						elements[Dark + 1];
 	adat<figure, 24>			furnitures;
@@ -260,7 +261,8 @@ public:
 	constexpr void				set(short unsigned i, map_tile_s v) { map_flags[i] |= (1 << v); }
 	constexpr void				set(element_s i, int v) { elements[i] = v; }
 	static void					setcamera(point pt);
-	static unsigned short		to(direction_s v);
+	unsigned short				to(unsigned short index, direction_s d) const;
+	void						wave(unsigned char start_index);
 };
 class answeri : stringbuilder {
 	struct element {
@@ -284,6 +286,12 @@ struct battlecardi {
 	char						bonus, count;
 	variant						cless;
 	statea						states;
+};
+class player : public creature {
+	deck						combat_deck;
+	adat<short unsigned, 24>	ability_deck;
+public:
+	void						prepare();
 };
 DECLENUM(area);
 extern board					map;

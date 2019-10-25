@@ -124,6 +124,7 @@
     <ClCompile Include="board.cpp" />
     <ClCompile Include="bstream.cpp" />
     <ClCompile Include="card.cpp" />
+    <ClCompile Include="class.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="command.cpp" />
     <ClCompile Include="converter.cpp" />
@@ -141,6 +142,7 @@
     <ClCompile Include="monster.cpp" />
     <ClCompile Include="png_util.cpp" />
     <ClCompile Include="point.cpp" />
+    <ClCompile Include="player.cpp" />
     <ClCompile Include="sprite_util.cpp" />
     <ClCompile Include="stringbuilder.cpp" />
     <ClCompile Include="surface_util.cpp" />

@@ -120,7 +120,6 @@ struct sprite : pma {
 	int					store(const unsigned char* p, int width, int w, int h, int ox, int oy, sprite::encodes mode, unsigned char shadow_index, color* original_pallette, int explicit_frame, unsigned char transparent_index);
 	void				write(const char* url) const;
 };
-typedef const char* (*proctext)(char* result, const char* result_maximum, void* object);
 namespace colors {
 extern color			active;
 extern color			button;
@@ -148,6 +147,7 @@ extern int				scroll;
 }
 namespace draw {
 typedef void(*callback)();
+typedef const char* (*proctext)(char* result, const char* result_maximum, void* object);
 namespace dialog {
 bool					color(struct color& result, struct color* custom = 0);
 bool					folder(const char* title, char* path);
@@ -246,7 +246,7 @@ void					circle(int x, int y, int radius, const color c1);
 void					circlef(int x, int y, int radius, const color c1, unsigned char alpha = 0xFF);
 void					create(int x, int y, int width, int height, unsigned flags, int bpp);
 void					decortext(unsigned flags);
-void					domodal();
+extern callback			domodal;
 void					execute(void(*callback)(), int value = 0);
 void					execute(const hotinfo& value);
 rect					getarea();

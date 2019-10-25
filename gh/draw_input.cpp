@@ -31,6 +31,7 @@ const int				map_normal = 1000;
 static int				map_scale = map_normal;
 extern rect				sys_static_area;
 int						distance(point p1, point p2);
+callback				draw::domodal;
 const int				size = 50;
 
 struct guii {
@@ -167,6 +168,9 @@ int draw::getfocus() {
 }
 
 void draw::execute(void(*proc)(), int param) {
+	domodal = proc;
+	hot.key = 0;
+	hot.param = param;
 }
 
 void draw::breakmodal(int result) {
@@ -184,24 +188,6 @@ void draw::buttonok() {
 
 int draw::getresult() {
 	return break_result;
-}
-
-static void before_render() {
-	hot.cursor = CursorArrow;
-	hot.hilite.clear();
-	render_control = elements;
-	if(hot.mouse.x < 0 || hot.mouse.y < 0)
-		sys_static_area.clear();
-	else
-		sys_static_area = {0, 0, draw::getwidth(), draw::getheight()};
-}
-
-bool draw::ismodal() {
-	before_render();
-	if(!break_modal)
-		return true;
-	break_modal = false;
-	return false;
 }
 
 static areas hilite(rect rc) {
@@ -422,6 +408,32 @@ static void render_tooltips() {
 	tooltips_text[0] = 0;
 }
 
+static void standart_domodal() {
+	render_tooltips();
+	if(hot.key == InputUpdate && keep_hot) {
+		keep_hot = false;
+		hot = keep_hot_value;
+	} else
+		hot.key = draw::rawinput();
+	if(!hot.key)
+		exit(0);
+}
+
+bool draw::ismodal() {
+	domodal = standart_domodal;
+	hot.cursor = CursorArrow;
+	hot.hilite.clear();
+	render_control = elements;
+	if(hot.mouse.x < 0 || hot.mouse.y < 0)
+		sys_static_area.clear();
+	else
+		sys_static_area = {0, 0, draw::getwidth(), draw::getheight()};
+	if(!break_modal)
+		return true;
+	break_modal = false;
+	return false;
+}
+
 void draw::initialize() {
 	colors::active = color::create(172, 128, 0);
 	colors::border = color::create(73, 73, 80);
@@ -455,27 +467,6 @@ static bool read_sprite(sprite** result, const char* name) {
 
 static void end_turn() {
 	breakmodal(0);
-}
-
-void draw::domodal() {
-	if(current_proc) {
-		auto ev = current_proc;
-		before_render();
-		hot.key = InputUpdate;
-		hot.param = current_param;
-		ev();
-		before_render();
-		hot.key = InputUpdate;
-		return;
-	}
-	render_tooltips();
-	if(hot.key == InputUpdate && keep_hot) {
-		keep_hot = false;
-		hot = keep_hot_value;
-	} else
-		hot.key = draw::rawinput();
-	if(!hot.key)
-		exit(0);
 }
 
 static int render_left() {

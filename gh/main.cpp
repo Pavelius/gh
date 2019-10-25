@@ -57,7 +57,7 @@ static void test_answer() {
 	char tem1[260]; stringbuilder sa(tem1); tem1[0] = 0;
 	actions.tostring(sa);
 	an.add(1, tem1);
-	an.choose(true, false, 0, sb);
+	an.choose(false, false, 0, sb);
 }
 
 int main() {
