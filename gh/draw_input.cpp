@@ -26,7 +26,8 @@ static rect				last_board;
 static point			tooltips_point;
 static short			tooltips_width;
 static char				tooltips_text[4096];
-static rect				hilite_rect;
+//static rect				hilite_rect;
+static short unsigned	hilite_index;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
 extern rect				sys_static_area;
@@ -39,6 +40,7 @@ struct guii {
 	short				button_width, window_width, window_height, hero_width;
 	short				tips_width, control_border, right_width;
 	short				padding;
+	bool				show_index;
 	void initialize() {
 		memset(this, 0, sizeof(*this));
 		opacity = 220;
@@ -345,8 +347,8 @@ static void keyparam() {
 static bool control_board() {
 	const int step = 32;
 	switch(hot.key) {
-	case MouseWheelUp: map_scale += 50; break;
-	case MouseWheelDown: map_scale -= 50; break;
+	//case MouseWheelUp: map_scale += 50; break;
+	//case MouseWheelDown: map_scale -= 50; break;
 	case KeyLeft: camera.x -= step; break;
 	case KeyRight: camera.x += step; break;
 	case KeyUp: camera.y -= step; break;
@@ -585,20 +587,42 @@ point board::p2h(point pt) {
 	return cube_to_oddr(cube_round(axial_to_cube({(short)q, (short)r})));
 }
 
-static void hexagon(point pt) {
+static void hexagon(point pt, const point* points, color c1) {
 	for(auto i = 0; i < 5; i++)
-		line(pt + hexagon_offset[i], pt + hexagon_offset[i + 1], colors::border);
-	line(pt + hexagon_offset[5], pt + hexagon_offset[0], colors::border);
+		line(pt + points[i], pt + points[i + 1], c1);
+	line(pt + points[5], pt + points[0], c1);
 }
 
-static void hexagon(short unsigned i) {
-	auto px = board::i2x(i);
-	auto py = board::i2y(i);
-	auto pt = board::h2p({px, py});
-	hexagon(pt);
-	char temp[32]; stringbuilder sb(temp);
-	sb.add("%1i", i);
-	text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
+static void hexagon(point pt, const point* points, color c1, float lw) {
+	auto push_linw = linw;
+	auto push_fore = fore;
+	linw = lw;
+	fore = c1;
+	for(auto i = 0; i < 5; i++) {
+		auto p1 = pt + points[i];
+		auto p2 = pt + points[i + 1];
+		line(p1.x, p1.y, p2.x, p2.y);
+	}
+	auto p1 = pt + points[5];
+	auto p2 = pt + points[0];
+	line(p1.x, p1.y, p2.x, p2.y);
+	linw = push_linw;
+	fore = push_fore;
+}
+
+static void hexagon(short unsigned i, bool use_hilite) {
+	auto pt = board::h2p(i) - camera;
+	hexagon(pt, hexagon_offset, colors::border);
+	if(gui.show_index) {
+		char temp[32]; stringbuilder sb(temp);
+		sb.add("%1i", i);
+		text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
+	}
+	if(use_hilite) {
+		const rect rc = {pt.x - size / 2, pt.y - size / 2, pt.x + size / 2, pt.y + size / 2};
+		if(areb(rc))
+			hilite_index = i;
+	}
 }
 
 static void paint_grid() {
@@ -607,7 +631,11 @@ static void paint_grid() {
 	for(short unsigned i = 0; i < map.getsize(); i++) {
 		if(map.is(i, HasWall))
 			continue;
-		hexagon(i);
+		hexagon(i, true);
+	}
+	if(hilite_index != Blocked) {
+		auto pt = board::h2p(hilite_index) - camera;
+		hexagon(pt, hexagon_offset2, colors::yellow);
 	}
 	font = pf;
 }
@@ -620,6 +648,7 @@ void board::paint_furnitures() const {
 static void paint_screen() {
 	const rect rc = {0, 0, draw::getwidth(), draw::getheight()};
 	rectf(rc, colors::gray);
+	hilite_index = Blocked;
 	paint_grid();
 }
 
@@ -627,6 +656,7 @@ void board::paint() const {
 	while(ismodal()) {
 		paint_screen();
 		paint_furnitures();
+		control_standart();
 		domodal();
 	}
 }
