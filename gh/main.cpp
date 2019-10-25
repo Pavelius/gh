@@ -44,11 +44,8 @@ static bool test_battle() {
 
 static void test_map() {
 	map.create();
-	map.set(0, HasWall);
-	map.set(1, HasWall);
-	map.set(32, HasWall);
-	map.add(FURN, 0, 35);
-	map.add(FURN, 1, 96);
+	map.add(FURN, 0, 77);
+	map.add(FURN, 1, 139);
 }
 
 int main() {

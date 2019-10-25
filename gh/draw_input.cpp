@@ -53,6 +53,7 @@ struct guii {
 		tips_width = 200;
 		button_width = 64;
 		opacity_hilighted = 200;
+		show_index = true;
 	}
 } gui;
 
@@ -347,10 +348,21 @@ static void keyparam() {
 static bool control_board() {
 	const int step = 32;
 	switch(hot.key) {
-	//case MouseWheelUp: map_scale += 50; break;
-	//case MouseWheelDown: map_scale -= 50; break;
 	case KeyLeft: camera.x -= step; break;
 	case KeyRight: camera.x += step; break;
+	case MouseWheelUp:
+		if((hot.key&Shift) != 0)
+			camera.x -= step;
+		else
+			camera.y -= step;
+		break;
+	case MouseWheelDown:
+		if((hot.key&Shift) != 0)
+			camera.x += step;
+		else
+			camera.y += step;
+		break;
+		break;
 	case KeyUp: camera.y -= step; break;
 	case KeyDown: camera.y += step; break;
 	case MouseLeft:
@@ -438,6 +450,7 @@ void draw::initialize() {
 	draw::font = metrics::font;
 	draw::fore = colors::text;
 	draw::fore_stroke = colors::blue;
+	gui.initialize();
 }
 
 static bool read_sprite(sprite** result, const char* name) {
@@ -503,6 +516,8 @@ void drawable::slide(int x, int y) {
 }
 
 void drawable::paint(int x, int y) const {
+	x -= camera.x;
+	y -= camera.y;
 	image(x, y, gres(res), frame, flags);
 }
 
@@ -612,6 +627,9 @@ static void hexagon(point pt, const point* points, color c1, float lw) {
 
 static void hexagon(short unsigned i, bool use_hilite) {
 	auto pt = board::h2p(i) - camera;
+	const rect rc = {0 - 100, 0 - 100, draw::getwidth() + 100, draw::getheight() + 100};
+	if(!pt.in(rc))
+		return;
 	hexagon(pt, hexagon_offset, colors::border);
 	if(gui.show_index) {
 		char temp[32]; stringbuilder sb(temp);
@@ -656,7 +674,7 @@ void board::paint() const {
 	while(ismodal()) {
 		paint_screen();
 		paint_furnitures();
-		control_standart();
 		domodal();
+		control_standart();
 	}
 }

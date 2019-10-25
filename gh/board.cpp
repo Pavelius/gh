@@ -4,7 +4,13 @@ board map;
 
 void board::create() {
 	memset(this, 0, sizeof(*this));
-	set(0, HasBlock);
+	for(short i = my; i > 0; i--) {
+		for(short x = 0; x < i / 2; x++) {
+			set(p2i({x, my - i}), HasWall);
+			//if(x!=0)
+			//	set(p2i({mx - x, my - i}), HasWall);
+		}
+	}
 }
 
 void board::add(res_s r, int frame, short unsigned i) {
