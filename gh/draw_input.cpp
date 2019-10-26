@@ -487,10 +487,17 @@ static int render_report(int x, int y, const char* picture, const char* format, 
 	return y - y0;
 }
 
-void drawable::paint(int x, int y) const {
-	x -= camera.x;
-	y -= camera.y;
-	image(x, y, gres(res), frame, flags);
+void drawable::paint() const {
+	auto x1 = x - camera.x;
+	auto y1 = y - camera.y;
+	image(x1, y1, gres(res), frame, flags);
+}
+
+void drawable::setdir(direction_s v) {
+	switch(v) {
+	case Right: flags = 0; break;
+	case Left: flags = ImageMirrorH; break;
+	}
 }
 
 const double sqrt_3 = 1.732050807568877;
@@ -686,4 +693,21 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* picture,
 		control_standart();
 	}
 	return getresult();
+}
+
+void playeri::paint() const {
+	//figure::paint();
+	hexagon({x - camera.x, y - camera.y}, hexagon_offset2, colors::blue);
+}
+
+void playeri::choose_abilities() {
+	pushfont pf;
+	while(ismodal()) {
+		rectf(last_board, colors::gray);
+		font = metrics::h2;
+		text(10, 10, creature::getname());
+		font = metrics::font;
+		image(10, 30, gres(PLAYERS), cless, 0);
+		domodal();
+	}
 }

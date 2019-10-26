@@ -1,9 +1,10 @@
 #include "main.h"
 
-player bsmeta<player>::elements[32];
-DECLBASE(player);
+playeri bsmeta<playeri>::elements[32];
+DECLBASE(playeri);
 
-void player::prepare() {
+void playeri::prepare() {
+	ability_deck.clear();
 	combat_deck.clear();
 	combat_deck.create();
 	combat_deck.shuffle();

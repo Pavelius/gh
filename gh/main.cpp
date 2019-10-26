@@ -44,7 +44,8 @@ static bool test_battle() {
 
 static void test_map() {
 	map.create();
-	map.add(FURN, 0, 77);
+	map.add(FURN, 0, 77, 2, Left);
+	map.add(FURN, 0, 79, 2, Right);
 	map.add(FURN, 1, 139);
 }
 
@@ -52,8 +53,9 @@ static void test_answer() {
 	char temp[260]; stringbuilder sb(temp);
 	sb.add("Внезапно все потемнело и вы увидели свет в дальнем краю прохода.");
 	creature p1, m1;
-	auto p2 = bsmeta<player>::add();
-	p2->type = Action;
+	auto p2 = bsmeta<playeri>::add();
+	p2->type = Class;
+	p2->cless = Brute;
 	p2->res = FURN;
 	p2->frame = 0;
 	p2->setpos(142);
@@ -63,6 +65,12 @@ static void test_answer() {
 	actions.tostring(sa);
 	an.add(1, tem1);
 	an.choose(false, false, 0, sb);
+}
+
+static void test_players() {
+	playeri p1;
+	p1.set(Tinkerer);
+	p1.choose_abilities();
 }
 
 int main() {
@@ -76,9 +84,9 @@ int main() {
 	unit_main();
 	map.setcamera(map.h2p(79));
 	draw::initialize();
-	draw::create(-1, -1, 900, 600, WFResize| WFMinmax, 32);
+	draw::create(-1, -1, 900, 600, 0, 32);
 	draw::setcaption("Gloomhaven board game");
-	test_answer();
+	test_players();
 	return 0;
 }
 

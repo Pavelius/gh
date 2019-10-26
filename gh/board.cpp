@@ -17,12 +17,19 @@ void board::create() {
 }
 
 void board::add(res_s r, int frame, short unsigned i) {
-	auto pt = h2p(i);
+	add(r, frame, i, 1, Left);
+}
+
+void board::add(res_s r, int frame, short unsigned i, int c, direction_s d) {
 	auto p = furnitures.add();
 	p->res = r;
 	p->frame = frame;
 	p->setpos(i);
-	map.set(i, HasBlock);
+	p->setdir(d);
+	for(auto n = 0; n < c; n++) {
+		map.set(i, HasBlock);
+		i = map.to(i, d);
+	}
 }
 
 unsigned short board::to(unsigned short index, direction_s d) const {
@@ -81,7 +88,7 @@ void board::wave(unsigned char start_index) {
 }
 
 void board::paint_players() const {
-	for(auto& e : bsmeta<player>()) {
+	for(auto& e : bsmeta<playeri>()) {
 		if(e)
 			e.paint();
 	}

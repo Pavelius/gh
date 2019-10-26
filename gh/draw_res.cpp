@@ -3,8 +3,8 @@
 using namespace draw;
 
 resi bsmeta<resi>::elements[] = {{"furn", "art/objects"},
-{"monsters", "art"},
-{"players", "art"},
+{"monsters", "art/creatures"},
+{"players", "art/creatures"},
 };
 assert_enum(res, LastResource);
 

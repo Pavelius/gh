@@ -228,6 +228,19 @@ extern color			fore; // Foreground color (curently selected color)
 extern color			fore_stroke; // foreground stroke color
 extern const sprite*	font; // Currently selected font
 //
+class pushfont {
+	const sprite*		v;
+public:
+	constexpr pushfont() : v(font) {}
+	~pushfont() { font = v; }
+};
+class pushfore {
+	color				v;
+public:
+	constexpr pushfore() : v(fore) {}
+	~pushfore() { fore = v; }
+};
+//
 void					addelement(int id, const rect& rc);
 int						aligned(int x, int width, unsigned state, int string_width);
 int						alignedh(const rect& rc, const char* string, unsigned state);

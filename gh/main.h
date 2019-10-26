@@ -64,7 +64,7 @@ enum monster_s : unsigned char {
 	AnimatedBones, AnimatedBodies, FireDemon,
 };
 enum class_s : unsigned char {
-	Brute,
+	Brute, Tinkerer,
 };
 enum res_s : unsigned char {
 	FURN, MONSTERS, PLAYERS,
@@ -72,7 +72,7 @@ enum res_s : unsigned char {
 };
 enum variant_s : unsigned char {
 	NoVariant,
-	Action, Area, Class, Card, Condition, Element, Modifier, Monster, State,
+	Action, Area, Card, Class, Condition, Element, Modifier, Monster, Player, State,
 };
 enum special_s : unsigned char {
 	NoSpecial,
@@ -116,17 +116,16 @@ struct variant {
 	constexpr variant(state_s v) : type(State), value(v) {}
 	constexpr operator bool() const { return type != NoVariant; }
 	void						clear() { type = NoVariant; value = 0; }
+	const char*					getname() const;
 };
 struct drawable : point {
 	res_s						res;
 	unsigned char				frame;
 	short unsigned				flags;
-	void						paint(int x, int y) const;
-	void						paint() const { paint(x, y); };
-	static void					slide(int x, int y);
+	void						paint() const;
+	void						setdir(direction_s v);
 };
-class deck : adat<unsigned short, 46> {
-public:
+struct deck : adat<unsigned short, 46> {
 	void						add(unsigned short v) { adat::add(v); }
 	void						add(unsigned short v, int count);
 	void						create();
@@ -192,13 +191,6 @@ public:
 	void						setpos(short unsigned v);
 	void						setpos(int x, int y) { this->x = x; this->y = y; }
 };
-class nameable {
-	const char*					name;
-public:
-	constexpr nameable() : name() {}
-	const char*					getname() const { return name; }
-	void						setname(const char* v) { name = v; }
-};
 class creature : public figure {
 	unsigned short				hp, hp_max;
 	char						actions[Guard + 1];
@@ -233,6 +225,11 @@ struct monsteri {
 	action_s					move;
 	info						levels[8][2];
 };
+struct classi {
+	const char*					name;
+	const char*					race;
+	char						abilities_cap;
+};
 class board {
 	static constexpr int		mx = 32;
 	static constexpr int		my = 24;
@@ -244,6 +241,7 @@ class board {
 public:
 	void						create();
 	void						add(res_s r, int frame, short unsigned i);
+	void						add(res_s r, int frame, short unsigned i, int c, direction_s d);
 	constexpr int				get(element_s i) const { return elements[i]; }
 	constexpr unsigned			getsize() const { return mx*my; }
 	static point				h2p(point v);
@@ -288,11 +286,17 @@ struct battlecardi {
 	variant						cless;
 	statea						states;
 };
-class player : public creature {
+class playeri : public creature {
+	char						name[16];
 	deck						combat_deck;
 	adat<short unsigned, 24>	ability_deck;
 public:
+	constexpr playeri() : creature(), name(), combat_deck(), ability_deck() {}
+	void						choose_abilities();
+	const char*					getname() const { return name; }
+	void						paint() const;
 	void						prepare();
+	void						set(class_s v) { type = Class; cless = v; }
 };
 DECLENUM(area);
 extern board					map;
