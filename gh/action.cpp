@@ -132,7 +132,7 @@ static void add(stringbuilder& sb, const action& e) {
 	add(sb, "Пробой", " ", e.pierce);
 	add(sb, "Опыт", " ", e.experience);
 	add(sb, "Цели", ":", e.target);
-	add(sb, "Использований", ":", e.use);
+	add(sb, "Применений", ":", e.use);
 	add(sb, e.area, e.area_size);
 }
 

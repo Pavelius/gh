@@ -67,8 +67,8 @@ enum class_s : unsigned char {
 	Brute, Tinkerer,
 };
 enum res_s : unsigned char {
-	FURN, MONSTERS, PLAYERS,
-	LastResource = PLAYERS
+	GLOOMHAVEN, DUNGEON,
+	FURN, MONSTERS, PLAYERS, PLAYERB,
 };
 enum variant_s : unsigned char {
 	NoVariant,
@@ -198,6 +198,7 @@ class creature : public figure {
 public:
 	constexpr creature() : figure(), actions(), hp(0), hp_max(0), level(0) {}
 	void						attack(creature& enemy, int bonus, int pierce, statea states, deck& cards);
+	void						create(variant v, int level);
 	void						damage(int v);
 	void						droploot() const;
 	bool						is(state_s v) const { return states.is(v); }
@@ -233,8 +234,10 @@ struct classi {
 	const char*					name;
 	const char*					race;
 	char						abilities_cap;
+	char						levels[11];
 };
 class answeri : stringbuilder {
+	typedef void(*tipspt)(stringbuilder& sb, int param);
 	struct element {
 		int						param;
 		const char*				text;
@@ -243,15 +246,15 @@ class answeri : stringbuilder {
 	char						buffer[4096];
 	adat<element, 16>			elements;
 public:
-	typedef void(*tipspt)(stringbuilder& sb, int param);
 	typedef void(*callback)();
 	constexpr explicit operator bool() const { return elements.count != 0; }
 	answeri();
 	void						add(int param, const char* format, ...);
 	void						addv(int param, const char* format, const char* format_param);
-	int							choose(bool cancel_button, bool random_choose, const char* format, tipspt tips = 0, callback proc = 0) const;
+	int							choose(bool cancel_button, bool random_choose, const char* format, tipspt tips = 0, callback proc = 0, callback back = 0, const char* format2 = 0, answeri* an2 = 0) const;
 	void						clear() { stringbuilder::clear(); elements.clear(); }
 	static int					compare(const void* p1, const void* p2);
+	int							paint_answers(int x, int y, bool cancel_button, void(*proc)(), tipspt tips) const;
 	void						sort();
 };
 struct battlecardi {
@@ -270,13 +273,14 @@ public:
 	constexpr playeri() : creature(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
 	void						activate();
 	void						choose_abilities();
+	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
 	static playeri*				getcurrent();
 	const char*					getname() const { return name; }
 	bool						isallowability(int v) const;
-	void						paint() const;
 	static void					paint_sheet();
+	static void					paint_back();
 	void						prepare();
 	void						set(class_s v) { type = Class; cless = v; }
 };
@@ -289,8 +293,7 @@ extern char					counter;
 extern char					elements[Dark + 1];
 //
 void						create();
-void						add(res_s r, int frame, short unsigned i);
-void						add(res_s r, int frame, short unsigned i, int c, direction_s d);
+void						add(variant v, short unsigned i, int level);
 inline int					get(element_s i) { return elements[i]; }
 inline unsigned				getsize() { return mx*my; }
 point						h2p(point v);
@@ -299,7 +302,6 @@ constexpr bool				is(element_s i) { return elements[i] > 0; }
 constexpr bool				is(short unsigned i, map_tile_s v) { return (map_flags[i] & (1 << v)) != 0; }
 static point				p2h(point pt);
 void						paint();
-void						paint_players();
 void						paint_screen(bool can_choose = false);
 static unsigned short		p2i(point pt) { return pt.y*mx + pt.x; }
 static short				i2x(short unsigned i) { return i % mx; }

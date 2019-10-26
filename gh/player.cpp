@@ -23,6 +23,7 @@ void playeri::prepare() {
 }
 
 static void ability_tips(stringbuilder& sb, int param) {
+	param = param & 0xFFF;
 	auto& ab = bsmeta<abilityi>::elements[param];
 	actiona a1, a2;
 	a1.parse(ab.upper, *current_player, false);
@@ -39,7 +40,7 @@ void playeri::choose_abilities() {
 		auto count = getabilities();
 		if(count >= need_count)
 			break;
-		answeri an;
+		answeri an, an2;
 		for(auto& e : bsmeta<abilityi>()) {
 			auto index = bsmeta<abilityi>::indexof(e);
 			if(!isallowability(index))
@@ -53,8 +54,19 @@ void playeri::choose_abilities() {
 		sb.adds("Выбирайте способности, которые вы будете использовать в этом приключении.");
 		sb.adds("Вам осталось выбрать еще [%1i] способностей.", need_count - count);
 		an.sort();
-		auto i = an.choose(false, false, sb, ability_tips, paint_sheet);
-		ability_hand.add(i);
+		for(auto index : ability_hand) {
+			auto& ab = bsmeta<abilityi>::elements[index];
+			an2.add(0x8000 + index, ab.name);
+		}
+		an2.sort();
+		const char* format2 = 0;
+		if(an2)
+			format2 = "В это приключение вы будете использовать только указанные в списке способности (левая кнопка мышки, чтобы убрать).";
+		auto i = an.choose(false, false, sb, ability_tips, paint_sheet, paint_back, format2, &an2);
+		if(i>=0xFFF)
+			ability_hand.remove(ability_hand.indexof(i&0xFFF));
+		else
+			ability_hand.add(i);
 	}
 }
 
@@ -67,4 +79,17 @@ bool playeri::isallowability(int v) const {
 	if(e.level > getlevel())
 		return false;
 	return true;
+}
+
+void playeri::create(class_s v, int level) {
+	memset(this, 0, sizeof(*this));
+	this->type = Class;
+	this->cless = v;
+	setlevel(level);
+	auto& mn = bsmeta<classi>::elements[v];
+	sethp(mn.levels[level]);
+	sethpmax(mn.levels[level]);
+	res = PLAYERS;
+	frame = v;
+	zcpy(name, "Ич");
 }

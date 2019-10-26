@@ -483,6 +483,12 @@ static int render_report(int x, int y, const char* format) {
 	return window(x, y, gui.window_width, format, gui.window_width) + gui.padding;
 }
 
+static int render_right(int x, int y, const char* format) {
+	if(!format)
+		return 0;
+	return window(x, y, gui.window_width, format) + gui.padding;
+}
+
 void drawable::paint() const {
 	auto x1 = x - camera.x;
 	auto y1 = y - camera.y;
@@ -625,7 +631,7 @@ void creature::paint() const {
 	image(x1, y1, gres(res), frame, flags);
 	auto c1 = colors::blue;
 	switch(type) {
-	case Player: c1 = colors::red; break;
+	case Class: c1 = colors::red; break;
 	case Monster: c1 = colors::white; break;
 	}
 	hexagon({x1, y1}, hexagon_offset, c1);
@@ -647,13 +653,23 @@ static void paint_grid(bool can_choose) {
 }
 
 static void paint_monsters() {
-	for(auto& e : bsmeta<creature>())
+	for(auto& e : bsmeta<creature>()) {
+		if(!e)
+			continue;
 		e.paint();
+	}
 }
 
 static void paint_furnitures() {
 	for(auto& e : bsmeta<figure>())
 		e.paint();
+}
+
+static void paint_players() {
+	for(auto& e : bsmeta<playeri>()) {
+		if(e)
+			e.paint();
+	}
 }
 
 void map::paint_screen(bool can_choose) {
@@ -663,6 +679,7 @@ void map::paint_screen(bool can_choose) {
 	hilite_index = Blocked;
 	paint_grid(can_choose);
 	paint_furnitures();
+	paint_monsters();
 	paint_players();
 }
 
@@ -698,46 +715,60 @@ void playeri::paint_sheet() {
 	//image(pt.x, pt.y, gres(MONSTERS), 3, 0);
 }
 
-int	answeri::choose(bool cancel_button, bool random_choose, const char* format, tipspt tips, callback proc) const {
-	int x, y;
+void playeri::paint_back() {
+	image(0, 0, gres(DUNGEON), 0, 0);
+	auto p = gres(PLAYERS);
+	image(590, 106, p, 0, 0);
+}
+
+static void paint_board() {
+	map::paint_screen(false);
+}
+
+int answeri::paint_answers(int x, int y, bool cancel_button, callback proc, answeri::tipspt tips) const {
+	auto y1 = y;
+	for(auto& e : elements) {
+		bool run; areas pa; auto y1 = y;
+		y += windowb(x, y, gui.right_width, e.getname(), run, false, 0, 0, 0, &pa);
+		if((pa == AreaHilited || pa == AreaHilitedPressed) && tips) {
+			stringbuilder sb(tooltips_text);
+			tooltips_point.x = x;
+			tooltips_point.y = y1;
+			tooltips_width = gui.right_width + metrics::padding * 2;
+			tips(sb, e.param);
+		}
+		if(run)
+			execute(proc, e.param);
+	}
+	if(cancel_button)
+		y += windowb(x, y, gui.right_width, "Отмена", buttoncancel, false, 0, KeyEscape);
+	return y - y1;
+}
+
+int	answeri::choose(bool cancel_button, bool random_choose, const char* format, tipspt tips, callback proc, callback back, const char* format2, answeri* an2) const {
 	if(!elements)
 		return 0;
 	if(random_choose)
 		return elements[rand() % elements.getcount()].param;
 	if(cancel_button && !elements)
 		return 0;
+	if(!back)
+		back = paint_board;
 	while(ismodal()) {
-		map::paint_screen(false);
-		x = getwidth() - gui.window_width - gui.border * 2;
-		y = gui.border * 2;
+		back();
+		auto x = getwidth() - gui.window_width - gui.border * 2;
+		auto y = gui.border * 2; auto y1 = y;
 		y += render_report(x, y, format);
 		x = getwidth() - gui.right_width - gui.border * 2;
 		if(proc)
 			proc();
-		for(auto& e : elements) {
-			bool run;
-			areas pa;
-			auto y1 = y;
-			y += windowb(x, y, gui.right_width, e.getname(), run, false, 0, 0, 0, &pa);
-			if((pa == AreaHilited || pa == AreaHilitedPressed) && tips) {
-				stringbuilder sb(tooltips_text);
-				tooltips_point.x = x;
-				tooltips_point.y = y1;
-				tooltips_width = gui.right_width + metrics::padding * 2;
-				tips(sb, e.param);
-			}
-			if(run)
-				execute(breakparam, e.param);
+		y += paint_answers(x, y, cancel_button, breakparam, tips);
+		if(format2) {
+			y1 += render_right(gui.border * 2, y1, format2);
+			y1 += an2->paint_answers(gui.border * 2, y1, false, breakparam, tips);
 		}
-		if(cancel_button)
-			y += windowb(x, y, gui.right_width, "Отмена", buttoncancel, false, 0, KeyEscape);
 		domodal();
 		control_standart();
 	}
 	return getresult();
-}
-
-void playeri::paint() const {
-	//figure::paint();
-	hexagon({x - camera.x, y - camera.y}, hexagon_offset2, colors::blue);
 }

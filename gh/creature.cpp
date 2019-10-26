@@ -60,3 +60,21 @@ void creature::attack(creature& enemy, int bonus, int pierce, statea states, dec
 	if(enemy.get(Retaliate)>0)
 		damage(enemy.get(Retaliate));
 }
+
+void creature::create(variant v, int level) {
+	memset(this, 0, sizeof(*this));
+	this->type = v.type;
+	this->monster = v.monster;
+	this->level = level;
+	auto& mn = bsmeta<monsteri>::elements[monster];
+	hp = mn.levels[level][0].hits;
+	hp_max = mn.levels[level][0].hits;
+	res = MONSTERS;
+	frame = mn.frame;
+	//setpos(i);
+	//p->setdir(d);
+	//for(auto n = 0; n < c; n++) {
+	//	set(i, HasBlock);
+	//	i = to(i, d);
+	//}
+}

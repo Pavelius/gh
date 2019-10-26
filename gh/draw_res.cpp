@@ -2,11 +2,14 @@
 
 using namespace draw;
 
-resi bsmeta<resi>::elements[] = {{"furn", "art/objects"},
+resi bsmeta<resi>::elements[] = {{"gloomhaven", "art/background"},
+{"dungeon", "art/background"},
+{"furn", "art/objects"},
 {"monsters", "art/creatures"},
 {"players", "art/creatures"},
+{"playerb", "art/creatures"},
 };
-assert_enum(res, LastResource);
+assert_enum(res, PLAYERB);
 
 const sprite* draw::gres(res_s id) {
 	auto& e = bsmeta<resi>::elements[id];

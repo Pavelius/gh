@@ -44,9 +44,9 @@ static bool test_battle() {
 
 static void test_map() {
 	map::create();
-	map::add(FURN, 0, 77, 2, Left);
-	map::add(FURN, 0, 79, 2, Right);
-	map::add(FURN, 1, 139);
+	map::add(AnimatedBones, 77, 1);
+	map::add(AnimatedBones, 78, 1);
+	map::add(Brute, 173, 1);
 }
 
 static void test_answer() {

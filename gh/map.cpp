@@ -21,22 +21,6 @@ void map::create() {
 	}
 }
 
-void map::add(res_s r, int frame, short unsigned i) {
-	add(r, frame, i, 1, Left);
-}
-
-void map::add(res_s r, int frame, short unsigned i, int c, direction_s d) {
-	auto p = bsmeta<figure>::add();
-	p->res = r;
-	p->frame = frame;
-	p->setpos(i);
-	p->setdir(d);
-	for(auto n = 0; n < c; n++) {
-		set(i, HasBlock);
-		i = to(i, d);
-	}
-}
-
 unsigned short map::to(unsigned short index, direction_s d) {
 	if(index == Blocked)
 		return Blocked;
@@ -92,9 +76,33 @@ void map::wave(unsigned char start_index) {
 	make_wave(start_index, movement_rate, false);
 }
 
-void map::paint_players() {
-	for(auto& e : bsmeta<playeri>()) {
-		if(e)
-			e.paint();
+static void add_monster(variant v, short unsigned i, int level) {
+	auto p = bsmeta<creature>::add();
+	p->create(v, 1);
+	p->setpos(i);
+}
+
+static void add_class(class_s v, short unsigned i, int level) {
+	auto p = bsmeta<playeri>::add();
+	p->create(v, 1);
+	p->setpos(i);
+}
+
+static void add_figure(res_s r, int frame, short unsigned i, int c, direction_s d) {
+	auto p = bsmeta<figure>::add();
+	p->res = r;
+	p->frame = frame;
+	p->setpos(i);
+	p->setdir(d);
+	for(auto n = 0; n < c; n++) {
+		set(i, HasBlock);
+		i = to(i, d);
+	}
+}
+
+void map::add(variant v, short unsigned i, int level) {
+	switch(v.type) {
+	case Monster: add_monster(v, i, level); break;
+	case Class: add_class(v.cless, i, level); break;
 	}
 }
