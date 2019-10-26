@@ -148,7 +148,7 @@ struct commanda {
 	command_s					data[8];
 	bool						is(command_s i) const;
 };
-struct ability {
+struct abilityi {
 	class_s						type;
 	char						level;
 	const char*					name;
@@ -193,10 +193,11 @@ public:
 };
 class creature : public figure {
 	unsigned short				hp, hp_max;
+	char						level;
 	char						actions[Guard + 1];
 	statea						states;
 public:
-	constexpr creature() : figure(), actions(), hp(0), hp_max(0) {}
+	constexpr creature() : figure(), actions(), hp(0), hp_max(0), level(0) {}
 	void						attack(creature& enemy, int bonus, int pierce, statea states, deck& cards);
 	void						damage(int v);
 	void						droploot() const;
@@ -205,12 +206,14 @@ public:
 	int							get(action_s i) const;
 	short unsigned				gethp() const { return hp; }
 	short unsigned				gethpmax() const { return hp; }
+	int							getlevel() const { return level; }
 	void						set(action_s i, int v);
 	void						set(state_s v) { states.add(v); }
 	void						setfriendly(const statea v);
 	void						sethostile(const statea v);
 	void						sethp(short unsigned v) { hp = v; }
 	void						sethpmax(short unsigned v) { hp_max = v; hp = v; }
+	void						setlevel(int v) { level = v; }
 };
 struct monsteri {
 	struct info {
@@ -270,13 +273,15 @@ class answeri : stringbuilder {
 		const char*				getname() const { return text; }
 	};
 	char						buffer[4096];
-	adat<element, 8>			elements;
+	adat<element, 16>			elements;
 public:
+	typedef void(*tipspt)(stringbuilder& sb, int param);
+	typedef void(*callback)();
 	constexpr explicit operator bool() const { return elements.count != 0; }
 	answeri();
 	void						add(int param, const char* format, ...);
 	void						addv(int param, const char* format, const char* format_param);
-	int							choose(bool cancel_button, bool random_choose, const char* picture, const char* format) const;
+	int							choose(bool cancel_button, bool random_choose, const char* format, tipspt tips = 0, callback proc = 0) const;
 	void						clear() { stringbuilder::clear(); elements.clear(); }
 	static int					compare(const void* p1, const void* p2);
 	void						sort();
@@ -286,15 +291,24 @@ struct battlecardi {
 	variant						cless;
 	statea						states;
 };
+typedef adat<short unsigned, 24> abilitya;
 class playeri : public creature {
 	char						name[16];
 	deck						combat_deck;
-	adat<short unsigned, 24>	ability_deck;
+	abilitya					ability_hand;
+	abilitya					ability_discard;
+	abilitya					ability_drop;
 public:
-	constexpr playeri() : creature(), name(), combat_deck(), ability_deck() {}
+	constexpr playeri() : creature(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
+	void						activate();
 	void						choose_abilities();
+	unsigned					getabilities() const { return ability_hand.getcount(); }
+	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
+	static playeri*				getcurrent();
 	const char*					getname() const { return name; }
+	bool						isallowability(int v) const;
 	void						paint() const;
+	static void					paint_sheet();
 	void						prepare();
 	void						set(class_s v) { type = Class; cless = v; }
 };

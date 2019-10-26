@@ -1,6 +1,6 @@
 #include "main.h"
 
-ability bsmeta<ability>::elements[] = {{},
+abilityi bsmeta<abilityi>::elements[] = {{},
 {Brute, 1, "Топот", 72, {Attack3, Pierce2}, {Jump4Attack2, Exp2, DiscardCard}},
 {Brute, 1, "Припасенный кинжал", 27, {Attack3, Range3, Exp1}, {Attack2}},
 {Brute, 1, "Рассечение", 27, {Attack3, Slash2, Exp1}, {Jump3, AddAir}},
@@ -15,4 +15,4 @@ ability bsmeta<ability>::elements[] = {{},
 {Brute, 1, "Угрожающий рык", 10, {Attack2, AddDisarm}, {AttractAttacks}},
 {Brute, 1, "Стена рока", 20, {Retaliate2, Shield2, Exp2, DiscardCard}, {AttackBoost1}},
 };
-DECLBASE(ability);
+DECLBASE(abilityi);

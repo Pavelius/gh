@@ -22,7 +22,7 @@ static bool				break_modal;
 static int				break_result;
 static point			camera;
 static point			camera_drag;
-static rect				last_board = {0, 0, 900, 600};
+static rect				last_window = {0, 0, 900, 600};
 static point			tooltips_point;
 static short			tooltips_width;
 static char				tooltips_text[4096];
@@ -283,14 +283,16 @@ static int window(int x, int y, int width_picture, int width_text, const char* p
 	return height + gui.border * 2;
 }
 
-static int windowb(int x, int y, int width, const char* string, bool& result, bool disabled, int border = 0, unsigned key = 0, const char* tips = 0) {
-	draw::state push;
+static int windowb(int x, int y, int width, const char* string, bool& result, bool disabled, int border = 0, unsigned key = 0, const char* tips = 0, areas* ppa = 0) {
+	pushfont ps;
 	draw::font = metrics::font;
 	rect rc = {x, y, x + width, y + draw::texth()};
 	auto ra = window(rc, disabled, true, border);
 	draw::text(rc, string, AlignCenterCenter);
 	if((ra == AreaHilited || ra == AreaHilitedPressed) && tips)
 		tooltips(x, y, rc.width(), tips);
+	if(ppa)
+		*ppa = ra;
 	result = false;
 	if(!disabled) {
 		if(ra == AreaHilitedPressed && hot.key == MouseLeft)
@@ -344,14 +346,14 @@ static bool control_board() {
 		camera.y += step;
 		break;
 	case MouseLeft:
-		if(hot.pressed && last_board == hot.hilite) {
-			draw::drag::begin(last_board);
+		if(hot.pressed && last_window == hot.hilite) {
+			draw::drag::begin(last_window);
 			camera_drag = camera;
 		} else
 			return false;
 		break;
 	default:
-		if(draw::drag::active(last_board)) {
+		if(draw::drag::active(last_window)) {
 			if(hot.mouse.x >= 0 && hot.mouse.y >= 0)
 				camera = camera_drag + (draw::drag::mouse - hot.mouse);
 			return true;
@@ -475,16 +477,10 @@ static int render_left() {
 	return y;
 }
 
-static int render_report(int x, int y, const char* picture, const char* format, bool only_height = false) {
+static int render_report(int x, int y, const char* format) {
 	if(!format)
 		return 0;
-	auto y0 = y;
-	if(picture)
-		y += window(x, y, gui.hero_width, gui.window_width, picture, format, 0, only_height);
-	else
-		y += window(x, y, gui.window_width, format, gui.window_width);
-	y += gui.padding;
-	return y - y0;
+	return window(x, y, gui.window_width, format, gui.window_width) + gui.padding;
 }
 
 void drawable::paint() const {
@@ -644,9 +640,9 @@ void board::paint_furnitures() const {
 }
 
 void board::paint_screen(bool can_choose) const {
-	last_board = {0, 0, draw::getwidth(), draw::getheight()};
-	area(last_board);
-	rectf(last_board, colors::gray);
+	last_window = {0, 0, draw::getwidth(), draw::getheight()};
+	area(last_window);
+	rectf(last_window, colors::gray);
 	hilite_index = Blocked;
 	paint_grid(can_choose);
 	paint_furnitures();
@@ -662,12 +658,32 @@ void board::paint() const {
 }
 
 void board::setcamera(point pt) {
-	pt.x -= last_board.width() / 2;
-	pt.y -= last_board.height() / 2;
+	pt.x -= last_window.width() / 2;
+	pt.y -= last_window.height() / 2;
 	camera = pt;
 }
 
-int	answeri::choose(bool cancel_button, bool random_choose, const char* picture, const char* format) const {
+static void hexagonf(short x, short y) {
+	auto p1 = hexagon_offset[4];
+	auto p2 = hexagon_offset[1];
+	rectf({x + p1.x, y + p1.y, x + p2.x + 1, y + p2.y});
+	triangle({x + p2.x, y + p2.y}, {x, y + size});
+	triangle({x + p2.x, y + p1.y}, {x, y - size});
+}
+
+void playeri::paint_sheet() {
+	auto x = gui.border, y = gui.border;
+	auto p = playeri::getcurrent();
+	if(!p)
+		return;
+	image(x, y, gres(PLAYERS), p->cless, 0);
+	image(300, 300, gres(MONSTERS), 0, 0);
+	triangle({325, 325}, {325-50, 350});
+	auto pt = board::h2p(174) - camera;
+	hexagonf(pt.x, pt.y);
+}
+
+int	answeri::choose(bool cancel_button, bool random_choose, const char* format, tipspt tips, callback proc) const {
 	int x, y;
 	if(!elements)
 		return 0;
@@ -679,11 +695,22 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* picture,
 		map.paint_screen(false);
 		x = getwidth() - gui.window_width - gui.border * 2;
 		y = gui.border * 2;
-		y += render_report(x, y, picture, format);
+		y += render_report(x, y, format);
 		x = getwidth() - gui.right_width - gui.border * 2;
+		if(proc)
+			proc();
 		for(auto& e : elements) {
 			bool run;
-			y += windowb(x, y, gui.right_width, e.getname(), run, false);
+			areas pa;
+			auto y1 = y;
+			y += windowb(x, y, gui.right_width, e.getname(), run, false, 0, 0, 0, &pa);
+			if((pa == AreaHilited || pa == AreaHilitedPressed) && tips) {
+				stringbuilder sb(tooltips_text);
+				tooltips_point.x = x;
+				tooltips_point.y = y1;
+				tooltips_width = gui.right_width + metrics::padding*2;
+				tips(sb, e.param);
+			}
 			if(run)
 				execute(breakparam, e.param);
 		}
@@ -698,16 +725,4 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* picture,
 void playeri::paint() const {
 	//figure::paint();
 	hexagon({x - camera.x, y - camera.y}, hexagon_offset2, colors::blue);
-}
-
-void playeri::choose_abilities() {
-	pushfont pf;
-	while(ismodal()) {
-		rectf(last_board, colors::gray);
-		font = metrics::h2;
-		text(10, 10, creature::getname());
-		font = metrics::font;
-		image(10, 30, gres(PLAYERS), cless, 0);
-		domodal();
-	}
 }

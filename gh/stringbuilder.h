@@ -13,6 +13,7 @@ class stringbuilder {
 public:
 	constexpr stringbuilder(char* pb, const char* pe) : pb(pb), p(pb), pe(pe) {}
 	template<unsigned N> constexpr stringbuilder(char(&result)[N]) : stringbuilder(result, result + N - 1) {}
+	constexpr explicit operator bool() const { return p>pb; }
 	constexpr operator char*() const { return pb; }
 	void				add(const char* format, ...) { addv(format, xva_start(format)); }
 	void				addby(const char* s);
@@ -23,6 +24,7 @@ public:
 	void				addof(const char* s);
 	void				adds(const char* format, ...) { addx(' ', format, xva_start(format)); }
 	void				addsep(char separator);
+	void				addsep(const char* separator);
 	void				addsz() { if(p < pe) *p++ = 0; }
 	void				addto(const char* s);
 	void				addv(const char* format, const char* format_param);

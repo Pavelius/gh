@@ -288,6 +288,7 @@ struct bsmeta {
 	static T*				add() { return (T*)source.add(); }
 	static T*				begin() { return (T*)source.begin(); }
 	static T*				end() { return (T*)source.end(); }
+	static int				indexof(T& e) { return &e - elements; }
 };
 #define DECLBASE(e) array bsmeta<e>::source(bsmeta<e>::elements, sizeof(bsmeta<e>::elements[0]), sizeof(bsmeta<e>::elements)/sizeof(bsmeta<e>::elements[0]))
 #define DECLENUM(e) template<> struct bsmeta<e##_s> : bsmeta<e##i> {}

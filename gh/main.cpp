@@ -8,7 +8,7 @@ static bool test_abilities() {
 	p1.set(Moved, 4);
 	p1.set(Attacked, 2);
 	pb.set(Air, 2);
-	for(auto& e : bsmeta<ability>()) {
+	for(auto& e : bsmeta<abilityi>()) {
 		if(!e)
 			continue;
 		actiona a1, a2;
@@ -36,7 +36,7 @@ static bool test_battle() {
 	board b;
 	creature p1, m1;
 	actiona actions;
-	actions.parse(bsmeta<ability>::elements[2].upper, b, p1, false);
+	actions.parse(bsmeta<abilityi>::elements[2].upper, b, p1, false);
 	m1.sethpmax(10); p1.sethpmax(10);
 	p1.attack(m1, 3, 0, {}, d1);
 	return true;
@@ -60,16 +60,17 @@ static void test_answer() {
 	p2->frame = 0;
 	p2->setpos(142);
 	answeri an;
-	actiona actions; actions.parse(bsmeta<ability>::elements[2].upper, map, p1, false);
+	actiona actions; actions.parse(bsmeta<abilityi>::elements[2].upper, map, p1, false);
 	char tem1[260]; stringbuilder sa(tem1); tem1[0] = 0;
 	actions.tostring(sa);
 	an.add(1, tem1);
-	an.choose(false, false, 0, sb);
+	an.choose(false, false, sb);
 }
 
 static void test_players() {
 	playeri p1;
-	p1.set(Tinkerer);
+	p1.set(Brute);
+	p1.setlevel(1);
 	p1.choose_abilities();
 }
 

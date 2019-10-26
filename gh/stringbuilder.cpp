@@ -221,6 +221,14 @@ void stringbuilder::addv(const char* src, const char* vl) {
 	}
 }
 
+void stringbuilder::addsep(const char* separator) {
+	if(p <= pb)
+		return;
+	if(p[-1] == '\n' || p[-1]==separator[0])
+		return;
+	add(separator);
+}
+
 void stringbuilder::addsep(char separator) {
 	if(p <= pb || p >= pe)
 		return;
@@ -249,7 +257,7 @@ void stringbuilder::addx(char separator, const char* format, const char* format_
 void stringbuilder::addx(const char* separator, const char* format, const char* format_param) {
 	if(!format || format[0] == 0)
 		return;
-	if(p != pb)
+	if(p > pb && p[-1]!='\n')
 		add(separator);
 	addv(format, format_param);
 }

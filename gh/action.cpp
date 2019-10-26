@@ -104,16 +104,14 @@ void actiona::parse(const commanda& source, board& b, creature& player, bool use
 
 static void add(stringbuilder& sb, action_s e, int b) {
 	if(b) {
-		if(*sb.begin())
-			sb.add(", ");
+		sb.addsep(", ");
 		sb.add("%1 %2i", bsmeta<actioni>::elements[e].name, b);
 	}
 }
 
 static void add(stringbuilder& sb, const char* modifier, const char* sep, int b) {
 	if(b) {
-		if(*sb.begin())
-			sb.add(", ");
+		sb.addsep(", ");
 		sb.add("%1%3%2i", modifier, b, sep);
 	}
 }
@@ -121,7 +119,7 @@ static void add(stringbuilder& sb, const char* modifier, const char* sep, int b)
 static void add(stringbuilder& sb, area_s a, int b) {
 	if(a == NoArea)
 		return;
-	if(*sb.begin())
+	if(sb)
 		sb.add(", ");
 	sb.add(bsmeta<areai>::elements[a].name);
 	if(b)

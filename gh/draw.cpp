@@ -885,7 +885,7 @@ bool draw::drag::active() {
 }
 
 bool draw::drag::active(const rect& value) {
-	if(drag_rect==value) {
+	if(drag_rect == value) {
 		if(!hot.pressed || hot.key == KeyEscape) {
 			drag_rect.clear();
 			hot.key = 0;
@@ -1031,6 +1031,28 @@ void draw::line(int x0, int y0, int x1, int y1) {
 			}
 		}
 	}
+}
+
+void draw::triangle(point v1, point v2) {
+	float invslope1 = (float)(v2.x - v1.x) / (float)(v2.y - v1.y);
+	float curx1 = v1.x;
+	float curx2 = float(v1.x + (v2.x - v1.x)*2);
+	auto push = line_antialiasing;
+	line_antialiasing = false;
+	if(v1.y < v2.y) {
+		for(auto scanlineY = v1.y; scanlineY <= v2.y; scanlineY++) {
+			line((int)curx1, scanlineY, (int)curx2, scanlineY);
+			curx1 += invslope1;
+			curx2 -= invslope1;
+		}
+	} else {
+		for(auto scanlineY = v1.y; scanlineY >= v2.y; scanlineY--) {
+			line((int)curx1, scanlineY, (int)curx2, scanlineY);
+			curx1 -= invslope1;
+			curx2 += invslope1;
+		}
+	}
+	line_antialiasing = push;
 }
 
 void draw::bezierseg(int x0, int y0, int x1, int y1, int x2, int y2) {
