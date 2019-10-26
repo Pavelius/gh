@@ -522,7 +522,7 @@ static const point hexagon_offset[6] = {{(short)(size * cos_30), -(short)(size /
 {0, -size},
 };
 
-point board::h2p(point hex) {
+point map::h2p(point hex) {
 	short x = short(size * sqrt_3) * hex.x + (short(size * sqrt_3) / 2) * hex.y;
 	short y = size * 3 / 2 * hex.y;
 	return {x, y};
@@ -570,7 +570,7 @@ static point cube_to_axial(cube c) {
 	return {0, 0};
 }
 
-point board::p2h(point pt) {
+point map::p2h(point pt) {
 	auto q = ((sqrt_3 / 3.0) * (double)pt.x - (1.0 / 3.0) * (double)pt.y) / (double)size;
 	auto r = ((2.0 / 3.0) * (double)pt.y) / (double)size;
 	return cube_to_oddr(cube_round(axial_to_cube({(short)q, (short)r})));
@@ -600,12 +600,12 @@ static void hexagon(point pt, const point* points, color c1, float lw) {
 }
 
 static void hexagon(short unsigned i, bool use_hilite) {
-	auto pt = board::h2p(i) - camera;
+	auto pt = map::h2p(i) - camera;
 	const rect rc = {0 - 100, 0 - 100, draw::getwidth() + 100, draw::getheight() + 100};
 	if(!pt.in(rc))
 		return;
 	hexagon(pt, hexagon_offset, colors::border);
-	if(map.is(i, HasBlock))
+	if(map::is(i, HasBlock))
 		hexagon(pt, hexagon_offset2, colors::green);
 	if(gui.show_index) {
 		char temp[32]; stringbuilder sb(temp);
@@ -619,27 +619,44 @@ static void hexagon(short unsigned i, bool use_hilite) {
 	}
 }
 
+void creature::paint() const {
+	short x1 = x - camera.x;
+	short y1 = y - camera.y;
+	image(x1, y1, gres(res), frame, flags);
+	auto c1 = colors::blue;
+	switch(type) {
+	case Player: c1 = colors::red; break;
+	case Monster: c1 = colors::white; break;
+	}
+	hexagon({x1, y1}, hexagon_offset, c1);
+}
+
 static void paint_grid(bool can_choose) {
 	auto pf = font;
 	font = metrics::font;
-	for(short unsigned i = 0; i < map.getsize(); i++) {
-		if(map.is(i, HasWall))
+	for(short unsigned i = 0; i < map::mx*map::my; i++) {
+		if(map::is(i, HasWall))
 			continue;
 		hexagon(i, can_choose);
 	}
 	if(hilite_index != Blocked) {
-		auto pt = board::h2p(hilite_index) - camera;
+		auto pt = map::h2p(hilite_index) - camera;
 		hexagon(pt, hexagon_offset2, colors::yellow);
 	}
 	font = pf;
 }
 
-void board::paint_furnitures() const {
-	for(auto& e : furnitures)
+static void paint_monsters() {
+	for(auto& e : bsmeta<creature>())
 		e.paint();
 }
 
-void board::paint_screen(bool can_choose) const {
+static void paint_furnitures() {
+	for(auto& e : bsmeta<figure>())
+		e.paint();
+}
+
+void map::paint_screen(bool can_choose) {
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
 	rectf(last_window, colors::gray);
@@ -649,7 +666,7 @@ void board::paint_screen(bool can_choose) const {
 	paint_players();
 }
 
-void board::paint() const {
+void map::paint() {
 	while(ismodal()) {
 		paint_screen(false);
 		domodal();
@@ -657,7 +674,7 @@ void board::paint() const {
 	}
 }
 
-void board::setcamera(point pt) {
+void map::setcamera(point pt) {
 	pt.x -= last_window.width() / 2;
 	pt.y -= last_window.height() / 2;
 	camera = pt;
@@ -676,11 +693,9 @@ void playeri::paint_sheet() {
 	auto p = playeri::getcurrent();
 	if(!p)
 		return;
-	image(x, y, gres(PLAYERS), p->cless, 0);
-	image(300, 300, gres(MONSTERS), 0, 0);
-	triangle({325, 325}, {325-50, 350});
-	auto pt = board::h2p(174) - camera;
-	hexagonf(pt.x, pt.y);
+	//image(x, y, gres(PLAYERS), p->cless, 0);
+	//auto pt = board::h2p(202) - camera;
+	//image(pt.x, pt.y, gres(MONSTERS), 3, 0);
 }
 
 int	answeri::choose(bool cancel_button, bool random_choose, const char* format, tipspt tips, callback proc) const {
@@ -692,7 +707,7 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 	if(cancel_button && !elements)
 		return 0;
 	while(ismodal()) {
-		map.paint_screen(false);
+		map::paint_screen(false);
 		x = getwidth() - gui.window_width - gui.border * 2;
 		y = gui.border * 2;
 		y += render_report(x, y, format);
@@ -708,7 +723,7 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 				stringbuilder sb(tooltips_text);
 				tooltips_point.x = x;
 				tooltips_point.y = y1;
-				tooltips_width = gui.right_width + metrics::padding*2;
+				tooltips_width = gui.right_width + metrics::padding * 2;
 				tips(sb, e.param);
 			}
 			if(run)

@@ -234,6 +234,7 @@ public:
 	constexpr array() : data(0), size(0), count_maximum(0), count(0), growable(true) {}
 	constexpr array(unsigned size) : data(0), size(size), count_maximum(0), count(0), growable(true) {}
 	constexpr array(void* data, unsigned size, unsigned count) : data(data), size(size), count_maximum(0), count(count), growable(false) {}
+	constexpr array(void* data, unsigned size, unsigned count, unsigned count_maximum) : data(data), size(size), count_maximum(count_maximum), count(count), growable(false) {}
 	template<typename T, unsigned N> constexpr array(T(&e)[N]) : array(e, sizeof(T), N) {}
 	template<typename T> constexpr array(T& e) : array(&e, sizeof(T), 1) {}
 	template<> constexpr array(array& e) : data(e.data), size(e.size), count(e.count), count_maximum(e.count_maximum), growable(e.growable) {}
@@ -290,7 +291,8 @@ struct bsmeta {
 	static T*				end() { return (T*)source.end(); }
 	static int				indexof(T& e) { return &e - elements; }
 };
-#define DECLBASE(e) array bsmeta<e>::source(bsmeta<e>::elements, sizeof(bsmeta<e>::elements[0]), sizeof(bsmeta<e>::elements)/sizeof(bsmeta<e>::elements[0]))
+#define DECLENUMX(e) array bsmeta<e>::source(bsmeta<e>::elements, sizeof(bsmeta<e>::elements[0]), sizeof(bsmeta<e>::elements)/sizeof(bsmeta<e>::elements[0]))
+#define DECLBASE(e) array bsmeta<e>::source(bsmeta<e>::elements, sizeof(bsmeta<e>::elements[0]), 0, sizeof(bsmeta<e>::elements)/sizeof(bsmeta<e>::elements[0]))
 #define DECLENUM(e) template<> struct bsmeta<e##_s> : bsmeta<e##i> {}
 #define assert_enum(e, last) static_assert(sizeof(bsmeta<e##i>::elements) / sizeof(bsmeta<e##i>::elements[0]) == last + 1, "Invalid count of " #e " elements");\
 array bsmeta<e##i>::source(bsmeta<e##i>::elements, sizeof(bsmeta<e##i>::elements[0]), sizeof(bsmeta<e##i>::elements)/sizeof(bsmeta<e##i>::elements[0]));

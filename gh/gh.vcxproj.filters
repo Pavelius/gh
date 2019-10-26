@@ -81,9 +81,6 @@
     <ClCompile Include="card.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="board.cpp">
-      <Filter>Логика</Filter>
-    </ClCompile>
     <ClCompile Include="sprite_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
@@ -115,6 +112,12 @@
       <Filter>Логика</Filter>
     </ClCompile>
     <ClCompile Include="variant.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="figure.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="map.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
   </ItemGroup>

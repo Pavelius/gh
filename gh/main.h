@@ -84,7 +84,6 @@ enum direction_s : unsigned char {
 enum map_tile_s : unsigned char {
 	HasWall, HasTrap, HasDanger, HasBlock,
 };
-class board;
 class creature;
 struct action;
 typedef cflags<element_s, unsigned char> elementa;
@@ -175,7 +174,7 @@ struct actioni {
 };
 struct actiona {
 	action						data[4];
-	void						parse(const commanda& source, board& b, creature& player, bool use_magic);
+	void						parse(const commanda& source, creature& player, bool use_magic);
 	void						tostring(stringbuilder& sb) const;
 };
 struct areai {
@@ -207,6 +206,7 @@ public:
 	short unsigned				gethp() const { return hp; }
 	short unsigned				gethpmax() const { return hp; }
 	int							getlevel() const { return level; }
+	void						paint() const;
 	void						set(action_s i, int v);
 	void						set(state_s v) { states.add(v); }
 	void						setfriendly(const statea v);
@@ -226,45 +226,13 @@ struct monsteri {
 	};
 	const char*					name;
 	action_s					move;
+	unsigned char				frame;
 	info						levels[8][2];
 };
 struct classi {
 	const char*					name;
 	const char*					race;
 	char						abilities_cap;
-};
-class board {
-	static constexpr int		mx = 32;
-	static constexpr int		my = 24;
-	unsigned char				map_flags[mx*my];
-	static unsigned short		movement_rate[mx*my];
-	char						counter;
-	char						elements[Dark + 1];
-	adat<figure, 24>			furnitures;
-public:
-	void						create();
-	void						add(res_s r, int frame, short unsigned i);
-	void						add(res_s r, int frame, short unsigned i, int c, direction_s d);
-	constexpr int				get(element_s i) const { return elements[i]; }
-	constexpr unsigned			getsize() const { return mx*my; }
-	static point				h2p(point v);
-	static point				h2p(short unsigned i) { return h2p({i2x(i), i2y(i)}); }
-	constexpr bool				is(element_s i) const { return elements[i] > 0; }
-	constexpr bool				is(short unsigned i, map_tile_s v) const { return (map_flags[i] & (1 << v)) != 0; }
-	static point				p2h(point pt);
-	void						paint() const;
-	void						paint_furnitures() const;
-	void						paint_players() const;
-	void						paint_screen(bool can_choose = false) const;
-	static unsigned short		p2i(point pt) { return pt.y*mx + pt.x; }
-	static short				i2x(short unsigned i) { return i % mx; }
-	static short				i2y(short unsigned i) { return i / mx; }
-	constexpr void				remove(short unsigned i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
-	constexpr void				set(short unsigned i, map_tile_s v) { map_flags[i] |= (1 << v); }
-	constexpr void				set(element_s i, int v) { elements[i] = v; }
-	static void					setcamera(point pt);
-	unsigned short				to(unsigned short index, direction_s d) const;
-	void						wave(unsigned char start_index);
 };
 class answeri : stringbuilder {
 	struct element {
@@ -312,5 +280,35 @@ public:
 	void						prepare();
 	void						set(class_s v) { type = Class; cless = v; }
 };
+namespace map {
+const int					mx = 32;
+const int					my = 24;
+extern unsigned char		map_flags[mx*my];
+extern unsigned short		movement_rate[mx*my];
+extern char					counter;
+extern char					elements[Dark + 1];
+//
+void						create();
+void						add(res_s r, int frame, short unsigned i);
+void						add(res_s r, int frame, short unsigned i, int c, direction_s d);
+inline int					get(element_s i) { return elements[i]; }
+inline unsigned				getsize() { return mx*my; }
+point						h2p(point v);
+point						h2p(short unsigned i);
+constexpr bool				is(element_s i) { return elements[i] > 0; }
+constexpr bool				is(short unsigned i, map_tile_s v) { return (map_flags[i] & (1 << v)) != 0; }
+static point				p2h(point pt);
+void						paint();
+void						paint_players();
+void						paint_screen(bool can_choose = false);
+static unsigned short		p2i(point pt) { return pt.y*mx + pt.x; }
+static short				i2x(short unsigned i) { return i % mx; }
+static short				i2y(short unsigned i) { return i / mx; }
+constexpr void				remove(short unsigned i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
+constexpr void				set(short unsigned i, map_tile_s v) { map_flags[i] |= (1 << v); }
+constexpr void				set(element_s i, int v) { elements[i] = v; }
+void						setcamera(point pt);
+unsigned short				to(unsigned short index, direction_s d);
+void						wave(unsigned char start_index);
+};
 DECLENUM(area);
-extern board					map;

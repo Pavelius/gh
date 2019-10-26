@@ -15,4 +15,4 @@ abilityi bsmeta<abilityi>::elements[] = {{},
 {Brute, 1, "Угрожающий рык", 10, {Attack2, AddDisarm}, {AttractAttacks}},
 {Brute, 1, "Стена рока", 20, {Retaliate2, Shield2, Exp2, DiscardCard}, {AttackBoost1}},
 };
-DECLBASE(abilityi);
+DECLENUMX(abilityi);

@@ -25,8 +25,8 @@ void playeri::prepare() {
 static void ability_tips(stringbuilder& sb, int param) {
 	auto& ab = bsmeta<abilityi>::elements[param];
 	actiona a1, a2;
-	a1.parse(ab.upper, map, *current_player, false);
-	a2.parse(ab.lower, map, *current_player, false);
+	a1.parse(ab.upper, *current_player, false);
+	a2.parse(ab.lower, *current_player, false);
 	a1.tostring(sb);
 	sb.add("\n[~или]\n");
 	a2.tostring(sb);

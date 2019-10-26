@@ -13,4 +13,4 @@ battlecardi bsmeta<battlecardi>::elements[] = {{0, 6},
 {10, 20, Bless},
 {-10, 20, Curse},
 };
-DECLBASE(battlecardi);
+DECLENUMX(battlecardi);

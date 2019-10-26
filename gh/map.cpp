@@ -1,13 +1,18 @@
 #include "view.h"
 
 const auto DefaultCost = 0xFFFE;
+using namespace map;
 
-board					map;
 static unsigned short	stack[256 * 256];
-unsigned short			board::movement_rate[board::mx * board::my];
+char					map::elements[Dark + 1];
+unsigned short			map::movement_rate[mx * my];
+unsigned char			map::map_flags[mx * my];
 
-void board::create() {
-	memset(this, 0, sizeof(*this));
+point map::h2p(short unsigned i) {
+	return h2p({i2x(i), i2y(i)});
+}
+
+void map::create() {
 	for(short y = my; y > 0; y--) {
 		for(short x = 0; x < y / 2; x++)
 			set(p2i({x, my - y}), HasWall);
@@ -16,23 +21,23 @@ void board::create() {
 	}
 }
 
-void board::add(res_s r, int frame, short unsigned i) {
+void map::add(res_s r, int frame, short unsigned i) {
 	add(r, frame, i, 1, Left);
 }
 
-void board::add(res_s r, int frame, short unsigned i, int c, direction_s d) {
-	auto p = furnitures.add();
+void map::add(res_s r, int frame, short unsigned i, int c, direction_s d) {
+	auto p = bsmeta<figure>::add();
 	p->res = r;
 	p->frame = frame;
 	p->setpos(i);
 	p->setdir(d);
 	for(auto n = 0; n < c; n++) {
-		map.set(i, HasBlock);
-		i = map.to(i, d);
+		set(i, HasBlock);
+		i = to(i, d);
 	}
 }
 
-unsigned short board::to(unsigned short index, direction_s d) const {
+unsigned short map::to(unsigned short index, direction_s d) {
 	if(index == Blocked)
 		return Blocked;
 	const auto map_scan_line = mx*my;
@@ -68,7 +73,7 @@ static void make_wave(unsigned short start_index, unsigned short* result, bool b
 			pop_counter = stack;
 		auto cost = result[index] + 1;
 		for(auto d : directions) {
-			auto i1 = map.to(index, d);
+			auto i1 = to(index, d);
 			if(i1 == Blocked || result[i1] == Blocked)
 				continue;
 			if(result[i1] < cost)
@@ -81,13 +86,13 @@ static void make_wave(unsigned short start_index, unsigned short* result, bool b
 	}
 }
 
-void board::wave(unsigned char start_index) {
+void map::wave(unsigned char start_index) {
 	for(auto& e : movement_rate)
 		e = DefaultCost;
 	make_wave(start_index, movement_rate, false);
 }
 
-void board::paint_players() const {
+void map::paint_players() {
 	for(auto& e : bsmeta<playeri>()) {
 		if(e)
 			e.paint();

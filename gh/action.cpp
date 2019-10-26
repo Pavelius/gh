@@ -60,23 +60,23 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 	return pb;
 }
 
-static const command_s* conditions(const command_s* pb, const command_s* pe, action* pa, board& b, bool use_magic) {
+static const command_s* conditions(const command_s* pb, const command_s* pe, action* pa, bool use_magic) {
 	while(*pb && pb < pe) {
 		auto& ce = getop(pb);
 		if(ce.type != Condition)
 			break;
 		auto true_condition = false;
 		if(ce.id.type == Element) {
-			true_condition = b.is(ce.id.element);
+			true_condition = map::is(ce.id.element);
 			if(true_condition && use_magic)
-				b.set(ce.id.element, 0);
+				map::set(ce.id.element, 0);
 		}
 		pb = modifiers(pb + 1, pe, pa, true_condition);
 	}
 	return pb;
 }
 
-void actiona::parse(const commanda& source, board& b, creature& player, bool use_magic) {
+void actiona::parse(const commanda& source, creature& player, bool use_magic) {
 	memset(this, 0, sizeof(*this));
 	action* pa = 0;
 	auto pb = source.data;
@@ -97,7 +97,7 @@ void actiona::parse(const commanda& source, board& b, creature& player, bool use
 			if(ce.special == BonusForSecondonary)
 				pa->bonus += player.get(ce.id_second.action);
 		}
-		pb = conditions(pb + 1, pe, pa, b, use_magic);
+		pb = conditions(pb + 1, pe, pa, use_magic);
 		pb = modifiers(pb, pe, pa, true);
 	}
 }
