@@ -1,7 +1,10 @@
 #include "view.h"
 
-const auto DefaultCost = 0xFFFE;
 using namespace map;
+
+enum movement_cost_s : indext {
+	DefaultCost = 0xFFFE
+};
 
 static unsigned short	stack[256 * 256];
 char					map::magic_elements[Dark + 1];
@@ -53,12 +56,29 @@ void map::moverestrict(indext v) {
 }
 
 void map::clearwave() {
-	for(auto& e : movement_rate)
-		e = DefaultCost;
+	for(indext i = 0; i < mx*my; i++) {
+		if(is(i, HasWall))
+			movement_rate[i] = Blocked;
+		else
+			movement_rate[i] = DefaultCost;
+	}
+}
+
+void map::block() {
+	for(indext i = 0; i < mx*my; i++) {
+		if(is(i, HasBlock))
+			movement_rate[i] = Blocked;
+	}
 }
 
 void map::block(reaction_s i) {
 	for(auto& e : bsmeta<creaturei>()) {
+		if(!e)
+			continue;
+		if(e.getreaction() == i)
+			movement_rate[e.getindex()] = Blocked;
+	}
+	for(auto& e : bsmeta<playeri>()) {
 		if(!e)
 			continue;
 		if(e.getreaction() == i)

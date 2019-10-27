@@ -307,6 +307,7 @@ extern char						magic_elements[Dark + 1];
 //
 void							create();
 void							add(variant v, indext i, int level);
+void							block();
 void							block(reaction_s i);
 void							clearwave();
 inline int						get(element_s i) { return magic_elements[i]; }

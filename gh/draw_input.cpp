@@ -645,6 +645,16 @@ void creaturei::paint() const {
 	case Monster: c1 = colors::white; break;
 	}
 	hexagon({x1, y1}, hexagon_offset, c1);
+	char temp[16]; stringbuilder sb(temp);
+	sb.add("%1i", hp);
+	auto pf = fore_stroke;
+	if(hp == hp_max)
+		fore_stroke = colors::red;
+	else if(hp>hp_max/2)
+		fore_stroke = colors::yellow;
+	else
+		fore_stroke = colors::red;
+	text(x1 - textw(temp)/2, y1 + 30, temp, -1, TextStroke);
 }
 
 static void paint_grid(bool can_choose, bool show_movement, bool show_index) {
