@@ -81,10 +81,13 @@ void creaturei::create(variant v, int level) {
 
 void creaturei::move(action_s id, char bonus) {
 	while(bonus > 0) {
+		slide(getindex());
+		map::clearwave();
+		map::block(getopposed());
 		map::wave(getindex());
 		map::moverestrict(bonus);
 		auto ni = choose_index(
-			"Укажите конечную клетку движения. Нажмите левой кнопкой мышки в центр клетки.", true);
+			"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true);
 		if(ni == Blocked)
 			return;
 		auto cm = map::getmovecost(ni);
@@ -92,5 +95,12 @@ void creaturei::move(action_s id, char bonus) {
 			return;
 		setpos(ni);
 		bonus -= cm;
+	}
+}
+
+reaction_s creaturei::getopposed() const {
+	switch(reaction) {
+	case Enemy: return Friend;
+	default: return Enemy;
 	}
 }

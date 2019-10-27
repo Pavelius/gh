@@ -647,13 +647,13 @@ void creaturei::paint() const {
 	hexagon({x1, y1}, hexagon_offset, c1);
 }
 
-static void paint_grid(bool can_choose, bool show_movement) {
+static void paint_grid(bool can_choose, bool show_movement, bool show_index) {
 	auto pf = font;
 	font = metrics::font;
 	for(short unsigned i = 0; i < map::mx*map::my; i++) {
 		if(map::is(i, HasWall))
 			continue;
-		hexagon(i, can_choose, gui.show_index, show_movement);
+		hexagon(i, can_choose, show_index, show_movement);
 	}
 	if(hilite_index != Blocked) {
 		auto pt = map::h2p(hilite_index) - camera;
@@ -682,23 +682,15 @@ static void paint_players() {
 	}
 }
 
-void map::paint_screen(bool can_choose, bool show_movement) {
+void map::paint_screen(bool can_choose, bool show_movement, bool show_index) {
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
 	rectf(last_window, colors::gray);
 	hilite_index = Blocked;
-	paint_grid(can_choose, show_movement);
+	paint_grid(can_choose, show_movement, show_index);
 	paint_furnitures();
 	paint_monsters();
 	paint_players();
-}
-
-void map::paint() {
-	while(ismodal()) {
-		paint_screen(false);
-		domodal();
-		control_standart();
-	}
 }
 
 void map::setcamera(point pt) {
@@ -737,7 +729,7 @@ void playeri::paint_back() {
 }
 
 static void paint_board() {
-	map::paint_screen(false);
+	map::paint_screen(false, false, gui.show_index);
 }
 
 int answeri::paint_answers(int x, int y, bool cancel_button, callback proc, answeri::tipspt tips) const {
@@ -790,12 +782,12 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 
 indext creaturei::choose_index(const char* format, bool show_movement) {
 	while(ismodal()) {
-		map::paint_screen(true, show_movement);
+		map::paint_screen(true, show_movement, false);
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2;
 		y += render_report(x, y, format);
 		x = getwidth() - gui.right_width - gui.border * 2;
-		y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeyEnter);
+		y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeySpace);
 		domodal();
 		control_standart();
 		if(hot.key == MouseLeft && hot.pressed && hilite_index != Blocked)
@@ -805,4 +797,35 @@ indext creaturei::choose_index(const char* format, bool show_movement) {
 	case 2: return hilite_index;
 	default: return Blocked;
 	}
+}
+
+void drawable::slide(point pt) {
+	const auto step = 16;
+	auto x0 = camera.x;
+	auto y0 = camera.y;
+	auto w = last_window.width();
+	if(!w)
+		w = getwidth();
+	auto h = last_window.height();
+	if(!h)
+		h = getheight();
+	auto x1 = pt.x - w / 2;
+	auto y1 = pt.y - h / 2;
+	auto lenght = distance({(short)x0, (short)y0}, {(short)x1, (short)y1});
+	if(!lenght)
+		return;
+	auto start = 0;
+	auto dx = x1 - x0;
+	auto dy = y1 - y0;
+	while(start < lenght && ismodal()) {
+		map::paint_screen(false, false, false);
+		sysredraw();
+		start += step;
+		short x2 = x0 + dx * start / lenght;
+		short y2 = y0 + dy * start / lenght;
+		camera.x = x2;
+		camera.y = y2;
+	}
+	camera.x = x1;
+	camera.y = y1;
 }

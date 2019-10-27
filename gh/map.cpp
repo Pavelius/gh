@@ -7,6 +7,7 @@ static unsigned short	stack[256 * 256];
 char					map::magic_elements[Dark + 1];
 static indext			movement_rate[mx * my];
 unsigned char			map::map_flags[mx * my];
+static direction_s		all_around[] = {LeftUp, RightUp, Left, Right, LeftDown, RightDown};
 
 point map::h2p(indext i) {
 	return h2p({i2x(i), i2y(i)});
@@ -44,32 +45,6 @@ unsigned short map::to(indext index, direction_s d) {
 	return i;
 }
 
-static void make_wave(indext start_index, indext* result, bool block) {
-	static direction_s directions[] = {LeftUp, RightUp, Left, Right, LeftDown, RightDown};
-	auto stack_end = stack + sizeof(stack) / sizeof(stack[0]);
-	auto push_counter = stack;
-	auto pop_counter = stack;
-	result[start_index] = 0;
-	*push_counter++ = start_index;
-	while(pop_counter != push_counter) {
-		auto index = *pop_counter++;
-		if(pop_counter >= stack_end)
-			pop_counter = stack;
-		auto cost = result[index] + 1;
-		for(auto d : directions) {
-			auto i1 = to(index, d);
-			if(i1 == Blocked || result[i1] == Blocked)
-				continue;
-			if(result[i1] < cost)
-				continue;
-			result[i1] = cost;
-			*push_counter++ = i1;
-			if(push_counter >= stack_end)
-				push_counter = stack;
-		}
-	}
-}
-
 void map::moverestrict(indext v) {
 	for(auto& e : movement_rate) {
 		if(e > v)
@@ -77,10 +52,43 @@ void map::moverestrict(indext v) {
 	}
 }
 
-void map::wave(indext start_index) {
+void map::clearwave() {
 	for(auto& e : movement_rate)
 		e = DefaultCost;
-	make_wave(start_index, movement_rate, false);
+}
+
+void map::block(reaction_s i) {
+	for(auto& e : bsmeta<creaturei>()) {
+		if(!e)
+			continue;
+		if(e.getreaction() == i)
+			movement_rate[e.getindex()] = Blocked;
+	}
+}
+
+void map::wave(indext start_index) {
+	auto stack_end = stack + sizeof(stack) / sizeof(stack[0]);
+	auto push_counter = stack;
+	auto pop_counter = stack;
+	movement_rate[start_index] = 0;
+	*push_counter++ = start_index;
+	while(pop_counter != push_counter) {
+		auto index = *pop_counter++;
+		if(pop_counter >= stack_end)
+			pop_counter = stack;
+		auto cost = movement_rate[index] + 1;
+		for(auto d : all_around) {
+			auto i1 = to(index, d);
+			if(i1 == Blocked || movement_rate[i1] == Blocked)
+				continue;
+			if(movement_rate[i1] < cost)
+				continue;
+			movement_rate[i1] = cost;
+			*push_counter++ = i1;
+			if(push_counter >= stack_end)
+				push_counter = stack;
+		}
+	}
 }
 
 static void add_monster(variant v, indext i, int level) {

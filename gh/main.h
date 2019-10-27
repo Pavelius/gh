@@ -84,6 +84,9 @@ enum direction_s : unsigned char {
 enum map_tile_s : unsigned char {
 	HasWall, HasTrap, HasDanger, HasBlock,
 };
+enum reaction_s : unsigned char {
+	Enemy, Friend
+};
 class creaturei;
 struct action;
 typedef cflags<element_s, unsigned char> elementa;
@@ -117,13 +120,6 @@ struct variant {
 	constexpr operator bool() const { return type != NoVariant; }
 	void						clear() { type = NoVariant; value = 0; }
 	const char*					getname() const;
-};
-struct drawable : point {
-	res_s						res;
-	unsigned char				frame;
-	short unsigned				flags;
-	void						paint() const;
-	void						setdir(direction_s v);
 };
 struct deck : adat<unsigned short, 46> {
 	void						add(unsigned short v) { adat::add(v); }
@@ -182,6 +178,15 @@ struct areai {
 	const char*					id;
 	const char*					name;
 };
+struct drawable : point {
+	res_s						res;
+	unsigned char				frame;
+	short unsigned				flags;
+	void						paint() const;
+	void						setdir(direction_s v);
+	static void					slide(point pt);
+	static void					slide(indext i);
+};
 class figurei : public drawable, public variant {
 	indext						index;
 public:
@@ -193,11 +198,13 @@ public:
 };
 class creaturei : public figurei {
 	unsigned short				hp, hp_max;
+	char						initiative;
 	char						level;
 	char						actions[Guard + 1];
 	statea						states;
+	reaction_s					reaction;
 public:
-	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0) {}
+	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
 	void						attack(creaturei& enemy, int bonus, int pierce, statea states, deck& cards);
 	static indext				choose_index(const char* format, bool show_movement);
 	void						create(variant v, int level);
@@ -208,10 +215,13 @@ public:
 	int							get(action_s i) const;
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
+	reaction_s					getopposed() const;
+	reaction_s					getreaction() const { return reaction; }
 	int							getlevel() const { return level; }
 	void						move(action_s id, char bonus);
 	void						paint() const;
 	void						set(action_s i, int v);
+	constexpr void				set(reaction_s i) { reaction = i; }
 	void						set(state_s v) { states.add(v); }
 	void						setfriendly(const statea v);
 	void						sethostile(const statea v);
@@ -285,7 +295,8 @@ public:
 	static void					paint_sheet();
 	static void					paint_back();
 	void						prepare();
-	void						set(class_s v) { type = Class; cless = v; }
+	constexpr void				set(class_s v) { type = Class; cless = v; }
+	constexpr void				set(reaction_s i) { creaturei::set(i); }
 };
 namespace map {
 const int						mx = 32;
@@ -296,6 +307,8 @@ extern char						magic_elements[Dark + 1];
 //
 void							create();
 void							add(variant v, indext i, int level);
+void							block(reaction_s i);
+void							clearwave();
 inline int						get(element_s i) { return magic_elements[i]; }
 indext							getmovecost(indext i);
 point							h2p(point v);
@@ -306,8 +319,7 @@ constexpr bool					is(element_s i) { return magic_elements[i] > 0; }
 constexpr bool					is(indext i, map_tile_s v) { return (map_flags[i] & (1 << v)) != 0; }
 void							moverestrict(indext v);
 static point					p2h(point pt);
-void							paint();
-void							paint_screen(bool can_choose = false, bool show_movement = false);
+void							paint_screen(bool can_choose, bool show_movement, bool show_index);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
 constexpr void					remove(indext i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
 constexpr void					set(indext i, map_tile_s v) { map_flags[i] |= (1 << v); }

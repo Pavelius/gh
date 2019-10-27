@@ -91,5 +91,6 @@ void playeri::create(class_s v, int level) {
 	sethpmax(mn.levels[level]);
 	res = PLAYERS;
 	frame = v;
+	set(Friend);
 	zcpy(name, "È÷");
 }
