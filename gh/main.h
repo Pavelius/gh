@@ -84,11 +84,12 @@ enum direction_s : unsigned char {
 enum map_tile_s : unsigned char {
 	HasWall, HasTrap, HasDanger, HasBlock,
 };
-class creature;
+class creaturei;
 struct action;
 typedef cflags<element_s, unsigned char> elementa;
 typedef cflags<state_s, unsigned char> statea;
 typedef cflags<card_s, unsigned char> carda;
+typedef unsigned short indext;
 struct variant {
 	variant_s					type;
 	union {
@@ -174,39 +175,41 @@ struct actioni {
 };
 struct actiona {
 	action						data[4];
-	void						parse(const commanda& source, creature& player, bool use_magic);
+	void						parse(const commanda& source, creaturei& player, bool use_magic);
 	void						tostring(stringbuilder& sb) const;
 };
 struct areai {
 	const char*					id;
 	const char*					name;
 };
-class figure : public drawable, public variant {
-	short unsigned				index;
+class figurei : public drawable, public variant {
+	indext						index;
 public:
-	constexpr figure() : drawable(), variant(), index(Blocked) {}
+	constexpr figurei() : drawable(), variant(), index(Blocked) {}
 	explicit constexpr operator bool() const { return type!=NoVariant; }
-	short unsigned				getindex() const { return index; }
+	constexpr indext			getindex() const { return index; }
 	void						setpos(short unsigned v);
-	void						setpos(int x, int y) { this->x = x; this->y = y; }
+	constexpr void				setpos(int x, int y) { this->x = x; this->y = y; }
 };
-class creature : public figure {
+class creaturei : public figurei {
 	unsigned short				hp, hp_max;
 	char						level;
 	char						actions[Guard + 1];
 	statea						states;
 public:
-	constexpr creature() : figure(), actions(), hp(0), hp_max(0), level(0) {}
-	void						attack(creature& enemy, int bonus, int pierce, statea states, deck& cards);
+	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0) {}
+	void						attack(creaturei& enemy, int bonus, int pierce, statea states, deck& cards);
+	static indext				choose_index(const char* format, bool show_movement);
 	void						create(variant v, int level);
 	void						damage(int v);
 	void						droploot() const;
-	bool						is(state_s v) const { return states.is(v); }
+	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
 	int							get(action_s i) const;
-	short unsigned				gethp() const { return hp; }
-	short unsigned				gethpmax() const { return hp; }
+	constexpr short unsigned	gethp() const { return hp; }
+	constexpr short unsigned	gethpmax() const { return hp; }
 	int							getlevel() const { return level; }
+	void						move(action_s id, char bonus);
 	void						paint() const;
 	void						set(action_s i, int v);
 	void						set(state_s v) { states.add(v); }
@@ -263,14 +266,14 @@ struct battlecardi {
 	statea						states;
 };
 typedef adat<short unsigned, 24> abilitya;
-class playeri : public creature {
+class playeri : public creaturei {
 	char						name[16];
 	deck						combat_deck;
 	abilitya					ability_hand;
 	abilitya					ability_discard;
 	abilitya					ability_drop;
 public:
-	constexpr playeri() : creature(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
+	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
 	void						activate();
 	void						choose_abilities();
 	void						create(class_s v, int level);
@@ -285,32 +288,32 @@ public:
 	void						set(class_s v) { type = Class; cless = v; }
 };
 namespace map {
-const int					mx = 32;
-const int					my = 24;
-extern unsigned char		map_flags[mx*my];
-extern unsigned short		movement_rate[mx*my];
-extern char					counter;
-extern char					elements[Dark + 1];
+const int						mx = 32;
+const int						my = 24;
+extern unsigned char			map_flags[mx*my];
+extern char						counter;
+extern char						magic_elements[Dark + 1];
 //
-void						create();
-void						add(variant v, short unsigned i, int level);
-inline int					get(element_s i) { return elements[i]; }
-inline unsigned				getsize() { return mx*my; }
-point						h2p(point v);
-point						h2p(short unsigned i);
-constexpr bool				is(element_s i) { return elements[i] > 0; }
-constexpr bool				is(short unsigned i, map_tile_s v) { return (map_flags[i] & (1 << v)) != 0; }
-static point				p2h(point pt);
-void						paint();
-void						paint_screen(bool can_choose = false);
-static unsigned short		p2i(point pt) { return pt.y*mx + pt.x; }
-static short				i2x(short unsigned i) { return i % mx; }
-static short				i2y(short unsigned i) { return i / mx; }
-constexpr void				remove(short unsigned i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
-constexpr void				set(short unsigned i, map_tile_s v) { map_flags[i] |= (1 << v); }
-constexpr void				set(element_s i, int v) { elements[i] = v; }
-void						setcamera(point pt);
-unsigned short				to(unsigned short index, direction_s d);
-void						wave(unsigned char start_index);
+void							create();
+void							add(variant v, indext i, int level);
+inline int						get(element_s i) { return magic_elements[i]; }
+indext							getmovecost(indext i);
+point							h2p(point v);
+point							h2p(indext i);
+constexpr short					i2x(indext i) { return i % mx; }
+constexpr short					i2y(indext i) { return i / mx; }
+constexpr bool					is(element_s i) { return magic_elements[i] > 0; }
+constexpr bool					is(indext i, map_tile_s v) { return (map_flags[i] & (1 << v)) != 0; }
+void							moverestrict(indext v);
+static point					p2h(point pt);
+void							paint();
+void							paint_screen(bool can_choose = false, bool show_movement = false);
+static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
+constexpr void					remove(indext i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
+constexpr void					set(indext i, map_tile_s v) { map_flags[i] |= (1 << v); }
+constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
+void							setcamera(point pt);
+unsigned short					to(indext index, direction_s d);
+void							wave(indext start_index);
 };
 DECLENUM(area);

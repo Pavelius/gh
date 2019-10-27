@@ -5,7 +5,7 @@ using namespace map;
 void unit_main();
 
 static bool test_abilities() {
-	creature p1;
+	creaturei p1;
 	p1.set(Moved, 4);
 	p1.set(Attacked, 2);
 	map::set(Air, 2);
@@ -34,7 +34,7 @@ static bool test_deck() {
 static bool test_battle() {
 	deck d1;
 	d1.create();
-	creature p1, m1;
+	creaturei p1, m1;
 	actiona actions;
 	actions.parse(bsmeta<abilityi>::elements[2].upper, p1, false);
 	m1.sethpmax(10); p1.sethpmax(10);
@@ -52,7 +52,7 @@ static void test_map() {
 static void test_answer() {
 	char temp[260]; stringbuilder sb(temp);
 	sb.add("Внезапно все потемнело и вы увидели свет в дальнем краю прохода.");
-	creature p1, m1;
+	creaturei p1, m1;
 	auto p2 = bsmeta<playeri>::add();
 	p2->type = Class;
 	p2->cless = Brute;
@@ -74,6 +74,13 @@ static void test_players() {
 	p1.choose_abilities();
 }
 
+static void test_movement() {
+	auto& p1 = bsmeta<playeri>::elements[0];
+	p1.activate();
+	p1.move(Move, 4);
+	//p1.choose_index(p1.getindex(), );
+}
+
 int main() {
 	if(!test_abilities())
 		return 0;
@@ -87,7 +94,7 @@ int main() {
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);
 	draw::setcaption("Gloomhaven board game");
-	test_players();
+	test_movement();
 	return 0;
 }
 

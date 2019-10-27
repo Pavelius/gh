@@ -1,6 +1,7 @@
 #include "view.h"
 
 using namespace draw;
+using namespace map;
 
 int isqrt(int num);
 struct focusable_element {
@@ -605,7 +606,7 @@ static void hexagon(point pt, const point* points, color c1, float lw) {
 	fore = push_fore;
 }
 
-static void hexagon(short unsigned i, bool use_hilite) {
+static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool show_movement) {
 	auto pt = map::h2p(i) - camera;
 	const rect rc = {0 - 100, 0 - 100, draw::getwidth() + 100, draw::getheight() + 100};
 	if(!pt.in(rc))
@@ -613,10 +614,19 @@ static void hexagon(short unsigned i, bool use_hilite) {
 	hexagon(pt, hexagon_offset, colors::border);
 	if(map::is(i, HasBlock))
 		hexagon(pt, hexagon_offset2, colors::green);
-	if(gui.show_index) {
-		char temp[32]; stringbuilder sb(temp);
-		sb.add("%1i", i);
-		text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
+	if(show_index || show_movement) {
+		char temp[32]; stringbuilder sb(temp); temp[0] = 0;
+		if(show_movement) {
+			auto m = getmovecost(i);
+			if(m && m!=Blocked)
+				sb.add("%1i", m);
+		}
+		else if(show_index)
+			sb.add("%1i", i);
+		if(temp[0])
+			text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
+		else
+			use_hilite = false;
 	}
 	if(use_hilite) {
 		const rect rc = {pt.x - size / 2, pt.y - size / 2, pt.x + size / 2, pt.y + size / 2};
@@ -625,7 +635,7 @@ static void hexagon(short unsigned i, bool use_hilite) {
 	}
 }
 
-void creature::paint() const {
+void creaturei::paint() const {
 	short x1 = x - camera.x;
 	short y1 = y - camera.y;
 	image(x1, y1, gres(res), frame, flags);
@@ -637,13 +647,13 @@ void creature::paint() const {
 	hexagon({x1, y1}, hexagon_offset, c1);
 }
 
-static void paint_grid(bool can_choose) {
+static void paint_grid(bool can_choose, bool show_movement) {
 	auto pf = font;
 	font = metrics::font;
 	for(short unsigned i = 0; i < map::mx*map::my; i++) {
 		if(map::is(i, HasWall))
 			continue;
-		hexagon(i, can_choose);
+		hexagon(i, can_choose, gui.show_index, show_movement);
 	}
 	if(hilite_index != Blocked) {
 		auto pt = map::h2p(hilite_index) - camera;
@@ -653,7 +663,7 @@ static void paint_grid(bool can_choose) {
 }
 
 static void paint_monsters() {
-	for(auto& e : bsmeta<creature>()) {
+	for(auto& e : bsmeta<creaturei>()) {
 		if(!e)
 			continue;
 		e.paint();
@@ -661,7 +671,7 @@ static void paint_monsters() {
 }
 
 static void paint_furnitures() {
-	for(auto& e : bsmeta<figure>())
+	for(auto& e : bsmeta<figurei>())
 		e.paint();
 }
 
@@ -672,12 +682,12 @@ static void paint_players() {
 	}
 }
 
-void map::paint_screen(bool can_choose) {
+void map::paint_screen(bool can_choose, bool show_movement) {
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
 	rectf(last_window, colors::gray);
 	hilite_index = Blocked;
-	paint_grid(can_choose);
+	paint_grid(can_choose, show_movement);
 	paint_furnitures();
 	paint_monsters();
 	paint_players();
@@ -715,10 +725,15 @@ void playeri::paint_sheet() {
 	//image(pt.x, pt.y, gres(MONSTERS), 3, 0);
 }
 
+static void paint_player_avatar() {
+	auto p = playeri::getcurrent();
+	if(p)
+		image(590, 106, gres(PLAYERS), p->cless, 0);
+}
+
 void playeri::paint_back() {
 	image(0, 0, gres(DUNGEON), 0, 0);
-	auto p = gres(PLAYERS);
-	image(590, 106, p, 0, 0);
+	paint_player_avatar();
 }
 
 static void paint_board() {
@@ -771,4 +786,23 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 		control_standart();
 	}
 	return getresult();
+}
+
+indext creaturei::choose_index(const char* format, bool show_movement) {
+	while(ismodal()) {
+		map::paint_screen(true, show_movement);
+		auto x = getwidth() - gui.window_width - gui.border * 2;
+		auto y = gui.border * 2;
+		y += render_report(x, y, format);
+		x = getwidth() - gui.right_width - gui.border * 2;
+		y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeyEnter);
+		domodal();
+		control_standart();
+		if(hot.key == MouseLeft && hot.pressed && hilite_index != Blocked)
+			breakmodal(2);
+	}
+	switch(getresult()) {
+	case 2: return hilite_index;
+	default: return Blocked;
+	}
 }

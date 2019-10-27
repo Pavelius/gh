@@ -1,9 +1,9 @@
 #include "main.h"
 
-figure bsmeta<figure>::elements[32];
-DECLBASE(figure);
+figurei bsmeta<figurei>::elements[32];
+DECLBASE(figurei);
 
-void figure::setpos(short unsigned v) {
+void figurei::setpos(short unsigned v) {
 	auto pt = map::h2p(v);
 	x = pt.x; y = pt.y;
 	index = v;

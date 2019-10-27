@@ -1,6 +1,6 @@
 #include "main.h"
 
-playeri	bsmeta<playeri>::elements[32];
+playeri	bsmeta<playeri>::elements[4];
 DECLBASE(playeri);
 
 static playeri* current_player;

@@ -76,7 +76,7 @@ static const command_s* conditions(const command_s* pb, const command_s* pe, act
 	return pb;
 }
 
-void actiona::parse(const commanda& source, creature& player, bool use_magic) {
+void actiona::parse(const commanda& source, creaturei& player, bool use_magic) {
 	memset(this, 0, sizeof(*this));
 	action* pa = 0;
 	auto pb = source.data;
