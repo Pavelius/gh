@@ -34,9 +34,9 @@ static bool test_deck() {
 static bool test_battle() {
 	creaturei p1, m1;
 	actiona actions;
-	actions.parse(bsmeta<abilityi>::elements[2].upper, p1, false);
-	m1.sethpmax(10); p1.sethpmax(10);
-	p1.attack(m1, 3, 0, {});
+	actions.parse(bsmeta<abilityi>::elements[1].lower, p1, false);
+	char temp[512]; stringbuilder sb(temp);
+	actions.tostring(sb);
 	return true;
 }
 
@@ -82,11 +82,11 @@ static void test_movement() {
 }
 
 int main() {
+	if(!test_battle())
+		return 0;
 	if(!test_abilities())
 		return 0;
 	if(!test_deck())
-		return 0;
-	if(!test_battle())
 		return 0;
 	test_map();
 	//unit_main();

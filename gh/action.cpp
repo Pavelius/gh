@@ -23,7 +23,7 @@ static const commandi& getop(const command_s* pb) {
 	return bsmeta<commandi>::elements[*pb];
 }
 
-static const command_s* modifiers(const command_s* pb, const command_s* pe, actionf* pa, bool run) {
+static const command_s* modifiers(const command_s* pb, const command_s* pe, actionf* pa, actiona* pp, bool run) {
 	while(*pb && pb < pe) {
 		auto& ce = getop(pb);
 		if(ce.type != Modifier)
@@ -35,7 +35,7 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 				pa->area_size = ce.bonus;
 				break;
 			case Card:
-				pa->card = ce.id.card;
+				pp->type = ce.id.card;
 				break;
 			case Element:
 				pa->elements.add(ce.id.element);
@@ -60,7 +60,7 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 	return pb;
 }
 
-static const command_s* conditions(const command_s* pb, const command_s* pe, actionf* pa, bool use_magic) {
+static const command_s* conditions(const command_s* pb, const command_s* pe, actionf* pa, actiona* pp, bool use_magic) {
 	while(*pb && pb < pe) {
 		auto& ce = getop(pb);
 		if(ce.type != Condition)
@@ -71,7 +71,7 @@ static const command_s* conditions(const command_s* pb, const command_s* pe, act
 			if(true_condition && use_magic)
 				map::set(ce.id.element, 0);
 		}
-		pb = modifiers(pb + 1, pe, pa, true_condition);
+		pb = modifiers(pb + 1, pe, pa, pp, true_condition);
 	}
 	return pb;
 }
@@ -95,8 +95,8 @@ void actiona::parse(const commanda& source, creaturei& player, bool use_magic) {
 			pa->id = ce.id.action;
 			pa->bonus = ce.bonus;
 		}
-		pb = conditions(pb + 1, pe, pa, use_magic);
-		pb = modifiers(pb, pe, pa, true);
+		pb = conditions(pb + 1, pe, pa, this, use_magic);
+		pb = modifiers(pb, pe, pa, this, true);
 	}
 }
 
@@ -142,5 +142,12 @@ void actiona::tostring(stringbuilder& sb) const {
 		if(!e.id)
 			continue;
 		add(sb, e);
+	}
+	if(type != StandartCard) {
+		if(sb)
+			sb.add(", ");
+		switch(type) {
+		case DiscardableCard: sb.add("—брос"); break;
+		}
 	}
 }

@@ -188,7 +188,6 @@ struct actionf {
 	area_s						area;
 	elementa					elements;
 	statea						states;
-	card_s						card;
 };
 struct actioni {
 	const char*					id;
@@ -199,7 +198,9 @@ struct action_counti {
 	const char*					name;
 };
 struct actiona {
+	card_s						type;
 	actionf						data[4];
+	constexpr actiona() : type(StandartCard), data{} {}
 	void						parse(const commanda& source, creaturei& player, bool use_magic);
 	void						tostring(stringbuilder& sb) const;
 };
