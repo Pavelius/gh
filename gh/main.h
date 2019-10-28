@@ -194,6 +194,10 @@ struct actioni {
 	const char*					id;
 	const char*					name;
 };
+struct action_counti {
+	const char*					id;
+	const char*					name;
+};
 struct actiona {
 	actionf						data[4];
 	void						parse(const commanda& source, creaturei& player, bool use_magic);

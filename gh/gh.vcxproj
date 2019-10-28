@@ -119,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="ability.cpp" />
     <ClCompile Include="action.cpp" />
+    <ClCompile Include="action_count.cpp" />
     <ClCompile Include="answer.cpp" />
     <ClCompile Include="area.cpp" />
     <ClCompile Include="map.cpp" />

@@ -120,6 +120,9 @@
     <ClCompile Include="map.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="action_count.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">

@@ -103,7 +103,10 @@ void actiona::parse(const commanda& source, creaturei& player, bool use_magic) {
 static void add(stringbuilder& sb, action_s e, int b) {
 	if(b) {
 		sb.addsep(", ");
-		sb.add("%1 %2i", bsmeta<actioni>::elements[e].name, b);
+		if(b>=InfiniteCount)
+			sb.add("%1 %2", bsmeta<actioni>::elements[e].name, bsmeta<action_counti>::elements[b-InfiniteCount].name);
+		else
+			sb.add("%1 %2i", bsmeta<actioni>::elements[e].name, b);
 	}
 }
 

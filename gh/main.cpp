@@ -94,8 +94,8 @@ int main() {
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);
 	draw::setcaption("Gloomhaven board game");
-	test_movement();
-	//test_players();
+	//test_movement();
+	test_players();
 	return 0;
 }
 
