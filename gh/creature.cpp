@@ -44,7 +44,8 @@ void creaturei::damage(int v) {
 		hp -= v;
 }
 
-void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states, deck& cards) {
+void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states) {
+	auto cards = getcombatcards();
 	auto d = cards.nextbonus(pierce, states);
 	auto s = enemy.get(Shield) - pierce;
 	if(s < 0)
@@ -156,11 +157,25 @@ creaturei* creaturei::choose(creaturei** source, unsigned count, const char* for
 	return 0;
 }
 
-void creaturei::attack(int bonus, int range, int pierce, statea states, deck& cards) {
+void creaturei::attack(int bonus, int range, int pierce, statea states) {
 	creaturei* targets[32];
 	auto count = select(targets, targets + sizeof(targets) / sizeof(targets[0]), getopposed(), getindex(), range, true);
 	auto enemy = choose(targets, count, "”кажите цель");
 	if(!enemy)
 		return;
-	attack(*enemy, bonus, pierce, states, cards);
+	attack(*enemy, bonus, pierce, states);
+}
+
+deck& creaturei::getmonstersdeck() {
+	static deck v;
+	return v;
+}
+
+deck& creaturei::getcombatcards() {
+	switch(type) {
+	case Class:
+		return static_cast<playeri*>(this)->getcombatcards();
+	default:
+		return getmonstersdeck();
+	}
 }

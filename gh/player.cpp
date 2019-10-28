@@ -96,5 +96,5 @@ void playeri::create(class_s v, int level) {
 }
 
 void playeri::attack(int bonus, int range, int pierce) {
-	creaturei::attack(bonus, range, pierce, {}, combat_deck);
+	creaturei::attack(bonus, range, pierce, {});
 }

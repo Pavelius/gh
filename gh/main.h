@@ -205,16 +205,18 @@ class creaturei : public figurei {
 	reaction_s					reaction;
 public:
 	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
-	void						attack(creaturei& enemy, int bonus, int pierce, statea states, deck& cards);
-	void						attack(int bonus, int range, int pierce, statea states, deck& cards);
+	void						attack(creaturei& enemy, int bonus, int pierce, statea states);
+	void						attack(int bonus, int range, int pierce, statea states);
 	static creaturei*			choose(creaturei** source, unsigned count, const char* format);
 	static indext				choose_index(const char* format, bool show_movement, bool show_apply);
 	void						create(variant v, int level);
+	static deck&				getmonstersdeck();
 	void						damage(int v);
 	void						droploot() const;
 	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
 	int							get(action_s i) const;
+	deck&						getcombatcards();
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
 	reaction_s					getopposed() const;
@@ -294,6 +296,7 @@ public:
 	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
+	deck&						getcombatcards() { return combat_deck; }
 	static playeri*				getcurrent();
 	const char*					getname() const { return name; }
 	bool						isallowability(int v) const;

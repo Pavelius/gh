@@ -32,13 +32,11 @@ static bool test_deck() {
 }
 
 static bool test_battle() {
-	deck d1;
-	d1.create();
 	creaturei p1, m1;
 	actiona actions;
 	actions.parse(bsmeta<abilityi>::elements[2].upper, p1, false);
 	m1.sethpmax(10); p1.sethpmax(10);
-	p1.attack(m1, 3, 0, {}, d1);
+	p1.attack(m1, 3, 0, {});
 	return true;
 }
 
