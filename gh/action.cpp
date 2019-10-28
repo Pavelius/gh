@@ -23,7 +23,7 @@ static const commandi& getop(const command_s* pb) {
 	return bsmeta<commandi>::elements[*pb];
 }
 
-static const command_s* modifiers(const command_s* pb, const command_s* pe, action* pa, bool run) {
+static const command_s* modifiers(const command_s* pb, const command_s* pe, actionf* pa, bool run) {
 	while(*pb && pb < pe) {
 		auto& ce = getop(pb);
 		if(ce.type != Modifier)
@@ -60,7 +60,7 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 	return pb;
 }
 
-static const command_s* conditions(const command_s* pb, const command_s* pe, action* pa, bool use_magic) {
+static const command_s* conditions(const command_s* pb, const command_s* pe, actionf* pa, bool use_magic) {
 	while(*pb && pb < pe) {
 		auto& ce = getop(pb);
 		if(ce.type != Condition)
@@ -78,7 +78,7 @@ static const command_s* conditions(const command_s* pb, const command_s* pe, act
 
 void actiona::parse(const commanda& source, creaturei& player, bool use_magic) {
 	memset(this, 0, sizeof(*this));
-	action* pa = 0;
+	actionf* pa = 0;
 	auto pb = source.data;
 	auto pe = pb + sizeof(source.data) / sizeof(source.data[0]);
 	while(*pb && pb < pe) {
@@ -94,8 +94,6 @@ void actiona::parse(const commanda& source, creaturei& player, bool use_magic) {
 		if(ce.id.type == Action) {
 			pa->id = ce.id.action;
 			pa->bonus = ce.bonus;
-			if(ce.special == BonusForSecondonary)
-				pa->bonus += player.get(ce.id_second.action);
 		}
 		pb = conditions(pb + 1, pe, pa, use_magic);
 		pb = modifiers(pb, pe, pa, true);
@@ -126,7 +124,7 @@ static void add(stringbuilder& sb, area_s a, int b) {
 		sb.add(":%1i", b);
 }
 
-static void add(stringbuilder& sb, const action& e) {
+static void add(stringbuilder& sb, const actionf& e) {
 	add(sb, e.id, e.bonus);
 	add(sb, "Дистанция", " ", e.range);
 	add(sb, "Пробой", " ", e.pierce);

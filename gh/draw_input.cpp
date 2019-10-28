@@ -570,11 +570,17 @@ static point pixel_to_flat_hex(point pixel) {
 }
 
 static cube axial_to_cube(point pt) {
-	return {0, 0, 0};
+	return {(double)pt.x, (double)(- pt.x - pt.y), (double)pt.y};
 }
 
 static point cube_to_axial(cube c) {
-	return {0, 0};
+	return {(short)c.x, (short)c.z};
+}
+
+int map::getdistance(point h1, point h2) {
+	auto a = axial_to_cube(h1);
+	auto b = axial_to_cube(h2);
+	return int(iabs(a.x - b.x) + iabs(a.y - b.y) + iabs(a.z - b.z)) / 2;
 }
 
 point map::p2h(point pt) {
@@ -695,7 +701,7 @@ static void paint_players() {
 	}
 }
 
-void map::paint_screen(bool can_choose, bool show_movement, bool show_index) {
+void map::paint_screen(bool can_choose, bool show_movement, bool show_index, bool paiint_hilite) {
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
 	rectf(last_window, colors::gray);
@@ -704,7 +710,8 @@ void map::paint_screen(bool can_choose, bool show_movement, bool show_index) {
 	paint_furnitures();
 	paint_monsters();
 	paint_players();
-	paint_hilite_hexagon();
+	if(paiint_hilite)
+		paint_hilite_hexagon();
 }
 
 void map::setcamera(point pt) {
@@ -743,7 +750,11 @@ void playeri::paint_back() {
 }
 
 static void paint_board() {
-	map::paint_screen(false, false, gui.show_index);
+	map::paint_screen(false, false, gui.show_index, true);
+}
+
+void creaturei::hiliteindex(stringbuilder& sb, int param) {
+	hilite_index = param;
 }
 
 int answeri::paint_answers(int x, int y, bool cancel_button, callback proc, answeri::tipspt tips) const {
@@ -794,15 +805,18 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 	return getresult();
 }
 
-indext creaturei::choose_index(const char* format, bool show_movement, bool show_apply) {
+indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply) {
 	while(ismodal()) {
-		map::paint_screen(true, show_movement, false);
+		map::paint_screen(true, show_movement, false, false);
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2;
 		y += render_report(x, y, format);
 		x = getwidth() - gui.right_width - gui.border * 2;
+		if(answers)
+			y += answers->paint_answers(x, y, false, breakparam, tips);
 		if(show_apply)
 			y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeySpace);
+		paint_hilite_hexagon();
 		domodal();
 		control_standart();
 		if(hot.key == MouseLeft && hot.pressed && hilite_index != Blocked)
@@ -832,7 +846,7 @@ void drawable::slide(point pt) {
 	auto dx = x1 - x0;
 	auto dy = y1 - y0;
 	while(start < lenght && ismodal()) {
-		map::paint_screen(false, false, false);
+		map::paint_screen(false, false, false, false);
 		sysredraw();
 		start += step;
 		short x2 = x0 + dx * start / lenght;

@@ -89,7 +89,7 @@ int main() {
 	if(!test_battle())
 		return 0;
 	test_map();
-	unit_main();
+	//unit_main();
 	setcamera(map::h2p(79));
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);

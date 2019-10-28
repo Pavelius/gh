@@ -51,6 +51,9 @@ enum action_s : unsigned char {
 	Move, Jump, Fly, Attack, AttackBoost, Push, Pull, Heal, Loot,
 	Bless, Curse,
 };
+enum action_bonus_s : char {
+	InfiniteCount = 100, MovedCount, AttackedCount,
+};
 enum modifier_s : unsigned char {
 	Bonus, Range, Target, Pierce, Experience, Use,
 };
@@ -88,10 +91,12 @@ enum reaction_s : unsigned char {
 	Enemy, Friend
 };
 class creaturei;
-struct action;
+struct actionf;
 typedef cflags<element_s, unsigned char> elementa;
 typedef cflags<state_s, unsigned char> statea;
 typedef cflags<card_s, unsigned char> carda;
+typedef adat<short unsigned, 24> abilitya;
+typedef adat<short unsigned, 16> itema;
 typedef unsigned short indext;
 struct variant {
 	variant_s					type;
@@ -121,6 +126,27 @@ struct variant {
 	void						clear() { type = NoVariant; value = 0; }
 	const char*					getname() const;
 };
+class answeri : stringbuilder {
+	struct element {
+		int						param;
+		const char*				text;
+		const char*				getname() const { return text; }
+	};
+	char						buffer[4096];
+	adat<element, 16>			elements;
+public:
+	typedef void(*tipspt)(stringbuilder& sb, int param);
+	typedef void(*callback)();
+	constexpr explicit operator bool() const { return elements.count != 0; }
+	answeri();
+	void						add(int param, const char* format, ...);
+	void						addv(int param, const char* format, const char* format_param);
+	int							choose(bool cancel_button, bool random_choose, const char* format, tipspt tips = 0, callback proc = 0, callback back = 0, const char* format2 = 0, answeri* an2 = 0) const;
+	void						clear() { stringbuilder::clear(); elements.clear(); }
+	static int					compare(const void* p1, const void* p2);
+	int							paint_answers(int x, int y, bool cancel_button, void(*proc)(), tipspt tips) const;
+	void						sort();
+};
 struct deck : adat<unsigned short, 46> {
 	void						add(unsigned short v) { adat::add(v); }
 	void						add(unsigned short v, int count);
@@ -137,8 +163,6 @@ struct commandi {
 	variant						id;
 	char						bonus;
 	special_s					special;
-	variant						id_second;
-	char						bonus_second;
 };
 struct commanda {
 	command_s					data[8];
@@ -157,7 +181,7 @@ struct monsterability {
 	char						initiative;
 	commanda					action;
 };
-struct action {
+struct actionf {
 	action_s					id;
 	char						bonus, range, pierce, experience, target, use, area_size;
 	area_s						area;
@@ -170,7 +194,7 @@ struct actioni {
 	const char*					name;
 };
 struct actiona {
-	action						data[4];
+	actionf						data[4];
 	void						parse(const commanda& source, creaturei& player, bool use_magic);
 	void						tostring(stringbuilder& sb) const;
 };
@@ -205,16 +229,19 @@ class creaturei : public figurei {
 	reaction_s					reaction;
 public:
 	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
+	void						act(const actionf& e);
 	void						attack(creaturei& enemy, int bonus, int pierce, statea states);
 	void						attack(int bonus, int range, int pierce, statea states);
 	static creaturei*			choose(creaturei** source, unsigned count, const char* format);
-	static indext				choose_index(const char* format, bool show_movement, bool show_apply);
+	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply);
 	void						create(variant v, int level);
+	int							getbonus(int bonus) const;
 	static deck&				getmonstersdeck();
 	void						damage(int v);
 	void						droploot() const;
 	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
+	void						loot(int range);
 	int							get(action_s i) const;
 	deck&						getcombatcards();
 	constexpr short unsigned	gethp() const { return hp; }
@@ -223,8 +250,11 @@ public:
 	reaction_s					getreaction() const { return reaction; }
 	creaturei*					gettarget(int distance) const;
 	int							getlevel() const { return level; }
+	void						heal(int bonus);
+	static void					hiliteindex(stringbuilder& sb, int param);
 	void						move(action_s id, char bonus);
 	void						paint() const;
+	void						remove(state_s v) { states.remove(v); }
 	static unsigned				select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target);
 	void						set(action_s i, int v);
 	constexpr void				set(reaction_s i) { reaction = i; }
@@ -234,6 +264,8 @@ public:
 	void						sethp(short unsigned v) { hp = v; }
 	void						sethpmax(short unsigned v) { hp_max = v; hp = v; }
 	void						setlevel(int v) { level = v; }
+	void						turnbegin();
+	void						turnend();
 };
 struct monsteri {
 	struct info {
@@ -255,39 +287,19 @@ struct classi {
 	char						abilities_cap;
 	char						levels[11];
 };
-class answeri : stringbuilder {
-	typedef void(*tipspt)(stringbuilder& sb, int param);
-	struct element {
-		int						param;
-		const char*				text;
-		const char*				getname() const { return text; }
-	};
-	char						buffer[4096];
-	adat<element, 16>			elements;
-public:
-	typedef void(*callback)();
-	constexpr explicit operator bool() const { return elements.count != 0; }
-	answeri();
-	void						add(int param, const char* format, ...);
-	void						addv(int param, const char* format, const char* format_param);
-	int							choose(bool cancel_button, bool random_choose, const char* format, tipspt tips = 0, callback proc = 0, callback back = 0, const char* format2 = 0, answeri* an2 = 0) const;
-	void						clear() { stringbuilder::clear(); elements.clear(); }
-	static int					compare(const void* p1, const void* p2);
-	int							paint_answers(int x, int y, bool cancel_button, void(*proc)(), tipspt tips) const;
-	void						sort();
-};
 struct battlecardi {
 	char						bonus, count;
 	variant						cless;
 	statea						states;
 };
-typedef adat<short unsigned, 24> abilitya;
 class playeri : public creaturei {
 	char						name[16];
 	deck						combat_deck;
 	abilitya					ability_hand;
 	abilitya					ability_discard;
 	abilitya					ability_drop;
+	itema						items;
+	itema						items_used;
 public:
 	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
 	void						activate();
@@ -306,6 +318,9 @@ public:
 	constexpr void				set(class_s v) { type = Class; cless = v; }
 	constexpr void				set(reaction_s i) { creaturei::set(i); }
 };
+struct treasurei : drawable {
+	unsigned char				count;
+};
 namespace map {
 const int						mx = 32;
 const int						my = 24;
@@ -319,6 +334,7 @@ void							block();
 void							block(reaction_s i);
 void							clearwave();
 inline int						get(element_s i) { return magic_elements[i]; }
+int								getdistance(point h1, point h2);
 indext							getmovecost(indext i);
 point							h2p(point v);
 point							h2p(indext i);
@@ -329,7 +345,7 @@ constexpr bool					is(element_s i) { return magic_elements[i] > 0; }
 constexpr bool					is(indext i, map_tile_s v) { return (map_flags[i] & (1 << v)) != 0; }
 void							moverestrict(indext v);
 static point					p2h(point pt);
-void							paint_screen(bool can_choose, bool show_movement, bool show_index);
+void							paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
 constexpr void					remove(indext i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
 constexpr void					set(indext i, map_tile_s v) { map_flags[i] |= (1 << v); }

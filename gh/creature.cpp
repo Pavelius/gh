@@ -44,7 +44,16 @@ void creaturei::damage(int v) {
 		hp -= v;
 }
 
+int creaturei::getbonus(int bonus) const {
+	switch(bonus) {
+	case MovedCount: return actions[Moved];
+	case AttackedCount: return actions[Attacked];
+	default: return bonus;
+	}
+}
+
 void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states) {
+	bonus = getbonus(bonus);
 	auto cards = getcombatcards();
 	auto d = cards.nextbonus(pierce, states);
 	auto s = enemy.get(Shield) - pierce;
@@ -87,7 +96,7 @@ void creaturei::move(action_s id, char bonus) {
 		map::block(getopposed());
 		map::wave(getindex());
 		map::moverestrict(bonus);
-		auto ni = choose_index(
+		auto ni = choose_index(0, 0,
 			"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
 		if(ni == Blocked)
 			return;
@@ -120,6 +129,7 @@ int distance(point p1, point p2);
 
 unsigned creaturei::select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target) {
 	auto pb = result;
+	auto hi = map::i2h(index);
 	for(auto& e : bsmeta<creaturei>()) {
 		if(!e)
 			continue;
@@ -130,8 +140,7 @@ unsigned creaturei::select(creaturei** result, creaturei** pe, reaction_s reacti
 				continue;
 		}
 		if(index != Blocked) {
-			auto d = distance(map::h2p(e.getindex()), map::h2p(index));
-			d = (d+2) / 100;
+			auto d = map::getdistance(map::i2h(e.getindex()), hi);
 			if(d > range)
 				continue;
 		}
@@ -146,10 +155,14 @@ creaturei* creaturei::choose(creaturei** source, unsigned count, const char* for
 		return 0;
 	else if(count == 1)
 		return source[0];
+	answeri an;
 	map::setwave(Blocked);
-	for(unsigned i = 0; i < count; i++)
-		map::setmovecost(source[i]->getindex(), 0);
-	auto index = choose_index(format, false, false);
+	for(unsigned i = 0; i < count; i++) {
+		auto index = source[i]->getindex();
+		map::setmovecost(index, 0);
+		an.add(index, "%1 (%2i хитов)", source[i]->getname(), source[i]->gethp());
+	}
+	auto index = choose_index(&an, creaturei::hiliteindex, format, false, false);
 	for(unsigned i = 0; i < count; i++) {
 		if(source[i]->getindex() == index)
 			return source[i];
@@ -160,7 +173,7 @@ creaturei* creaturei::choose(creaturei** source, unsigned count, const char* for
 void creaturei::attack(int bonus, int range, int pierce, statea states) {
 	creaturei* targets[32];
 	auto count = select(targets, targets + sizeof(targets) / sizeof(targets[0]), getopposed(), getindex(), range, true);
-	auto enemy = choose(targets, count, "Укажите цель");
+	auto enemy = choose(targets, count, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.");
 	if(!enemy)
 		return;
 	attack(*enemy, bonus, pierce, states);
@@ -178,4 +191,50 @@ deck& creaturei::getcombatcards() {
 	default:
 		return getmonstersdeck();
 	}
+}
+
+void creaturei::act(const actionf& e) {
+	creaturei* target;
+	switch(e.id) {
+	case Move:
+	case Jump:
+	case Fly:
+		move(e.id, e.bonus);
+		break;
+	case Attack:
+		attack(e.bonus, e.range, e.pierce, e.states);
+		break;
+	case Loot:
+		loot(e.bonus);
+		break;
+	case Heal:
+		target = this;
+		if(e.range > 0) {
+		}
+		target->heal(e.bonus);
+		break;
+	}
+}
+
+void creaturei::heal(int bonus) {
+	if(bonus < 0)
+		return;
+	if(is(Wound))
+		remove(Wound);
+	if(is(Poison)) {
+		remove(Poison);
+		return;
+	}
+	hp += bonus;
+	if(hp > hp_max)
+		hp = hp_max;
+}
+
+void creaturei::loot(int range) {
+	
+}
+
+void creaturei::turnbegin() {
+	if(is(Wound))
+		damage(1);
 }
