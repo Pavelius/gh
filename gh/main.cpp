@@ -76,7 +76,7 @@ static void test_movement() {
 	auto& p1 = bsmeta<playeri>::elements[0];
 	p1.activate();
 	p1.move(Move, 4);
-	p1.attack(3);
+	p1.attack(3, 0, 1, {});
 	p1.move(Move, 2);
 	//p1.choose_index(p1.getindex(), );
 }

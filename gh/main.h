@@ -52,7 +52,7 @@ enum action_s : unsigned char {
 	Bless, Curse,
 };
 enum action_bonus_s : char {
-	InfiniteCount = 100, MovedCount, AttackedCount,
+	InfiniteCount = 100, MovedCount, AttackedCount, ShieldCount,
 };
 enum modifier_s : unsigned char {
 	Bonus, Range, Target, Pierce, Experience, Use,
@@ -235,6 +235,7 @@ public:
 	static creaturei*			choose(creaturei** source, unsigned count, const char* format);
 	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply);
 	void						create(variant v, int level);
+	int							get(action_s id) const;
 	int							getbonus(int bonus) const;
 	static deck&				getmonstersdeck();
 	void						damage(int v);
@@ -242,7 +243,7 @@ public:
 	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
 	void						loot(int range);
-	int							get(action_s i) const;
+	//int							get(action_s i) const;
 	deck&						getcombatcards();
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
@@ -303,7 +304,6 @@ class playeri : public creaturei {
 public:
 	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
 	void						activate();
-	void						attack(int bonus, int range = 1, int pierce = 0);
 	void						choose_abilities();
 	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }

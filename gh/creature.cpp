@@ -25,12 +25,6 @@ void creaturei::setfriendly(const statea v) {
 	}
 }
 
-int creaturei::get(action_s i) const {
-	if(i <= Guard)
-		return actions[i];
-	return 0;
-}
-
 void creaturei::droploot() const {
 }
 
@@ -48,12 +42,14 @@ int creaturei::getbonus(int bonus) const {
 	switch(bonus) {
 	case MovedCount: return actions[Moved];
 	case AttackedCount: return actions[Attacked];
+	case ShieldCount: return actions[Shield];
 	default: return bonus;
 	}
 }
 
 void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states) {
 	bonus = getbonus(bonus);
+	bonus += get(Attack);
 	auto cards = getcombatcards();
 	auto d = cards.nextbonus(pierce, states);
 	auto s = enemy.get(Shield) - pierce;
@@ -237,4 +233,30 @@ void creaturei::loot(int range) {
 void creaturei::turnbegin() {
 	if(is(Wound))
 		damage(1);
+}
+
+int	creaturei::get(action_s id) const {
+	auto r = 0;
+	if(type == Monster) {
+		auto& mn = bsmeta<monsteri>::elements[monster];
+		auto& lv = mn.levels[level][0];
+		switch(id) {
+		case Move:
+			r = lv.movement;
+			break;
+		case Fly:
+		case Jump:
+			if(mn.move==id)
+				r = lv.movement;
+			break;
+		case Attack:
+			r = lv.attack;
+			break;
+		}
+	} else if(type == Class) {
+
+	}
+	if(id <= Guard)
+		r += actions[id];
+	return r;
 }

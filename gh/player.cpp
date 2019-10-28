@@ -94,7 +94,3 @@ void playeri::create(class_s v, int level) {
 	set(Friend);
 	zcpy(name, "È÷");
 }
-
-void playeri::attack(int bonus, int range, int pierce) {
-	creaturei::attack(bonus, range, pierce, {});
-}
