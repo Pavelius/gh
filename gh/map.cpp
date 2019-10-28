@@ -64,11 +64,20 @@ void map::clearwave() {
 	}
 }
 
+void map::setwave(indext v) {
+	for(auto& e : movement_rate)
+		e = v;
+}
+
 void map::block() {
 	for(indext i = 0; i < mx*my; i++) {
 		if(is(i, HasBlock))
 			movement_rate[i] = Blocked;
 	}
+}
+
+void map::setmovecost(indext i, indext v) {
+	movement_rate[i] = v;
 }
 
 void map::block(reaction_s i) {

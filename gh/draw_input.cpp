@@ -615,13 +615,12 @@ static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool sho
 	if(map::is(i, HasBlock))
 		hexagon(pt, hexagon_offset2, colors::green);
 	if(show_index || show_movement) {
+		auto m = getmovecost(i);
 		char temp[32]; stringbuilder sb(temp); temp[0] = 0;
 		if(show_movement) {
-			auto m = getmovecost(i);
-			if(m && m!=Blocked)
+			if(m && m != Blocked)
 				sb.add("%1i", m);
-		}
-		else if(show_index)
+		} else if(show_index)
 			sb.add("%1i", i);
 		if(temp[0])
 			text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
@@ -629,9 +628,12 @@ static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool sho
 			use_hilite = false;
 	}
 	if(use_hilite) {
-		const rect rc = {pt.x - size / 2, pt.y - size / 2, pt.x + size / 2, pt.y + size / 2};
-		if(areb(rc))
-			hilite_index = i;
+		auto m = getmovecost(i);
+		if(m != Blocked) {
+			const rect rc = {pt.x - size / 2, pt.y - size / 2, pt.x + size / 2, pt.y + size / 2};
+			if(areb(rc))
+				hilite_index = i;
+		}
 	}
 }
 
@@ -650,11 +652,11 @@ void creaturei::paint() const {
 	auto pf = fore_stroke;
 	if(hp == hp_max)
 		fore_stroke = colors::red;
-	else if(hp>hp_max/2)
+	else if(hp > hp_max / 2)
 		fore_stroke = colors::yellow;
 	else
 		fore_stroke = colors::red;
-	text(x1 - textw(temp)/2, y1 + 30, temp, -1, TextStroke);
+	text(x1 - textw(temp) / 2, y1 + 30, temp, -1, TextStroke);
 }
 
 static void paint_grid(bool can_choose, bool show_movement, bool show_index) {
@@ -665,11 +667,12 @@ static void paint_grid(bool can_choose, bool show_movement, bool show_index) {
 			continue;
 		hexagon(i, can_choose, show_index, show_movement);
 	}
-	if(hilite_index != Blocked) {
-		auto pt = map::h2p(hilite_index) - camera;
-		hexagon(pt, hexagon_offset2, colors::yellow);
-	}
 	font = pf;
+}
+
+static void paint_hilite_hexagon() {
+	auto pt = map::h2p(hilite_index) - camera;
+	hexagon(pt, hexagon_offset2, colors::yellow);
 }
 
 static void paint_monsters() {
@@ -701,6 +704,7 @@ void map::paint_screen(bool can_choose, bool show_movement, bool show_index) {
 	paint_furnitures();
 	paint_monsters();
 	paint_players();
+	paint_hilite_hexagon();
 }
 
 void map::setcamera(point pt) {
@@ -790,23 +794,23 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 	return getresult();
 }
 
-indext creaturei::choose_index(const char* format, bool show_movement) {
+indext creaturei::choose_index(const char* format, bool show_movement, bool show_apply) {
 	while(ismodal()) {
 		map::paint_screen(true, show_movement, false);
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2;
 		y += render_report(x, y, format);
 		x = getwidth() - gui.right_width - gui.border * 2;
-		y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeySpace);
+		if(show_apply)
+			y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeySpace);
 		domodal();
 		control_standart();
 		if(hot.key == MouseLeft && hot.pressed && hilite_index != Blocked)
 			breakmodal(2);
 	}
-	switch(getresult()) {
-	case 2: return hilite_index;
-	default: return Blocked;
-	}
+	if(getresult() == 2)
+		return hilite_index;
+	return Blocked;
 }
 
 void drawable::slide(point pt) {

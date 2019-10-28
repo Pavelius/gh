@@ -206,7 +206,9 @@ class creaturei : public figurei {
 public:
 	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
 	void						attack(creaturei& enemy, int bonus, int pierce, statea states, deck& cards);
-	static indext				choose_index(const char* format, bool show_movement);
+	void						attack(int bonus, int range, int pierce, statea states, deck& cards);
+	static creaturei*			choose(creaturei** source, unsigned count, const char* format);
+	static indext				choose_index(const char* format, bool show_movement, bool show_apply);
 	void						create(variant v, int level);
 	void						damage(int v);
 	void						droploot() const;
@@ -217,9 +219,11 @@ public:
 	constexpr short unsigned	gethpmax() const { return hp; }
 	reaction_s					getopposed() const;
 	reaction_s					getreaction() const { return reaction; }
+	creaturei*					gettarget(int distance) const;
 	int							getlevel() const { return level; }
 	void						move(action_s id, char bonus);
 	void						paint() const;
+	static unsigned				select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target);
 	void						set(action_s i, int v);
 	constexpr void				set(reaction_s i) { reaction = i; }
 	void						set(state_s v) { states.add(v); }
@@ -285,6 +289,7 @@ class playeri : public creaturei {
 public:
 	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
 	void						activate();
+	void						attack(int bonus, int range = 1, int pierce = 0);
 	void						choose_abilities();
 	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }
@@ -316,6 +321,7 @@ point							h2p(point v);
 point							h2p(indext i);
 constexpr short					i2x(indext i) { return i % mx; }
 constexpr short					i2y(indext i) { return i / mx; }
+constexpr point					i2h(indext i) { return {i2x(i), i2y(i)}; }
 constexpr bool					is(element_s i) { return magic_elements[i] > 0; }
 constexpr bool					is(indext i, map_tile_s v) { return (map_flags[i] & (1 << v)) != 0; }
 void							moverestrict(indext v);
@@ -326,6 +332,8 @@ constexpr void					remove(indext i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
 constexpr void					set(indext i, map_tile_s v) { map_flags[i] |= (1 << v); }
 constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
 void							setcamera(point pt);
+void							setmovecost(indext i, indext v);
+void							setwave(indext v);
 unsigned short					to(indext index, direction_s d);
 void							wave(indext start_index);
 };

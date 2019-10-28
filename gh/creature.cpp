@@ -87,7 +87,7 @@ void creaturei::move(action_s id, char bonus) {
 		map::wave(getindex());
 		map::moverestrict(bonus);
 		auto ni = choose_index(
-			"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true);
+			"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
 		if(ni == Blocked)
 			return;
 		auto cm = map::getmovecost(ni);
@@ -103,4 +103,64 @@ reaction_s creaturei::getopposed() const {
 	case Enemy: return Friend;
 	default: return Enemy;
 	}
+}
+
+static int getdistance(point p1, point p2) {
+	auto dx = p1.x - p2.x;
+	auto dy = p1.y - p2.y;
+	if(dx < 0)
+		dx = -dx;
+	if(dy < 0)
+		dy = -dy;
+	return dx > dy ? dx : dy;
+}
+
+int distance(point p1, point p2);
+
+unsigned creaturei::select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target) {
+	auto pb = result;
+	for(auto& e : bsmeta<creaturei>()) {
+		if(!e)
+			continue;
+		if(e.reaction != reaction)
+			continue;
+		if(valid_attack_target) {
+			if(e.is(Invisibility))
+				continue;
+		}
+		if(index != Blocked) {
+			auto d = distance(map::h2p(e.getindex()), map::h2p(index));
+			d = (d+2) / 100;
+			if(d > range)
+				continue;
+		}
+		if(pb < pe)
+			*pb++ = &e;
+	}
+	return pb - result;
+}
+
+creaturei* creaturei::choose(creaturei** source, unsigned count, const char* format) {
+	if(!count)
+		return 0;
+	else if(count == 1)
+		return source[0];
+	map::setwave(Blocked);
+	for(unsigned i = 0; i < count; i++)
+		map::setmovecost(source[i]->getindex(), 0);
+	auto index = choose_index(format, false, false);
+	for(unsigned i = 0; i < count; i++) {
+		if(source[i]->getindex() == index)
+			return source[i];
+	}
+	return 0;
+}
+
+void creaturei::attack(int bonus, int range, int pierce, statea states, deck& cards) {
+	creaturei* targets[32];
+	auto count = select(targets, targets + sizeof(targets) / sizeof(targets[0]), getopposed(), getindex(), range, true);
+	auto enemy = choose(targets, count, "Укажите цель");
+	if(!enemy)
+		return;
+	attack(*enemy, bonus, pierce, states, cards);
 }
