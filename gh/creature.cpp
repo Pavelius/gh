@@ -158,7 +158,7 @@ creaturei* creaturei::choose(creaturei** source, unsigned count, const char* for
 		map::setmovecost(index, 0);
 		an.add(index, "%1 (%2i хитов)", source[i]->getname(), source[i]->gethp());
 	}
-	auto index = choose_index(&an, creaturei::hiliteindex, format, false, false);
+	auto index = choose_index(&an, 0, format, false, false);
 	for(unsigned i = 0; i < count; i++) {
 		if(source[i]->getindex() == index)
 			return source[i];

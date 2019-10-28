@@ -35,7 +35,7 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 				pa->area_size = ce.bonus;
 				break;
 			case Card:
-				pa->cards.add(ce.id.card);
+				pa->card = ce.id.card;
 				break;
 			case Element:
 				pa->elements.add(ce.id.element);

@@ -177,6 +177,8 @@ void draw::execute(void(*proc)(), int param) {
 void draw::breakmodal(int result) {
 	break_modal = true;
 	break_result = result;
+	hot.key = 0;
+	hot.param = 0;
 }
 
 void draw::buttoncancel() {
@@ -757,17 +759,21 @@ void creaturei::hiliteindex(stringbuilder& sb, int param) {
 	hilite_index = param;
 }
 
-int answeri::paint_answers(int x, int y, bool cancel_button, callback proc, answeri::tipspt tips) const {
+int answeri::paint_answers(int x, int y, bool cancel_button, callback proc, answeri::tipspt tips, bool hilite_answer) const {
 	auto y1 = y;
 	for(auto& e : elements) {
 		bool run; areas pa; auto y1 = y;
 		y += windowb(x, y, gui.right_width, e.getname(), run, false, 0, 0, 0, &pa);
-		if((pa == AreaHilited || pa == AreaHilitedPressed) && tips) {
-			stringbuilder sb(tooltips_text);
-			tooltips_point.x = x;
-			tooltips_point.y = y1;
-			tooltips_width = gui.right_width + metrics::padding * 2;
-			tips(sb, e.param);
+		if((pa == AreaHilited || pa == AreaHilitedPressed)) {
+			if(hilite_answer)
+				hilite_index = e.param;
+			if(tips) {
+				stringbuilder sb(tooltips_text);
+				tooltips_point.x = x;
+				tooltips_point.y = y1;
+				tooltips_width = gui.right_width + metrics::padding * 2;
+				tips(sb, e.param);
+			}
 		}
 		if(run)
 			execute(proc, e.param);
@@ -794,10 +800,10 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 		x = getwidth() - gui.right_width - gui.border * 2;
 		if(proc)
 			proc();
-		y += paint_answers(x, y, cancel_button, breakparam, tips);
+		y += paint_answers(x, y, cancel_button, breakparam, tips, false);
 		if(format2) {
 			y1 += render_right(gui.border * 2, y1, format2);
-			y1 += an2->paint_answers(gui.border * 2, y1, false, breakparam, tips);
+			y1 += an2->paint_answers(gui.border * 2, y1, false, breakparam, tips, false);
 		}
 		domodal();
 		control_standart();
@@ -813,7 +819,7 @@ indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, con
 		y += render_report(x, y, format);
 		x = getwidth() - gui.right_width - gui.border * 2;
 		if(answers)
-			y += answers->paint_answers(x, y, false, breakparam, tips);
+			y += answers->paint_answers(x, y, false, 0, tips, true);
 		if(show_apply)
 			y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeySpace);
 		paint_hilite_hexagon();

@@ -145,7 +145,7 @@ public:
 	int							choose(bool cancel_button, bool random_choose, const char* format, tipspt tips = 0, callback proc = 0, callback back = 0, const char* format2 = 0, answeri* an2 = 0) const;
 	void						clear() { stringbuilder::clear(); elements.clear(); }
 	static int					compare(const void* p1, const void* p2);
-	int							paint_answers(int x, int y, bool cancel_button, void(*proc)(), tipspt tips) const;
+	int							paint_answers(int x, int y, bool cancel_button, void(*proc)(), tipspt tips, bool hilite_answer) const;
 	void						sort();
 };
 struct deck : adat<unsigned short, 46> {
@@ -188,7 +188,7 @@ struct actionf {
 	area_s						area;
 	elementa					elements;
 	statea						states;
-	carda						cards;
+	card_s						card;
 };
 struct actioni {
 	const char*					id;
