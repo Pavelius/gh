@@ -130,7 +130,7 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Condition, AllyNearTarget},
 {Condition, EnemyNearTarget},
 // Действия с картами
-{Modifier, Discard},
+{Modifier, DiscardableCard},
 };
 assert_enum(command, DiscardCard);
 

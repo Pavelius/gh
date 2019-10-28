@@ -235,6 +235,10 @@ void creaturei::turnbegin() {
 		damage(1);
 }
 
+void creaturei::turnend() {
+	loot(0);
+}
+
 int	creaturei::get(action_s id) const {
 	auto r = 0;
 	if(type == Monster) {

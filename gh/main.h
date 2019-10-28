@@ -40,7 +40,8 @@ enum condition_s : unsigned char {
 	AllyNearTarget, EnemyNearTarget,
 };
 enum card_s : unsigned char {
-	Discard, Exhause,
+	StandartCard,
+	DiscardableCard, ExhauseCard,
 };
 enum area_s : unsigned char {
 	NoArea,
