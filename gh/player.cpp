@@ -29,6 +29,7 @@ static void ability_tips(stringbuilder& sb, int param) {
 	actiona a1, a2;
 	a1.parse(ab.upper, *current_player, false);
 	a2.parse(ab.lower, *current_player, false);
+	sb.add("[Инициатива: %1i]\n", ab.initiative);
 	a1.tostring(sb);
 	sb.add("\n[~или]\n");
 	a2.tostring(sb);
@@ -202,7 +203,9 @@ void playeri::choose_tactic() {
 		char temp[512]; stringbuilder sb(temp);
 		sb.adds("Выбирайте способности на этот ход.");
 		if(actions[0]) {
-			sb.adds("Первая способность будет [%1].", bsmeta<abilityi>::elements[actions[0]].name);
+			sb.adds("Первая способность [%1]. Ваша инициатива на этот ход будет [%2i]",
+				bsmeta<abilityi>::elements[actions[0]].name,
+				bsmeta<abilityi>::elements[actions[0]].initiative);
 			if(actions[1])
 				sb.adds("Вторая способность будет [%1].", bsmeta<abilityi>::elements[actions[1]].name);
 			else
