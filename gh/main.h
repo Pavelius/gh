@@ -303,11 +303,13 @@ union abilityid {
 	int							i;
 	struct {
 		short unsigned			index;
-		unsigned char			standart;
 		unsigned char			upper;
+		unsigned char			standart;
 	};
-	constexpr abilityid(short unsigned index, unsigned char standart, unsigned char upper) : index(index), standart(standart), upper(upper) {}
+	constexpr abilityid() : i(0) {}
 	constexpr abilityid(int i) : i(i) {}
+	constexpr abilityid(short unsigned index, unsigned char upper, unsigned char standart) : index(index), standart(standart), upper(upper) {}
+	const commanda&				getability() const;
 };
 class playeri : public creaturei {
 	char						name[16];
@@ -320,9 +322,8 @@ class playeri : public creaturei {
 	short unsigned				actions[2];
 public:
 	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop(), actions() {}
-	void						act(short unsigned card, bool upper);
 	void						activate();
-	bool						addact(short unsigned i);
+	bool						addaction(short unsigned i);
 	void						addcard(short unsigned i) { ability_hand.add(i); }
 	void						choose_abilities();
 	abilityid					choose_action();
@@ -334,9 +335,11 @@ public:
 	const char*					getname() const { return name; }
 	bool						isallowability(int v) const;
 	bool						isacted() const { return actions[0] == 0 && actions[1] == 0; }
+	void						makeaction(abilityid id);
 	static void					paint_sheet();
 	static void					paint_back();
 	void						prepare();
+	void						removeaction(abilityid id);
 	constexpr void				set(class_s v) { type = Class; cless = v; }
 	constexpr void				set(reaction_s i) { creaturei::set(i); }
 	void						turn();

@@ -63,8 +63,8 @@ void playeri::choose_abilities() {
 		if(an2)
 			format2 = "В это приключение вы будете использовать только указанные в списке способности (левая кнопка мышки, чтобы убрать).";
 		auto i = an.choose(false, false, sb, ability_tips, paint_sheet, paint_back, format2, &an2);
-		if(i>=0xFFF)
-			ability_hand.remove(ability_hand.indexof(i&0xFFF));
+		if(i >= 0xFFF)
+			ability_hand.remove(ability_hand.indexof(i & 0xFFF));
 		else
 			ability_hand.add(i);
 	}
@@ -96,20 +96,13 @@ void playeri::create(class_s v, int level) {
 	combat_deck.create();
 }
 
-void playeri::act(short unsigned card, bool upper) {
-	auto& ae = bsmeta<abilityi>::elements[card];
-	auto& sc = upper ? ae.upper : ae.lower;
-	actiona action;
-	action.parse(sc, *this, true);
+void playeri::makeaction(abilityid id) {
+	actiona action; action.parse(id.getability(), *this, true);
 	for(auto& e : action.data)
 		creaturei::act(e);
-	if(action.type == DiscardableCard)
-		ability_discard.add(card);
-	else
-		ability_drop.add(card);
 }
 
-bool playeri::addact(short unsigned i) {
+bool playeri::addaction(short unsigned i) {
 	if(!actions[0])
 		actions[0] = i;
 	else if(!actions[1])
@@ -120,6 +113,28 @@ bool playeri::addact(short unsigned i) {
 	if(card_index != -1)
 		ability_hand.remove(card_index);
 	return true;
+}
+
+void playeri::removeaction(abilityid id) {
+	if(actions[0] == id.index)
+		actions[0] = 0;
+	else if(actions[1] == id.index)
+		actions[1] = 0;
+	else
+		return;
+	actiona ac; ac.parse(id.getability(), *this, false);
+	if(ac.type == DiscardableCard)
+		ability_discard.add(id.i);
+	else
+		ability_drop.add(id.i);
+}
+
+static void combat_ability_tips(stringbuilder& sb, int param) {
+	abilityid id = param;
+	auto& cm = id.getability();
+	actiona action;
+	action.parse(cm, *current_player, true);
+	action.tostring(sb);
 }
 
 static void addc(answeri& an, short unsigned i, int upper, int standart) {
@@ -144,13 +159,18 @@ abilityid playeri::choose_action() {
 		addc(an, actions[0], 0, 0);
 		addc(an, actions[0], 0, 1);
 	}
-	abilityid id = an.choose(false, false, "Выбирайте действие", 0, 0, 0, 0, 0);
+	abilityid id = an.choose(false, false, "Что вы хотите сделать в свой ход?", combat_ability_tips, 0, 0, 0, 0);
 	return id;
 }
 
 void playeri::turn() {
+	abilityid id;
 	turnbegin();
-	auto id1 = choose_action();
-	auto id2 = choose_action();
+	id = choose_action();
+	makeaction(id);
+	removeaction(id);
+	id = choose_action();
+	makeaction(id);
+	removeaction(id);
 	turnend();
 }
