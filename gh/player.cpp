@@ -112,3 +112,20 @@ void playeri::act(short unsigned card, bool upper) {
 	else
 		ability_drop.add(card);
 }
+
+bool playeri::addact(short unsigned i) {
+	if(!actions[0])
+		actions[0] = i;
+	else if(!actions[1])
+		actions[1] = i;
+	else
+		return false;
+	auto card_index = ability_hand.indexof(i);
+	if(card_index != -1)
+		ability_hand.remove(card_index);
+	return true;
+}
+
+void playeri::turn() {
+
+}

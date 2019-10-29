@@ -307,10 +307,12 @@ class playeri : public creaturei {
 	abilitya					ability_drop;
 	itema						items;
 	itema						items_used;
+	short unsigned				actions[2];
 public:
-	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
+	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop(), actions() {}
 	void						act(short unsigned card, bool upper);
 	void						activate();
+	bool						addact(short unsigned i);
 	void						addcard(short unsigned i) { ability_hand.add(i); }
 	void						choose_abilities();
 	void						create(class_s v, int level);
@@ -320,11 +322,13 @@ public:
 	static playeri*				getcurrent();
 	const char*					getname() const { return name; }
 	bool						isallowability(int v) const;
+	bool						isacted() const { return actions[0] == 0 && actions[1] == 0; }
 	static void					paint_sheet();
 	static void					paint_back();
 	void						prepare();
 	constexpr void				set(class_s v) { type = Class; cless = v; }
 	constexpr void				set(reaction_s i) { creaturei::set(i); }
+	void						turn();
 };
 struct treasurei : drawable {
 	unsigned char				count;
