@@ -97,10 +97,6 @@ void playeri::create(class_s v, int level) {
 }
 
 void playeri::act(short unsigned card, bool upper) {
-	auto card_index = ability_hand.indexof(card);
-	if(card_index == -1)
-		return;
-	ability_hand.remove(card_index);
 	auto& ae = bsmeta<abilityi>::elements[card];
 	auto& sc = upper ? ae.upper : ae.lower;
 	actiona action;
@@ -126,6 +122,12 @@ bool playeri::addact(short unsigned i) {
 	return true;
 }
 
-void playeri::turn() {
+short unsigned playeri::choose_action() {
+	answeri an;
+	return 0;
+}
 
+void playeri::turn() {
+	turnbegin();
+	turnend();
 }

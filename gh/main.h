@@ -223,6 +223,7 @@ public:
 	constexpr figurei() : drawable(), variant(), index(Blocked) {}
 	explicit constexpr operator bool() const { return type!=NoVariant; }
 	constexpr indext			getindex() const { return index; }
+	constexpr bool				isplayer() const { return type == Class; }
 	void						setpos(short unsigned v);
 	constexpr void				setpos(int x, int y) { this->x = x; this->y = y; }
 };
@@ -249,7 +250,6 @@ public:
 	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
 	void						loot(int range);
-	//int							get(action_s i) const;
 	deck&						getcombatcards();
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
@@ -299,6 +299,14 @@ struct battlecardi {
 	variant						cless;
 	statea						states;
 };
+union abilityid {
+	int							i;
+	struct {
+		short unsigned			index;
+		unsigned char			standart;
+		unsigned char			upper;
+	};
+};
 class playeri : public creaturei {
 	char						name[16];
 	deck						combat_deck;
@@ -315,6 +323,7 @@ public:
 	bool						addact(short unsigned i);
 	void						addcard(short unsigned i) { ability_hand.add(i); }
 	void						choose_abilities();
+	short unsigned				choose_action();
 	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
