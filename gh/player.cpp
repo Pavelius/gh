@@ -122,12 +122,35 @@ bool playeri::addact(short unsigned i) {
 	return true;
 }
 
-short unsigned playeri::choose_action() {
+static void addc(answeri& an, short unsigned i, int upper, int standart) {
+	auto& ab = bsmeta<abilityi>::elements[i];
+	auto& ac = upper ? ab.upper : ab.lower;
+	abilityid id(i, upper, standart);
+	if(!standart)
+		an.add(id.i, ab.name);
+	else if(upper)
+		an.add(id.i, "Обычная атака");
+	else
+		an.add(id.i, "Обычное движение");
+}
+
+abilityid playeri::choose_action() {
 	answeri an;
-	return 0;
+	if(actions[1]) {
+		addc(an, actions[1], 1, 0);
+		addc(an, actions[1], 1, 1);
+	}
+	if(actions[0]) {
+		addc(an, actions[0], 0, 0);
+		addc(an, actions[0], 0, 1);
+	}
+	abilityid id = an.choose(false, false, "Выбирайте действие", 0, 0, 0, 0, 0);
+	return id;
 }
 
 void playeri::turn() {
 	turnbegin();
+	auto id1 = choose_action();
+	auto id2 = choose_action();
 	turnend();
 }

@@ -306,6 +306,8 @@ union abilityid {
 		unsigned char			standart;
 		unsigned char			upper;
 	};
+	constexpr abilityid(short unsigned index, unsigned char standart, unsigned char upper) : index(index), standart(standart), upper(upper) {}
+	constexpr abilityid(int i) : i(i) {}
 };
 class playeri : public creaturei {
 	char						name[16];
@@ -323,7 +325,7 @@ public:
 	bool						addact(short unsigned i);
 	void						addcard(short unsigned i) { ability_hand.add(i); }
 	void						choose_abilities();
-	short unsigned				choose_action();
+	abilityid					choose_action();
 	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }

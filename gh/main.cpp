@@ -94,8 +94,11 @@ static void test_ability() {
 	p1.addcard(9);
 	p1.addcard(10);
 	p1.activate();
-	p1.act(3, false);
-	p1.act(1, true);
+	p1.addact(3);
+	p1.addact(1);
+	p1.turn();
+	//p1.act(3, false);
+	//p1.act(1, true);
 }
 
 int main() {
