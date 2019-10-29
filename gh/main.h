@@ -227,6 +227,13 @@ public:
 	void						setpos(short unsigned v);
 	constexpr void				setpos(int x, int y) { this->x = x; this->y = y; }
 };
+class trapi : public figurei {
+	char						damage;
+	statea						states;
+public:
+	char						getdamage() const { return damage; }
+	const statea&				getstate() const { return states; }
+};
 class creaturei : public figurei {
 	unsigned short				hp, hp_max;
 	char						initiative;

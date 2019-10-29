@@ -148,6 +148,7 @@
     <ClCompile Include="sprite_util.cpp" />
     <ClCompile Include="stringbuilder.cpp" />
     <ClCompile Include="surface_util.cpp" />
+    <ClCompile Include="trap.cpp" />
     <ClCompile Include="variant.cpp" />
     <ClCompile Include="win_draw.cpp" />
     <ClCompile Include="win_io_file.cpp" />

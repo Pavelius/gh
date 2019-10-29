@@ -29,9 +29,8 @@ static void ability_tips(stringbuilder& sb, int param) {
 	actiona a1, a2;
 	a1.parse(ab.upper, *current_player, false);
 	a2.parse(ab.lower, *current_player, false);
-	sb.add("[Инициатива: %1i]\n", ab.initiative);
 	a1.tostring(sb);
-	sb.add("\n[~или]\n");
+	sb.add("\n[Инициатива: %1i]\n", ab.initiative);
 	a2.tostring(sb);
 }
 

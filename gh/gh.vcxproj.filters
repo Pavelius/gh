@@ -123,6 +123,9 @@
     <ClCompile Include="action_count.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="trap.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">
