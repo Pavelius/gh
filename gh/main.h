@@ -314,6 +314,7 @@ union abilityid {
 class playeri : public creaturei {
 	char						name[16];
 	deck						combat_deck;
+	char						used_ability;
 	abilitya					ability_hand;
 	abilitya					ability_discard;
 	abilitya					ability_drop;
@@ -321,12 +322,14 @@ class playeri : public creaturei {
 	itema						items_used;
 	short unsigned				actions[2];
 public:
-	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop(), actions() {}
+	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop(),
+		actions(), used_ability(0) {}
 	void						activate();
 	bool						addaction(short unsigned i);
 	void						addcard(short unsigned i) { ability_hand.add(i); }
 	void						choose_abilities();
 	abilityid					choose_action();
+	void						choose_tactic();
 	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
@@ -342,6 +345,7 @@ public:
 	void						removeaction(abilityid id);
 	constexpr void				set(class_s v) { type = Class; cless = v; }
 	constexpr void				set(reaction_s i) { creaturei::set(i); }
+	void						setup_standart();
 	void						turn();
 };
 struct treasurei : drawable {

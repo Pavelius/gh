@@ -11,6 +11,7 @@ playeri* playeri::getcurrent() {
 
 void playeri::activate() {
 	current_player = this;
+	slide(getindex());
 }
 
 void playeri::prepare() {
@@ -141,36 +142,94 @@ static void addc(answeri& an, short unsigned i, int upper, int standart) {
 	auto& ab = bsmeta<abilityi>::elements[i];
 	auto& ac = upper ? ab.upper : ab.lower;
 	abilityid id(i, upper, standart);
-	if(!standart)
-		an.add(id.i, ab.name);
-	else if(upper)
-		an.add(id.i, "Обычная атака");
+	if(!standart) {
+		if(upper)
+			an.add(id.i, ab.name);
+		else
+			an.add(id.i, "Маневр и %1", ab.name);
+	} else if(upper)
+		an.add(id.i, "Атака вместо %1", ab.name);
 	else
-		an.add(id.i, "Обычное движение");
+		an.add(id.i, "Движение вместо %1", ab.name);
 }
 
 abilityid playeri::choose_action() {
+	activate();
 	answeri an;
-	if(actions[1]) {
-		addc(an, actions[1], 1, 0);
-		addc(an, actions[1], 1, 1);
-	}
 	if(actions[0]) {
-		addc(an, actions[0], 0, 0);
-		addc(an, actions[0], 0, 1);
+		if(used_ability==-1 || used_ability == 0)
+			addc(an, actions[0], 1, 0);
+		if(used_ability == -1 || used_ability == 1)
+			addc(an, actions[0], 0, 0);
+		if(used_ability == -1 || used_ability == 0)
+			addc(an, actions[0], 1, 1);
+		if(used_ability == -1 || used_ability == 1)
+			addc(an, actions[0], 0, 1);
 	}
-	abilityid id = an.choose(false, false, "Что вы хотите сделать в свой ход?", combat_ability_tips, 0, 0, 0, 0);
+	if(actions[1]) {
+		if(used_ability == -1 || used_ability == 0)
+			addc(an, actions[1], 1, 0);
+		if(used_ability == -1 || used_ability == 1)
+			addc(an, actions[1], 0, 0);
+		if(used_ability == -1 || used_ability == 0)
+			addc(an, actions[1], 1, 1);
+		if(used_ability == -1 || used_ability == 1)
+			addc(an, actions[1], 0, 1);
+	}
+	char temp[260]; stringbuilder sb(temp);
+	sb.add("Выбирайте [левой кнопкой мышки] одно действие из списка ниже");
+	abilityid id = an.choose(false, false, sb, combat_ability_tips, 0, 0, 0, 0);
 	return id;
 }
 
 void playeri::turn() {
 	abilityid id;
 	turnbegin();
+	used_ability = -1;
 	id = choose_action();
 	makeaction(id);
 	removeaction(id);
+	used_ability = id.upper;
 	id = choose_action();
 	makeaction(id);
 	removeaction(id);
 	turnend();
+}
+
+void playeri::choose_tactic() {
+	actions[0] = actions[1] = 0;
+	while(!actions[0] || !actions[1]) {
+		char temp[512]; stringbuilder sb(temp);
+		sb.adds("Выбирайте способности на этот ход.");
+		if(actions[0]) {
+			sb.adds("Первая способность будет [%1].", bsmeta<abilityi>::elements[actions[0]].name);
+			if(actions[1])
+				sb.adds("Вторая способность будет [%1].", bsmeta<abilityi>::elements[actions[1]].name);
+			else
+				sb.adds("Выбирайте вторую способность.");
+		}
+		else
+			sb.adds("Каждый ход вы можете разыграть две свои способности из списка ниже. После этого они пойдут в сброс.");
+		answeri an;
+		for(auto index : ability_hand)
+			an.add(index, bsmeta<abilityi>::elements[index].name);
+		auto index = an.choose(false, false, sb, ability_tips);
+		addaction(index);
+	}
+}
+
+void playeri::setup_standart() {
+	ability_hand.clear();
+	auto cap = bsmeta<classi>::elements[cless].abilities_cap;
+	for(auto& e : bsmeta<abilityi>()) {
+		if(!e)
+			continue;
+		if(e.level > getlevel())
+			continue;
+		if(e.type != cless)
+			continue;
+		ability_hand.add(bsmeta<abilityi>::indexof(e));
+		if(--cap <= 0)
+			break;
+	}
 }

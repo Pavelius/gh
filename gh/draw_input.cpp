@@ -41,7 +41,6 @@ struct guii {
 	short				button_width, window_width, window_height, hero_width;
 	short				tips_width, control_border, right_width;
 	short				padding;
-	bool				show_index;
 	void initialize() {
 		memset(this, 0, sizeof(*this));
 		opacity = 220;
@@ -54,7 +53,6 @@ struct guii {
 		tips_width = 200;
 		button_width = 64;
 		opacity_hilighted = 200;
-		show_index = true;
 	}
 } gui;
 
@@ -752,7 +750,7 @@ void playeri::paint_back() {
 }
 
 static void paint_board() {
-	map::paint_screen(false, false, gui.show_index, true);
+	map::paint_screen(false, false, false, true);
 }
 
 void creaturei::hiliteindex(stringbuilder& sb, int param) {

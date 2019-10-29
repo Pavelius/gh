@@ -83,19 +83,8 @@ static void test_movement() {
 
 static void test_ability() {
 	auto& p1 = bsmeta<playeri>::elements[0];
-	p1.addcard(1);
-	p1.addcard(2);
-	p1.addcard(3);
-	p1.addcard(4);
-	p1.addcard(5);
-	p1.addcard(6);
-	p1.addcard(7);
-	p1.addcard(8);
-	p1.addcard(9);
-	p1.addcard(10);
-	p1.activate();
-	p1.addaction(3);
-	p1.addaction(1);
+	p1.setup_standart();
+	p1.choose_tactic();
 	p1.turn();
 	//p1.act(3, false);
 	//p1.act(1, true);
