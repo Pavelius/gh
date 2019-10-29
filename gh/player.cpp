@@ -93,4 +93,22 @@ void playeri::create(class_s v, int level) {
 	frame = v;
 	set(Friend);
 	zcpy(name, "È÷");
+	combat_deck.create();
+}
+
+void playeri::act(short unsigned card, bool upper) {
+	auto card_index = ability_hand.indexof(card);
+	if(card_index == -1)
+		return;
+	ability_hand.remove(card_index);
+	auto& ae = bsmeta<abilityi>::elements[card];
+	auto& sc = upper ? ae.upper : ae.lower;
+	actiona action;
+	action.parse(sc, *this, true);
+	for(auto& e : action.data)
+		creaturei::act(e);
+	if(action.type == DiscardableCard)
+		ability_discard.add(card);
+	else
+		ability_drop.add(card);
 }

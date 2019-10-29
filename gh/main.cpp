@@ -81,6 +81,23 @@ static void test_movement() {
 	//p1.choose_index(p1.getindex(), );
 }
 
+static void test_ability() {
+	auto& p1 = bsmeta<playeri>::elements[0];
+	p1.addcard(1);
+	p1.addcard(2);
+	p1.addcard(3);
+	p1.addcard(4);
+	p1.addcard(5);
+	p1.addcard(6);
+	p1.addcard(7);
+	p1.addcard(8);
+	p1.addcard(9);
+	p1.addcard(10);
+	p1.activate();
+	p1.act(3, false);
+	p1.act(1, true);
+}
+
 int main() {
 	if(!test_battle())
 		return 0;
@@ -95,7 +112,8 @@ int main() {
 	draw::create(-1, -1, 900, 600, 0, 32);
 	draw::setcaption("Gloomhaven board game");
 	//test_movement();
-	test_players();
+	//test_players();
+	test_ability();
 	return 0;
 }
 

@@ -309,7 +309,9 @@ class playeri : public creaturei {
 	itema						items_used;
 public:
 	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop() {}
+	void						act(short unsigned card, bool upper);
 	void						activate();
+	void						addcard(short unsigned i) { ability_hand.add(i); }
 	void						choose_abilities();
 	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }

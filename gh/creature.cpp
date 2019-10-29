@@ -126,6 +126,8 @@ int distance(point p1, point p2);
 unsigned creaturei::select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target) {
 	auto pb = result;
 	auto hi = map::i2h(index);
+	if(!range)
+		range = 1;
 	for(auto& e : bsmeta<creaturei>()) {
 		if(!e)
 			continue;
