@@ -266,3 +266,8 @@ int	creaturei::get(action_s id) const {
 		r += actions[id];
 	return r;
 }
+
+void creaturei::turn() {
+	turnbegin();
+	turnend();
+}

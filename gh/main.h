@@ -278,6 +278,7 @@ public:
 	void						sethp(short unsigned v) { hp = v; }
 	void						sethpmax(short unsigned v) { hp_max = v; hp = v; }
 	void						setlevel(int v) { level = v; }
+	void						turn();
 	void						turnbegin();
 	void						turnend();
 };
