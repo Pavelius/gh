@@ -4,7 +4,7 @@ using namespace draw;
 
 resi bsmeta<resi>::elements[] = {{"gloomhaven", "art/background"},
 {"dungeon", "art/background"},
-{"furn", "art/objects"},
+{"furniture", "art/objects"},
 {"monsters", "art/creatures"},
 {"players", "art/creatures"},
 {"playerb", "art/creatures"},

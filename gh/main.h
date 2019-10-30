@@ -49,7 +49,7 @@ enum area_s : unsigned char {
 };
 enum action_s : unsigned char {
 	Moved, Attacked, Shield, Retaliate, Guard,
-	Move, Jump, Fly, Attack, AttackBoost, Push, Pull, Heal, Loot,
+	Move, Jump, Fly, Attack, AttackBoost, Push, Pull, Heal, Loot, AttackRange,
 	Bless, Curse,
 };
 enum action_bonus_s : char {
@@ -86,7 +86,7 @@ enum direction_s : unsigned char {
 	Left, LeftUp, RightUp, Right, RightDown, LeftDown,
 };
 enum map_tile_s : unsigned char {
-	HasWall, HasTrap, HasDanger, HasBlock,
+	Passable, HasWall, HasBlock, HasTrap, HasDanger, HasHard,
 };
 enum reaction_s : unsigned char {
 	Enemy, Friend
@@ -255,6 +255,7 @@ public:
 	int							getbonus(int bonus) const;
 	deck&						getcombatcards();
 	creaturei*					getenemy() const;
+	creaturei*					getenemy(int range) const;
 	int							getlevel() const { return level; }
 	int							getinitiative() const { return initiative; }
 	static deck&				getmonstersdeck();
@@ -266,7 +267,6 @@ public:
 	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
 	void						loot(int range);
-	void						monsteract();
 	void						heal(int bonus);
 	static void					hiliteindex(stringbuilder& sb, int param);
 	void						move(action_s id, char bonus);
@@ -366,15 +366,16 @@ struct treasurei : drawable {
 namespace map {
 const int						mx = 32;
 const int						my = 24;
-extern unsigned char			map_flags[mx*my];
+//extern unsigned char			map_tile[mx*my];
 extern char						counter;
 extern char						magic_elements[Dark + 1];
 //
-void							create();
 void							add(variant v, indext i, int level);
+void							add(res_s r, indext i, int frame, int c, direction_s d);
 void							block();
 void							block(reaction_s i);
 void							clearwave();
+void							create();
 inline int						get(element_s i) { return magic_elements[i]; }
 int								getdistance(point h1, point h2);
 indext							getmovecost(indext i);
@@ -384,13 +385,12 @@ constexpr short					i2x(indext i) { return i % mx; }
 constexpr short					i2y(indext i) { return i / mx; }
 constexpr point					i2h(indext i) { return {i2x(i), i2y(i)}; }
 constexpr bool					is(element_s i) { return magic_elements[i] > 0; }
-constexpr bool					is(indext i, map_tile_s v) { return (map_flags[i] & (1 << v)) != 0; }
+bool							is(indext i, map_tile_s v);
 void							moverestrict(indext v);
 static point					p2h(point pt);
 void							paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
-constexpr void					remove(indext i, map_tile_s v) { map_flags[i] &= ~(1 << v); }
-constexpr void					set(indext i, map_tile_s v) { map_flags[i] |= (1 << v); }
+void							set(indext i, map_tile_s v);
 constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
 void							setcamera(point pt);
 void							setmovecost(indext i, indext v);

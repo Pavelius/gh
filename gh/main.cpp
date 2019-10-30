@@ -2,8 +2,6 @@
 
 using namespace map;
 
-void unit_main();
-
 static bool test_abilities() {
 	creaturei p1;
 	p1.set(Moved, 4);
@@ -42,9 +40,10 @@ static bool test_battle() {
 
 static void test_map() {
 	map::create();
+	map::add(FURN, 173 - map::mx, 2, 2, Right);
 	map::add(AnimatedBones, 77, 1);
 	map::add(AnimatedBones, 78, 1);
-	map::add(Brute, 173, 1);
+	map::add(Brute, 174, 1);
 }
 
 static void test_answer() {
@@ -90,6 +89,8 @@ static void test_ability() {
 	//p1.act(1, true);
 }
 
+void util_main();
+
 int main() {
 	if(!test_battle())
 		return 0;
@@ -98,7 +99,7 @@ int main() {
 	if(!test_deck())
 		return 0;
 	test_map();
-	//unit_main();
+	util_main();
 	setcamera(map::h2p(79));
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);

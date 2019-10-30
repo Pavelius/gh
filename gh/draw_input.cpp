@@ -498,8 +498,19 @@ void drawable::paint() const {
 
 void drawable::setdir(direction_s v) {
 	switch(v) {
-	case Right: flags = 0; break;
-	case Left: flags = ImageMirrorH; break;
+	case Right:
+		flags = 0;
+		break;
+	case RightUp:
+		flags = ImageMirrorV;
+		break;
+	case Left:
+	case LeftDown:
+		flags = ImageMirrorH;
+		break;
+	case LeftUp:
+		flags = ImageMirrorH | ImageMirrorV;
+		break;
 	}
 }
 

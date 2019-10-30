@@ -9,7 +9,7 @@ enum movement_cost_s : indext {
 static unsigned short	stack[256 * 256];
 char					map::magic_elements[Dark + 1];
 static indext			movement_rate[mx * my];
-unsigned char			map::map_flags[mx * my];
+static unsigned char	map_tile[mx * my];
 static direction_s		all_around[] = {LeftUp, RightUp, Left, Right, LeftDown, RightDown};
 
 point map::h2p(indext i) {
@@ -132,16 +132,18 @@ static void add_class(class_s v, indext i, int level) {
 	p->setpos(i);
 }
 
-static void add_figure(res_s r, int frame, indext i, int c, direction_s d) {
+void map::add(res_s r, indext i, int frame, int c, direction_s d) {
 	auto p = bsmeta<figurei>::add();
 	p->res = r;
-	p->frame = frame;
 	p->setpos(i);
-	p->setdir(d);
 	for(auto n = 0; n < c; n++) {
 		set(i, HasBlock);
 		i = to(i, d);
 	}
+	if(d == RightDown || d==LeftDown || d==RightUp || d==LeftUp)
+		frame++;
+	p->frame = frame;
+	p->setdir(d);
 }
 
 void map::add(variant v, indext i, int level) {
@@ -153,4 +155,12 @@ void map::add(variant v, indext i, int level) {
 
 indext map::getmovecost(indext i) {
 	return movement_rate[i];
+}
+
+bool map::is(indext i, map_tile_s v) {
+	return map_tile[i] == v;
+}
+
+void map::set(indext i, map_tile_s v) {
+	map_tile[i] = v;
 }

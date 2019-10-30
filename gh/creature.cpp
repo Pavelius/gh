@@ -63,7 +63,7 @@ void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states) {
 		return;
 	enemy.sethostile(states);
 	setfriendly(states);
-	if(enemy.get(Retaliate)>0)
+	if(enemy.get(Retaliate) > 0)
 		damage(enemy.get(Retaliate));
 }
 
@@ -87,13 +87,23 @@ void creaturei::create(variant v, int level) {
 
 void creaturei::move(action_s id, char bonus) {
 	while(bonus > 0) {
+		indext ni = Blocked;
 		slide(getindex());
 		map::clearwave();
 		map::block(getopposed());
+		if(id==Move)
+			map::block();
 		map::wave(getindex());
 		map::moverestrict(bonus);
-		auto ni = choose_index(0, 0,
-			"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
+		if(isplayer()) {
+			ni = choose_index(0, 0,
+				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
+		} else {
+			auto target = getenemy();
+			if(target) {
+
+			}
+		}
 		if(ni == Blocked)
 			return;
 		auto cm = map::getmovecost(ni);
@@ -229,7 +239,7 @@ void creaturei::heal(int bonus) {
 }
 
 void creaturei::loot(int range) {
-	
+
 }
 
 void creaturei::turnbegin() {
@@ -252,11 +262,14 @@ int	creaturei::get(action_s id) const {
 			break;
 		case Fly:
 		case Jump:
-			if(mn.move==id)
+			if(mn.move == id)
 				r = lv.movement;
 			break;
 		case Attack:
 			r = lv.attack;
+			break;
+		case AttackRange:
+			r = lv.range;
 			break;
 		}
 	} else if(type == Class) {
@@ -267,13 +280,39 @@ int	creaturei::get(action_s id) const {
 	return r;
 }
 
-creaturei* creaturei::getenemy() const {
+static int source_range;
+
+static int compare_creatures(const void* v1, const void* v2) {
+	auto p1 = *((creaturei**)v1);
+	auto p2 = *((creaturei**)v2);
+	auto h1 = map::i2h(source_range);
+	auto r1 = distance(h1, map::i2h(p1->getindex()));
+	auto r2 = distance(h1, map::i2h(p2->getindex()));
+	if(r1 < r2)
+		return -1;
+	if(r1 > r2)
+		return 1;
+	auto i1 = p1->getinitiative();
+	auto i2 = p2->getinitiative();
+	if(i1 < i2)
+		return -1;
+	if(i1 > i2)
+		return 1;
+	return 0;
+}
+
+creaturei* creaturei::getenemy(int range) const {
 	creaturei* source[32];
-	auto count = select(source, source + sizeof(source) / sizeof(source[0]), getopposed(), getindex(), 3, true);
+	auto count = select(source, source + sizeof(source) / sizeof(source[0]), getopposed(), getindex(), range, true);
+	qsort(source, count, sizeof(source[0]), compare_creatures);
 	return source[0];
 }
 
-void creaturei::monsteract() {
+creaturei* creaturei::getenemy() const {
+	auto range = get(AttackRange);
+	if(!range)
+		range = 1;
+	return getenemy(get(Move) + range);
 }
 
 void creaturei::turn() {
