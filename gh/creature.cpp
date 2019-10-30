@@ -90,11 +90,20 @@ void creaturei::move(action_s id, char bonus) {
 		indext ni = Blocked;
 		slide(getindex());
 		map::clearwave();
-		map::block(getopposed());
-		if(id==Move)
+		if(id == Move) {
+			map::block(getopposed());
 			map::block();
-		map::wave(getindex());
-		map::moverestrict(bonus);
+			map::wave(getindex());
+			map::moverestrict(bonus);
+		} else {
+			// Если полет, то вначале двигаемся так, как будто
+			// преград нету, затем блокируем клетки
+			map::wave(getindex());
+			map::moverestrict(bonus);
+			map::block(getopposed());
+			map::block();
+		}
+		map::block(reaction);
 		if(isplayer()) {
 			ni = choose_index(0, 0,
 				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
