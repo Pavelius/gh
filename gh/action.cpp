@@ -136,6 +136,14 @@ static void add(stringbuilder& sb, const actionf& e) {
 	add(sb, "Цели", ":", e.target);
 	add(sb, "Применений", ":", e.use);
 	add(sb, e.area, e.area_size);
+	for(auto s = Disarm; s <= Strenght; s = (state_s)(s+1)) {
+		if(e.states.is(s)) {
+			if(sb)
+				sb.add(", ");
+			sb.add(bsmeta<statei>::elements[s].name);
+		}
+	}
+
 }
 
 void actiona::tostring(stringbuilder& sb) const {

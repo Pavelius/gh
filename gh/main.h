@@ -182,6 +182,10 @@ struct monsterability {
 	char						initiative;
 	commanda					action;
 };
+struct statei {
+	const char*					id;
+	const char*					name;
+};
 struct actionf {
 	action_s					id;
 	char						bonus, range, pierce, experience, target, use, area_size;

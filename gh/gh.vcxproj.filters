@@ -126,6 +126,9 @@
     <ClCompile Include="trap.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="state.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">
