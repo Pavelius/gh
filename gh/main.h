@@ -9,10 +9,10 @@ const unsigned short Blocked = 0xFFFF;
 enum command_s : unsigned char {
 	NoCommand,
 	// Actions
-	Attack1, Attack2, Attack3, Attack4, Attack5, Attack6, Attack7, Attack8, AttackXMove,
+	Attack0, Attack1, Attack2, Attack3, Attack4, Attack5, Attack6, Attack7, Attack8, AttackXMove,
 	AttackBoost1, AttackBoost2, AttackBoost3,
 	Loot1, Loot2, Loot3,
-	Move1, Move2, Move3, Move4, Move5, Move6, MoveXAttack,
+	Move0, Move1, Move2, Move3, Move4, Move5, Move6, MoveXAttack,
 	Jump1, Jump2, Jump3, Jump4, Jump5, Jump6, Jump4Attack2,
 	Fly1, Fly2, Fly3, Fly4, Fly5, Fly6, Fly7, Fly8,
 	Retaliate1, Retaliate2, Retaliate3,
@@ -249,21 +249,24 @@ public:
 	static creaturei*			choose(creaturei** source, unsigned count, const char* format);
 	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply);
 	void						create(variant v, int level);
-	int							get(action_s id) const;
-	int							getbonus(int bonus) const;
-	static deck&				getmonstersdeck();
 	void						damage(int v);
 	void						droploot() const;
-	constexpr bool				is(state_s v) const { return states.is(v); }
-	bool						isalive() const { return hp > 0; }
-	void						loot(int range);
+	int							get(action_s id) const;
+	int							getbonus(int bonus) const;
 	deck&						getcombatcards();
+	creaturei*					getenemy() const;
+	int							getlevel() const { return level; }
+	int							getinitiative() const { return initiative; }
+	static deck&				getmonstersdeck();
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
 	reaction_s					getopposed() const;
 	reaction_s					getreaction() const { return reaction; }
 	creaturei*					gettarget(int distance) const;
-	int							getlevel() const { return level; }
+	constexpr bool				is(state_s v) const { return states.is(v); }
+	bool						isalive() const { return hp > 0; }
+	void						loot(int range);
+	void						monsteract();
 	void						heal(int bonus);
 	static void					hiliteindex(stringbuilder& sb, int param);
 	void						move(action_s id, char bonus);
@@ -294,6 +297,7 @@ struct monsteri {
 	const char*					name;
 	action_s					move;
 	unsigned char				frame;
+	commanda*					deck;
 	info						levels[8][2];
 };
 struct classi {

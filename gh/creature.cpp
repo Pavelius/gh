@@ -267,6 +267,15 @@ int	creaturei::get(action_s id) const {
 	return r;
 }
 
+creaturei* creaturei::getenemy() const {
+	creaturei* source[32];
+	auto count = select(source, source + sizeof(source) / sizeof(source[0]), getopposed(), getindex(), 3, true);
+	return source[0];
+}
+
+void creaturei::monsteract() {
+}
+
 void creaturei::turn() {
 	turnbegin();
 	turnend();
