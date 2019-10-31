@@ -212,6 +212,10 @@ deck& creaturei::getcombatcards() {
 
 void creaturei::act(const actionf& e) {
 	creaturei* target;
+	for(auto s = Fire; s < AnyElement; s = element_s(s + 1)) {
+		if(e.consume.is(s))
+			map::set(s, 0);
+	}
 	switch(e.id) {
 	case Move:
 	case Jump:
