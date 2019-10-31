@@ -97,6 +97,7 @@ typedef cflags<element_s, unsigned char> elementa;
 typedef cflags<state_s, unsigned char> statea;
 typedef cflags<card_s, unsigned char> carda;
 typedef adat<short unsigned, 24> abilitya;
+typedef adat<creaturei*, 31> creaturea;
 typedef adat<short unsigned, 16> itema;
 typedef unsigned short indext;
 struct variant {
@@ -253,8 +254,9 @@ class creaturei : public figurei {
 	char						actions[Guard + 1];
 	statea						states;
 	reaction_s					reaction;
+	char						moved;
 public:
-	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
+	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0), moved(0) {}
 	void						act(const actionf& e);
 	void						attack(creaturei& enemy, int bonus, int pierce, statea states);
 	void						attack(int bonus, int range, int pierce, statea states);
@@ -278,11 +280,13 @@ public:
 	creaturei*					gettarget(int distance) const;
 	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
+	bool						ismoved() const { return moved > 0; }
 	void						loot(int range);
 	void						heal(int bonus);
 	static void					hiliteindex(stringbuilder& sb, int param);
 	void						move(action_s id, char bonus);
 	void						paint() const;
+	void						playturn();
 	void						remove(state_s v) { states.remove(v); }
 	static unsigned				select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target);
 	void						set(action_s i, int v);
@@ -293,6 +297,7 @@ public:
 	void						sethp(short unsigned v) { hp = v; }
 	void						sethpmax(short unsigned v) { hp_max = v; hp = v; }
 	void						setlevel(int v) { level = v; }
+	void						setmoved(int v) { moved = v; }
 	void						turn();
 	void						turnbegin();
 	void						turnend();
@@ -402,6 +407,9 @@ void							moverestrict(indext v);
 static point					p2h(point pt);
 void							paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
+void							playround();
+void							roundbegin();
+void							roundend();
 void							set(indext i, map_tile_s v);
 constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
 void							setcamera(point pt);

@@ -11,6 +11,7 @@ char					map::magic_elements[Dark + 1];
 static indext			movement_rate[mx * my];
 static unsigned char	map_tile[mx * my];
 static direction_s		all_around[] = {LeftUp, RightUp, Left, Right, LeftDown, RightDown};
+static creaturea		combatants;
 
 point map::h2p(indext i) {
 	return h2p({i2x(i), i2y(i)});
@@ -163,4 +164,51 @@ bool map::is(indext i, map_tile_s v) {
 
 void map::set(indext i, map_tile_s v) {
 	map_tile[i] = v;
+}
+
+static int compare(const void* p1, const void* p2) {
+	auto e1 = *((creaturei**)p1);
+	auto e2 = *((creaturei**)p2);
+	return e1->getinitiative() - e2->getinitiative();
+}
+
+static void selectall() {
+	combatants.clear();
+	for(auto& e : bsmeta<creaturei>()) {
+		if(!e)
+			continue;
+		combatants.add(&e);
+	}
+	for(auto& e : bsmeta<playeri>()) {
+		if(!e)
+			continue;
+		combatants.add(&e);
+	}
+	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare);
+}
+
+void map::roundbegin() {
+	selectall();
+	for(auto p : combatants)
+		p->setmoved(0);
+}
+
+void map::roundend() {
+}
+
+void map::playround() {
+	roundbegin();
+	auto run = true;
+	while(run) {
+		selectall();
+		run = false;
+		for(auto p : combatants) {
+			if(p->ismoved())
+				continue;
+			p->playturn();
+			p->setmoved(1);
+			run = true;
+		}
+	}
+	roundend();
 }

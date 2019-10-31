@@ -332,3 +332,10 @@ void creaturei::turn() {
 	turnbegin();
 	turnend();
 }
+
+void creaturei::playturn() {
+	if(isplayer())
+		static_cast<playeri*>(this)->turn();
+	else
+		turn();
+}

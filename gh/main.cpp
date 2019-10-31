@@ -86,8 +86,11 @@ static void test_ability() {
 	p1.setup_standart();
 	p1.choose_tactic();
 	p1.turn();
-	//p1.act(3, false);
-	//p1.act(1, true);
+}
+
+static void test_play() {
+	map::roundbegin();
+	map::roundend();
 }
 
 void util_main();
