@@ -141,7 +141,7 @@ void map::add(res_s r, indext i, int frame, int c, direction_s d) {
 		set(i, HasBlock);
 		i = to(i, d);
 	}
-	if(d == RightDown || d==LeftDown || d==RightUp || d==LeftUp)
+	if(d == RightDown || d == LeftDown || d == RightUp || d == LeftUp)
 		frame++;
 	p->frame = frame;
 	p->setdir(d);
@@ -151,6 +151,12 @@ void map::add(variant v, indext i, int level) {
 	switch(v.type) {
 	case Monster: add_monster(v, i, level); break;
 	case Class: add_class(v.cless, i, level); break;
+	case Object:
+		switch(v.object) {
+		case Coin: add(COINS, i, xrand(0, 2), 0); break;
+			//case TreasureChest: add(COINS, i, 0, 0); break;
+		}
+		break;
 	}
 }
 
@@ -208,6 +214,7 @@ void map::playround() {
 			p->playturn();
 			p->setmoved(1);
 			run = true;
+			break;
 		}
 	}
 	roundend();

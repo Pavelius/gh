@@ -72,11 +72,16 @@ enum class_s : unsigned char {
 };
 enum res_s : unsigned char {
 	GLOOMHAVEN, DUNGEON,
-	FURN, MONSTERS, PLAYERS, PLAYERB,
+	COINS, FURN,
+	MONSTERS, PLAYERS, PLAYERB,
+};
+enum object_s : unsigned char {
+	NoObject,
+	Coin, TreasureChest,
 };
 enum variant_s : unsigned char {
 	NoVariant,
-	Action, Area, Card, Class, Condition, Element, Modifier, Monster, Player, State,
+	Action, Area, Card, Class, Condition, Element, Modifier, Monster, Object, Player, State,
 };
 enum special_s : unsigned char {
 	NoSpecial,
@@ -112,6 +117,7 @@ struct variant {
 		monster_s				monster;
 		modifier_s				modifier;
 		state_s					state;
+		object_s				object;
 		unsigned char			value;
 	};
 	constexpr variant() : type(NoVariant), value(0) {}
@@ -123,6 +129,7 @@ struct variant {
 	constexpr variant(element_s v) : type(Element), value(v) {}
 	constexpr variant(modifier_s v) : type(Modifier), value(v) {}
 	constexpr variant(monster_s v) : type(Monster), value(v) {}
+	constexpr variant(object_s v) : type(Object), value(v) {}
 	constexpr variant(state_s v) : type(State), value(v) {}
 	constexpr operator bool() const { return type != NoVariant; }
 	void						clear() { type = NoVariant; value = 0; }
@@ -388,7 +395,7 @@ extern char						counter;
 extern char						magic_elements[Dark + 1];
 //
 void							add(variant v, indext i, int level);
-void							add(res_s r, indext i, int frame, int c, direction_s d);
+void							add(res_s r, indext i, int frame, int c, direction_s d = Right);
 void							block();
 void							block(reaction_s i);
 void							clearwave();

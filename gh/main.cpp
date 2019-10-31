@@ -41,6 +41,8 @@ static bool test_battle() {
 static void test_map() {
 	map::create();
 	map::add(FURN, 173 - map::mx, 2, 2, Right);
+	map::add(Coin, 48, 0);
+	map::add(Coin, 17, 0);
 	map::add(AnimatedBones, 77, 1);
 	map::add(AnimatedBones, 78, 1);
 	map::add(Brute, 174, 1);
@@ -89,13 +91,16 @@ static void test_ability() {
 }
 
 static void test_play() {
-	map::roundbegin();
-	map::roundend();
+	auto& p1 = bsmeta<playeri>::elements[0];
+	p1.setup_standart();
+	p1.choose_tactic();
+	map::playround();
 }
 
 void util_main();
 
 int main() {
+	util_main();
 	if(!test_battle())
 		return 0;
 	if(!test_abilities())
@@ -103,14 +108,14 @@ int main() {
 	if(!test_deck())
 		return 0;
 	test_map();
-	//util_main();
 	setcamera(map::h2p(79));
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);
 	draw::setcaption("Gloomhaven board game");
 	//test_movement();
 	//test_players();
-	test_ability();
+	//test_ability();
+	test_play();
 	return 0;
 }
 

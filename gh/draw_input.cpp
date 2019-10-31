@@ -761,7 +761,7 @@ void playeri::paint_back() {
 }
 
 static void paint_board() {
-	map::paint_screen(false, false, false, true);
+	map::paint_screen(false, false, true, true);
 }
 
 void creaturei::hiliteindex(stringbuilder& sb, int param) {
