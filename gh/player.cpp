@@ -27,8 +27,8 @@ static void ability_tips(stringbuilder& sb, int param) {
 	param = param & 0xFFF;
 	auto& ab = bsmeta<abilityi>::elements[param];
 	actiona a1, a2;
-	a1.parse(ab.upper, *current_player, false);
-	a2.parse(ab.lower, *current_player, false);
+	a1.parse(ab.upper, *current_player);
+	a2.parse(ab.lower, *current_player);
 	a1.tostring(sb);
 	sb.add("\n[Инициатива: %1i]\n", ab.initiative);
 	a2.tostring(sb);
@@ -98,7 +98,7 @@ void playeri::create(class_s v, int level) {
 }
 
 void playeri::makeaction(abilityid id) {
-	actiona action; action.parse(id.getability(), *this, true);
+	actiona action; action.parse(id.getability(), *this);
 	for(auto& e : action.data)
 		creaturei::act(e);
 }
@@ -123,7 +123,7 @@ void playeri::removeaction(abilityid id) {
 		actions[1] = 0;
 	else
 		return;
-	actiona ac; ac.parse(id.getability(), *this, false);
+	actiona ac; ac.parse(id.getability(), *this);
 	if(ac.type == DiscardableCard)
 		ability_discard.add(id.i);
 	else
@@ -134,7 +134,7 @@ static void combat_ability_tips(stringbuilder& sb, int param) {
 	abilityid id = param;
 	auto& cm = id.getability();
 	actiona action;
-	action.parse(cm, *current_player, true);
+	action.parse(cm, *current_player);
 	action.tostring(sb);
 }
 

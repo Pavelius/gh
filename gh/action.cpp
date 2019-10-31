@@ -61,43 +61,35 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 	return pb;
 }
 
-static const command_s* conditions(const command_s* pb, const command_s* pe, actionf* pa, actiona* pp, bool use_magic) {
-	while(*pb && pb < pe) {
-		auto& ce = getop(pb);
-		if(ce.type != Condition)
-			break;
-		auto true_condition = false;
-		if(ce.id.type == Element) {
-			true_condition = map::is(ce.id.element);
-			if(true_condition && use_magic)
-				map::set(ce.id.element, 0);
-		}
-		pb = modifiers(pb + 1, pe, pa, pp, true_condition);
-	}
-	return pb;
-}
-
-void actiona::parse(const commanda& source, creaturei& player, bool use_magic) {
+void actiona::parse(const commanda& source, creaturei& player) {
 	memset(this, 0, sizeof(*this));
 	actionf* pa = 0;
 	auto pb = source.data;
 	auto pe = pb + sizeof(source.data) / sizeof(source.data[0]);
 	while(*pb && pb < pe) {
 		auto& ce = getop(pb);
-		if(ce.type != Action)
-			break;
-		if(!pa)
-			pa = data;
-		else
-			pa++;
-		if(pa >= data + sizeof(data) / sizeof(data[0]))
-			return;
-		if(ce.id.type == Action) {
-			pa->id = ce.id.action;
-			pa->bonus = ce.bonus;
-		}
-		pb = conditions(pb + 1, pe, pa, this, use_magic);
-		pb = modifiers(pb, pe, pa, this, true);
+		if(ce.type == Action) {
+			if(!pa)
+				pa = data;
+			else
+				pa++;
+			if(pa >= data + sizeof(data) / sizeof(data[0]))
+				return;
+			if(ce.id.type == Action) {
+				pa->id = ce.id.action;
+				pa->bonus = ce.bonus;
+			}
+			pb++;
+		} else if(ce.type == Condition) {
+			auto true_condition = false;
+			if(ce.id.type == Element) {
+				true_condition = map::is(ce.id.element);
+				if(true_condition)
+					pa->consume.add(ce.id.element);
+			}
+			pb = modifiers(pb + 1, pe, pa, this, true_condition);
+		} else
+			pb = modifiers(pb, pe, pa, this, true);
 	}
 }
 
@@ -143,7 +135,20 @@ static void add(stringbuilder& sb, const actionf& e) {
 			sb.add(bsmeta<statei>::elements[s].name);
 		}
 	}
-
+	for(auto s = Fire; s <= AnyElement; s = (element_s)(s + 1)) {
+		if(e.consume.is(s)) {
+			if(sb)
+				sb.add(", ");
+			sb.add("-%1", bsmeta<elementi>::elements[s].name);
+		}
+	}
+	for(auto s = Fire; s <= AnyElement; s = (element_s)(s + 1)) {
+		if(e.elements.is(s)) {
+			if(sb)
+				sb.add(", ");
+			sb.add(bsmeta<elementi>::elements[s].name);
+		}
+	}
 }
 
 void actiona::tostring(stringbuilder& sb) const {

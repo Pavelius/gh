@@ -11,10 +11,10 @@ static bool test_abilities() {
 		if(!e)
 			continue;
 		actiona a1, a2;
-		a1.parse(e.upper, p1, true);
+		a1.parse(e.upper, p1);
 		if(!a1.data[0].id && !a1.data[0].bonus)
 			return false;
-		a2.parse(e.lower, p1, true);
+		a2.parse(e.lower, p1);
 		if(!a2.data[0].id && !a2.data[0].bonus)
 			return false;
 	}
@@ -32,7 +32,7 @@ static bool test_deck() {
 static bool test_battle() {
 	creaturei p1, m1;
 	actiona actions;
-	actions.parse(bsmeta<abilityi>::elements[1].lower, p1, false);
+	actions.parse(bsmeta<abilityi>::elements[1].lower, p1);
 	char temp[512]; stringbuilder sb(temp);
 	actions.tostring(sb);
 	return true;
@@ -44,6 +44,7 @@ static void test_map() {
 	map::add(AnimatedBones, 77, 1);
 	map::add(AnimatedBones, 78, 1);
 	map::add(Brute, 174, 1);
+	map::set(Air, 2);
 }
 
 static void test_answer() {
@@ -57,7 +58,7 @@ static void test_answer() {
 	p2->frame = 0;
 	p2->setpos(142);
 	answeri an;
-	actiona actions; actions.parse(bsmeta<abilityi>::elements[2].upper, p1, false);
+	actiona actions; actions.parse(bsmeta<abilityi>::elements[2].upper, p1);
 	char tem1[260]; stringbuilder sa(tem1); tem1[0] = 0;
 	actions.tostring(sa);
 	an.add(1, tem1);

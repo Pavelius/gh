@@ -182,6 +182,10 @@ struct monsterability {
 	char						initiative;
 	commanda					action;
 };
+struct elementi {
+	const char*					id;
+	const char*					name;
+};
 struct statei {
 	const char*					id;
 	const char*					name;
@@ -190,7 +194,7 @@ struct actionf {
 	action_s					id;
 	char						bonus, range, pierce, experience, target, use, area_size;
 	area_s						area;
-	elementa					elements;
+	elementa					consume, elements;
 	statea						states;
 };
 struct actioni {
@@ -205,7 +209,7 @@ struct actiona {
 	card_s						type;
 	actionf						data[4];
 	constexpr actiona() : type(StandartCard), data{} {}
-	void						parse(const commanda& source, creaturei& player, bool use_magic);
+	void						parse(const commanda& source, creaturei& player);
 	void						tostring(stringbuilder& sb) const;
 };
 struct areai {
