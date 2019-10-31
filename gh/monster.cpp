@@ -1,13 +1,7 @@
 #include "main.h"
 
-struct monstermovei {
-	char			initiative;
-	commanda		commands;
-	bool			refresh;
-};
-
-static monstermovei skeleton_move[] = {{45, {Move0, Attack0}},
-{20, {MoveM2, Attack0, Heal2}, true},
+static monstermovei skeleton_actions[] = {{45, {Move0, Attack0}},
+{20, {MoveM2, Attack0, Heal2, DiscardCard}},
 {64, {MoveM1, Attack1}},
 {45, {Move0, Attack0}},
 {74, {Move0, Attack0}}, // ÷ель каждой атаки один и тот же враг
@@ -15,11 +9,9 @@ static monstermovei skeleton_move[] = {{45, {Move0, Attack0}},
 {25, {Move1, AttackM1}},
 {12, {Shield1, Heal2}},
 };
-static commanda skeleton_actions[] = {{Move0, Attack0},
+static monstermovei zombie_actions[] = {66, {Move0, Attack0},
 };
-static commanda zombie_actions[] = {{Move0, Attack0},
-};
-static commanda fire_demon_actions[] = {{Move0, Attack0},
+static monstermovei fire_demon_actions[] = {30, {Move0, Attack0},
 };
 
 monsteri bsmeta<monsteri>::elements[] = {{"ќжившие кости", Move, 2, skeleton_actions,

@@ -100,7 +100,7 @@ int main() {
 	if(!test_deck())
 		return 0;
 	test_map();
-	util_main();
+	//util_main();
 	setcamera(map::h2p(79));
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);

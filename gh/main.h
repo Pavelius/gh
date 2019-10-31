@@ -169,6 +169,10 @@ struct commanda {
 	command_s					data[8];
 	bool						is(command_s i) const;
 };
+struct monstermovei {
+	char						initiative;
+	commanda					commands;
+};
 struct abilityi {
 	class_s						type;
 	char						level;
@@ -305,7 +309,7 @@ struct monsteri {
 	const char*					name;
 	action_s					move;
 	unsigned char				frame;
-	commanda*					deck;
+	monstermovei*				deck;
 	info						levels[8][2];
 };
 struct classi {
