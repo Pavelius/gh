@@ -1,5 +1,20 @@
 #include "main.h"
 
+struct monstermovei {
+	char			initiative;
+	commanda		commands;
+	bool			refresh;
+};
+
+static monstermovei skeleton_move[] = {{45, {Move0, Attack0}},
+{20, {MoveM2, Attack0, Heal2}, true},
+{64, {MoveM1, Attack1}},
+{45, {Move0, Attack0}},
+{74, {Move0, Attack0}}, // ÷ель каждой атаки один и тот же враг
+{81, {Attack2}},
+{25, {Move1, AttackM1}},
+{12, {Shield1, Heal2}},
+};
 static commanda skeleton_actions[] = {{Move0, Attack0},
 };
 static commanda zombie_actions[] = {{Move0, Attack0},

@@ -9,10 +9,10 @@ const unsigned short Blocked = 0xFFFF;
 enum command_s : unsigned char {
 	NoCommand,
 	// Actions
-	Attack0, Attack1, Attack2, Attack3, Attack4, Attack5, Attack6, Attack7, Attack8, AttackXMove,
+	AttackM2, AttackM1, Attack0, Attack1, Attack2, Attack3, Attack4, Attack5, Attack6, Attack7, Attack8, AttackXMove,
 	AttackBoost1, AttackBoost2, AttackBoost3,
 	Loot1, Loot2, Loot3,
-	Move0, Move1, Move2, Move3, Move4, Move5, Move6, MoveXAttack,
+	MoveM2, MoveM1, Move0, Move1, Move2, Move3, Move4, Move5, Move6, MoveXAttack,
 	Jump1, Jump2, Jump3, Jump4, Jump5, Jump6, Jump4Attack2,
 	Fly1, Fly2, Fly3, Fly4, Fly5, Fly6, Fly7, Fly8,
 	Retaliate1, Retaliate2, Retaliate3,

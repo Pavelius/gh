@@ -2,6 +2,8 @@
 
 commandi bsmeta<commandi>::elements[] = {{},
 // Атака
+{Action, Attack, -2},
+{Action, Attack, -1},
 {Action, Attack, 0},
 {Action, Attack, 1},
 {Action, Attack, 2},
@@ -20,6 +22,8 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Action, Loot, 2},
 {Action, Loot, 3},
 // Движение
+{Action, Move, -2},
+{Action, Move, -1},
 {Action, Move, 0},
 {Action, Move, 1},
 {Action, Move, 2},
