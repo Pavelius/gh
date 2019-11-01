@@ -96,8 +96,36 @@ void map::block(reaction_s i) {
 	}
 }
 
-void map::waverange(indext start_index) {
-
+short unsigned map::getnearest(indext start_index, int range) {
+	if(!range)
+		range = 1;
+	auto stack_end = stack + sizeof(stack) / sizeof(stack[0]);
+	auto push_counter = stack;
+	auto pop_counter = stack;
+	*push_counter++ = start_index;
+	auto start_hex = i2h(start_index);
+	auto result_index = Blocked;
+	auto result_cost = Blocked;
+	while(pop_counter != push_counter) {
+		auto index = *pop_counter++;
+		if(pop_counter >= stack_end)
+			pop_counter = stack;
+		for(auto d : all_around) {
+			auto i1 = to(index, d);
+			if(i1 == Blocked || movement_rate[i1] == Blocked)
+				continue;
+			if(result_cost >= movement_rate[i1])
+				continue;
+			if(getdistance(i2h(i1), start_hex) > range)
+				continue;
+			result_index = i1;
+			result_cost = movement_rate[i1];
+			*push_counter++ = i1;
+			if(push_counter >= stack_end)
+				push_counter = stack;
+		}
+	}
+	return result_index;
 }
 
 void map::wave(indext start_index) {

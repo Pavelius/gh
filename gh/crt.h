@@ -8,7 +8,7 @@
 #define maptbl(t, id) (t[imax((unsigned)0, imin((unsigned)id, (sizeof(t)/sizeof(t[0])-1)))])
 #define maprnd(t) t[rand()%(sizeof(t)/sizeof(t[0]))]
 #define lenghtof(t) (sizeof(t)/sizeof(t[0]))
-#define zendof(t) (t + sizeof(t)/sizeof(t[0]) - 1)
+#define zendof(t) (t + sizeof(t)/sizeof(t[0])-1)
 
 extern "C" int						atexit(void(*func)(void));
 extern "C" void*					bsearch(const void* key, const void *base, unsigned num, unsigned size, int(*compar)(const void *, const void *));

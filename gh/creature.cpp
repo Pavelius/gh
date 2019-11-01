@@ -104,15 +104,11 @@ void creaturei::move(action_s id, char bonus) {
 			map::block();
 		}
 		map::block(reaction);
-		if(isplayer()) {
+		if(isplayer())
 			ni = choose_index(0, 0,
 				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
-		} else {
-			auto target = getenemy();
-			if(target) {
-
-			}
-		}
+		else
+			ni = getmovepos(bonus);
 		if(ni == Blocked)
 			return;
 		auto cm = map::getmovecost(ni);
@@ -220,7 +216,7 @@ void creaturei::act(const actionf& e) {
 	case Move:
 	case Jump:
 	case Fly:
-		move(e.id, e.bonus);
+		move(e.id, get(Move) + e.bonus);
 		break;
 	case Attack:
 		attack(e.bonus, e.range, e.pierce, e.states);
@@ -335,7 +331,16 @@ creaturei* creaturei::getenemy() const {
 }
 
 void creaturei::turn() {
+	auto pm = getmonstermove();
+	if(!pm)
+		return;
 	turnbegin();
+	actiona	actions;
+	actions.parse(pm->commands, *this);
+	for(auto& e : actions.data) {
+		if(e.id)
+			act(e);
+	}
 	turnend();
 }
 
@@ -346,10 +351,38 @@ void creaturei::playturn() {
 		turn();
 }
 
-void creaturei::moveauto(char bonus) {
-	indext movement_rate[map::mx * map::my];
-	memcpy(movement_rate, map::movement_rate, sizeof(movement_rate));
-	for(auto& e : bsmeta<playeri>()) {
-		map::clearwave();
+indext creaturei::getmovepos(char bonus, char range) const {
+	creaturei* source[32];
+	auto count = select(source, source + sizeof(source) / sizeof(source[0]), getopposed(), getindex(), range, true);
+	auto start_hex = map::i2h(getindex());
+	creaturei* best_creature = 0;
+	auto best_range = Blocked;
+	auto best_index = Blocked;
+	for(unsigned i = 0; i < count; i++) {
+		auto p = source[i];
+		auto d1 = getdistance(start_hex, map::i2h(p->getindex()));
+		if(best_range < d1)
+			continue;
+		auto i1 = map::getnearest(getindex(), range);
+		if(i1 == Blocked)
+			continue;
+		best_range = d1;
+		best_creature = p;
+		best_index = i1;
 	}
+	return best_index;
+}
+
+indext creaturei::getmovepos(char bonus) const {
+	auto range = get(AttackRange);
+	auto ni = getmovepos(bonus, range);
+	if(ni != Blocked)
+		return ni;
+	return getmovepos(127, range);
+}
+
+const monstermovei* creaturei::getmonstermove() const {
+	if(isplayer())
+		return 0;
+	return bsmeta<monsteri>::elements[monster].deck;
 }

@@ -254,6 +254,21 @@ public:
 	char						getdamage() const { return damage; }
 	const statea&				getstate() const { return states; }
 };
+struct monsteri {
+	struct info {
+		char					hits;
+		char					movement;
+		char					attack;
+		char					range;
+		commanda				abilities;
+		actiona					immunities;
+	};
+	const char*					name;
+	action_s					move;
+	unsigned char				frame;
+	monstermovei*				deck;
+	info						levels[8][2];
+};
 class creaturei : public figurei {
 	unsigned short				hp, hp_max;
 	char						initiative;
@@ -280,11 +295,13 @@ public:
 	int							getlevel() const { return level; }
 	int							getinitiative() const { return initiative; }
 	static deck&				getmonstersdeck();
+	const monstermovei*			getmonstermove() const;
+	indext						getmovepos(char bonus) const;
+	indext						getmovepos(char bonus, char range) const;
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
 	reaction_s					getopposed() const;
 	reaction_s					getreaction() const { return reaction; }
-	creaturei*					gettarget(int distance) const;
 	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
 	bool						ismoved() const { return moved > 0; }
@@ -292,7 +309,6 @@ public:
 	void						heal(int bonus);
 	static void					hiliteindex(stringbuilder& sb, int param);
 	void						move(action_s id, char bonus);
-	void						moveauto(char bonus);
 	void						paint() const;
 	void						playturn();
 	void						remove(state_s v) { states.remove(v); }
@@ -309,21 +325,6 @@ public:
 	void						turn();
 	void						turnbegin();
 	void						turnend();
-};
-struct monsteri {
-	struct info {
-		char					hits;
-		char					movement;
-		char					attack;
-		char					range;
-		commanda				abilities;
-		actiona					immunities;
-	};
-	const char*					name;
-	action_s					move;
-	unsigned char				frame;
-	monstermovei*				deck;
-	info						levels[8][2];
 };
 struct classi {
 	const char*					name;
@@ -391,6 +392,10 @@ public:
 struct treasurei : drawable {
 	unsigned char				count;
 };
+struct eventi {
+	const char*					text;
+	const char*					variants[2];
+};
 namespace map {
 const int						mx = 32;
 const int						my = 24;
@@ -407,6 +412,7 @@ void							create();
 inline int						get(element_s i) { return magic_elements[i]; }
 int								getdistance(point h1, point h2);
 indext							getmovecost(indext i);
+short unsigned					getnearest(indext start_index, int range);
 point							h2p(point v);
 point							h2p(indext i);
 constexpr short					i2x(indext i) { return i % mx; }
@@ -428,6 +434,6 @@ void							setmovecost(indext i, indext v);
 void							setwave(indext v);
 unsigned short					to(indext index, direction_s d);
 void							wave(indext start_index);
-void							waverange(indext start_index);
+void							waverange(indext start_index, int range);
 };
 DECLENUM(area);

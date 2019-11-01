@@ -123,6 +123,7 @@
     <ClCompile Include="answer.cpp" />
     <ClCompile Include="area.cpp" />
     <ClCompile Include="element.cpp" />
+    <ClCompile Include="event.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="bstream.cpp" />
     <ClCompile Include="card.cpp" />

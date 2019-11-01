@@ -132,6 +132,9 @@
     <ClCompile Include="element.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="event.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crt.h">
