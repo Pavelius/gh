@@ -252,7 +252,13 @@ void creaturei::heal(int bonus) {
 }
 
 void creaturei::loot(int range) {
+	for(auto& e : bsmeta<figurei>()) {
+		if(e.type != Object)
+			continue;
+		if(e.object == Coin) {
 
+		}
+	}
 }
 
 void creaturei::turnbegin() {

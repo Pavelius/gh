@@ -357,9 +357,10 @@ class playeri : public creaturei {
 	itema						items;
 	itema						items_used;
 	short unsigned				actions[2];
+	short						coins;
 public:
 	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop(),
-		actions(), used_ability(0) {}
+		actions(), used_ability(0), coins(0) {}
 	void						activate();
 	bool						addaction(short unsigned i);
 	void						addcard(short unsigned i) { ability_hand.add(i); }
@@ -369,6 +370,7 @@ public:
 	void						create(class_s v, int level);
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
+	int							getcoins() const { return coins; }
 	deck&						getcombatcards() { return combat_deck; }
 	static playeri*				getcurrent();
 	const char*					getname() const { return name; }
@@ -381,6 +383,7 @@ public:
 	void						removeaction(abilityid id);
 	constexpr void				set(class_s v) { type = Class; cless = v; }
 	constexpr void				set(reaction_s i) { creaturei::set(i); }
+	void						setcoins(int v) { coins = v; }
 	void						setup_standart();
 	void						turn();
 };
