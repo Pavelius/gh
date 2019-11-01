@@ -8,7 +8,7 @@ enum movement_cost_s : indext {
 
 static unsigned short	stack[256 * 256];
 char					map::magic_elements[Dark + 1];
-static indext			movement_rate[mx * my];
+indext					map::movement_rate[mx * my];
 static unsigned char	map_tile[mx * my];
 static direction_s		all_around[] = {LeftUp, RightUp, Left, Right, LeftDown, RightDown};
 static creaturea		combatants;
@@ -94,6 +94,10 @@ void map::block(reaction_s i) {
 		if(e.getreaction() == i)
 			movement_rate[e.getindex()] = Blocked;
 	}
+}
+
+void map::waverange(indext start_index) {
+
 }
 
 void map::wave(indext start_index) {

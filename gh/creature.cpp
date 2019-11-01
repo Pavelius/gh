@@ -345,3 +345,11 @@ void creaturei::playturn() {
 	else
 		turn();
 }
+
+void creaturei::moveauto(char bonus) {
+	indext movement_rate[map::mx * map::my];
+	memcpy(movement_rate, map::movement_rate, sizeof(movement_rate));
+	for(auto& e : bsmeta<playeri>()) {
+		map::clearwave();
+	}
+}

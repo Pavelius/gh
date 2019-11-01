@@ -292,6 +292,7 @@ public:
 	void						heal(int bonus);
 	static void					hiliteindex(stringbuilder& sb, int param);
 	void						move(action_s id, char bonus);
+	void						moveauto(char bonus);
 	void						paint() const;
 	void						playturn();
 	void						remove(state_s v) { states.remove(v); }
@@ -393,9 +394,9 @@ struct treasurei : drawable {
 namespace map {
 const int						mx = 32;
 const int						my = 24;
-//extern unsigned char			map_tile[mx*my];
 extern char						counter;
 extern char						magic_elements[Dark + 1];
+extern indext					movement_rate[mx * my];
 //
 void							add(variant v, indext i, int level);
 void							add(res_s r, indext i, int frame, int c, direction_s d = Right);
@@ -427,5 +428,6 @@ void							setmovecost(indext i, indext v);
 void							setwave(indext v);
 unsigned short					to(indext index, direction_s d);
 void							wave(indext start_index);
+void							waverange(indext start_index);
 };
 DECLENUM(area);
