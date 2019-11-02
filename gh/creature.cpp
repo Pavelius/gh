@@ -5,6 +5,7 @@ DECLBASE(creaturei);
 
 static state_s state_hostile[] = {Disarm, Immobilize, Wound, Muddle, Poison, Stun};
 static state_s state_friendly[] = {Invisibility, Strenght};
+creaturea	creaturei::combatants;
 
 void creaturei::set(action_s i, int v) {
 	if(i <= Guard)
@@ -116,6 +117,7 @@ void creaturei::move(action_s id, char bonus) {
 		auto cm = map::getmovecost(ni);
 		if(cm == Blocked)
 			return;
+		slide(ni);
 		setpos(ni);
 		bonus -= cm;
 	}
@@ -182,30 +184,65 @@ unsigned creaturei::select(creaturei** result, creaturei** pe, reaction_s reacti
 	return pb - result;
 }
 
-creaturei* creaturei::choose(creaturei** source, unsigned count, const char* format) {
+static int sort_index;
+
+static int compare_creatures(const void* v1, const void* v2) {
+	auto p1 = *((creaturei**)v1);
+	auto p2 = *((creaturei**)v2);
+	auto h1 = map::i2h(sort_index);
+	auto r1 = distance(h1, map::i2h(p1->getindex()));
+	auto r2 = distance(h1, map::i2h(p2->getindex()));
+	if(r1 < r2)
+		return -1;
+	if(r1 > r2)
+		return 1;
+	auto i1 = p1->getinitiative();
+	auto i2 = p2->getinitiative();
+	if(i1 < i2)
+		return -1;
+	if(i1 > i2)
+		return 1;
+	return 0;
+}
+
+static creaturei* getbest(creaturei** source, unsigned count, short unsigned start_index) {
 	if(!count)
 		return 0;
 	else if(count == 1)
 		return source[0];
-	answeri an;
-	map::setwave(Blocked);
-	for(unsigned i = 0; i < count; i++) {
-		auto index = source[i]->getindex();
-		map::setmovecost(index, 0);
-		an.add(index, "%1 (%2i хитов)", source[i]->getname(), source[i]->gethp());
+	auto result_index = 0;
+	for(unsigned i = 1; i < count; i++) {
+		if(compare_creatures(&source[i], &source[result_index])<0)
+			result_index = i;
 	}
-	auto index = choose_index(&an, 0, format, false, false);
-	for(unsigned i = 0; i < count; i++) {
-		if(source[i]->getindex() == index)
-			return source[i];
-	}
+	return source[result_index];
+}
+
+creaturei* creaturei::choose(creaturei** source, unsigned count, const char* format, bool interactive, short unsigned start_index) {
+	if(!count)
+		return 0;
+	if(interactive) {
+		answeri an;
+		map::setwave(Blocked);
+		for(unsigned i = 0; i < count; i++) {
+			auto index = source[i]->getindex();
+			map::setmovecost(index, 0);
+			an.add(index, "%1 (%2i хитов)", source[i]->getname(), source[i]->gethp());
+		}
+		auto index = choose_index(&an, 0, format, false, false);
+		for(unsigned i = 0; i < count; i++) {
+			if(source[i]->getindex() == index)
+				return source[i];
+		}
+	} else
+		return getbest(source, count, start_index);
 	return 0;
 }
 
 void creaturei::attack(int bonus, int range, int pierce, statea states) {
 	creaturei* targets[32];
 	auto count = select(targets, targets + sizeof(targets) / sizeof(targets[0]), getopposed(), getindex(), range, true);
-	auto enemy = choose(targets, count, "”кажите цель атаки. ўелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.");
+	auto enemy = choose(targets, count, "”кажите цель атаки. ўелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex());
 	if(!enemy)
 		return;
 	attack(*enemy, bonus, pierce, states);
@@ -314,27 +351,6 @@ int	creaturei::get(action_s id) const {
 	return r;
 }
 
-static int source_range;
-
-static int compare_creatures(const void* v1, const void* v2) {
-	auto p1 = *((creaturei**)v1);
-	auto p2 = *((creaturei**)v2);
-	auto h1 = map::i2h(source_range);
-	auto r1 = distance(h1, map::i2h(p1->getindex()));
-	auto r2 = distance(h1, map::i2h(p2->getindex()));
-	if(r1 < r2)
-		return -1;
-	if(r1 > r2)
-		return 1;
-	auto i1 = p1->getinitiative();
-	auto i2 = p2->getinitiative();
-	if(i1 < i2)
-		return -1;
-	if(i1 > i2)
-		return 1;
-	return 0;
-}
-
 creaturei* creaturei::getenemy(int range) const {
 	creaturei* source[32];
 	auto count = select(source, source + sizeof(source) / sizeof(source[0]), getopposed(), getindex(), range, true);
@@ -399,4 +415,42 @@ const monstermovei* creaturei::getmonstermove() const {
 	if(isplayer())
 		return 0;
 	return bsmeta<monsteri>::elements[monster].deck;
+}
+
+static int compare_initiative(const void* p1, const void* p2) {
+	auto e1 = *((creaturei**)p1);
+	auto e2 = *((creaturei**)p2);
+	return e1->getinitiative() - e2->getinitiative();
+}
+
+void creaturei::updatecombatants() {
+	combatants.clear();
+	for(auto& e : bsmeta<creaturei>()) {
+		if(!e)
+			continue;
+		combatants.add(&e);
+	}
+	for(auto& e : bsmeta<playeri>()) {
+		if(!e)
+			continue;
+		combatants.add(&e);
+	}
+	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
+}
+
+void creaturei::roundbegin() {
+	updatecombatants();
+	for(auto p : combatants) {
+		if(p->isplayer())
+			p->initiative = bsmeta<abilityi>::elements[p->getplayer()->getaction(0)].initiative;
+		else
+			p->initiative = p->getmonstermove()->initiative;
+	}
+	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
+}
+
+playeri* creaturei::getplayer() const {
+	if(type == Class)
+		return (playeri*)this;
+	return 0;
 }

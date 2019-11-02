@@ -97,6 +97,7 @@ enum reaction_s : unsigned char {
 	Enemy, Friend
 };
 class creaturei;
+class playeri;
 struct actionf;
 typedef cflags<element_s, unsigned char> elementa;
 typedef cflags<state_s, unsigned char> statea;
@@ -276,14 +277,14 @@ class creaturei : public figurei {
 	char						actions[Guard + 1];
 	statea						states;
 	reaction_s					reaction;
-	char						moved;
 public:
-	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0), moved(0) {}
+	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
 	void						act(const actionf& e);
 	void						attack(creaturei& enemy, int bonus, int pierce, statea states);
 	void						attack(int bonus, int range, int pierce, statea states);
-	static creaturei*			choose(creaturei** source, unsigned count, const char* format);
+	static creaturei*			choose(creaturei** source, unsigned count, const char* format, bool interactive = true, short unsigned start_index = Blocked);
 	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply);
+	static creaturea			combatants;
 	void						create(variant v, int level);
 	void						damage(int v);
 	void						droploot() const;
@@ -296,15 +297,15 @@ public:
 	int							getinitiative() const { return initiative; }
 	static deck&				getmonstersdeck();
 	const monstermovei*			getmonstermove() const;
-	indext						getmovepos(char bonus) const;
 	indext						getmovepos(char bonus, char range) const;
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
 	reaction_s					getopposed() const;
+	playeri*					getplayer() const;
 	reaction_s					getreaction() const { return reaction; }
 	constexpr bool				is(state_s v) const { return states.is(v); }
 	bool						isalive() const { return hp > 0; }
-	bool						ismoved() const { return moved > 0; }
+	bool						ismoved() const { return initiative == 0; }
 	void						loot(int range);
 	void						heal(int bonus);
 	static void					hiliteindex(stringbuilder& sb, int param);
@@ -312,6 +313,7 @@ public:
 	void						paint() const;
 	void						playturn();
 	void						remove(state_s v) { states.remove(v); }
+	static void					roundbegin();
 	static unsigned				select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target);
 	void						set(action_s i, int v);
 	constexpr void				set(reaction_s i) { reaction = i; }
@@ -320,11 +322,12 @@ public:
 	void						sethostile(const statea v);
 	void						sethp(short unsigned v) { hp = v; }
 	void						sethpmax(short unsigned v) { hp_max = v; hp = v; }
+	void						setintitiative(int v) { initiative = v; }
 	void						setlevel(int v) { level = v; }
-	void						setmoved(int v) { moved = v; }
 	void						turn();
 	void						turnbegin();
 	void						turnend();
+	static void					updatecombatants();
 };
 struct classi {
 	const char*					name;
@@ -370,6 +373,7 @@ public:
 	abilityid					choose_action();
 	void						choose_tactic();
 	void						create(class_s v, int level);
+	short unsigned				getaction(int i) const { return actions[i]; }
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
 	int							getcoins() const { return coins; }
@@ -426,8 +430,6 @@ static point					p2h(point pt);
 void							paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
 void							playround();
-void							roundbegin();
-void							roundend();
 void							set(indext i, map_tile_s v);
 constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
 void							setcamera(point pt);
