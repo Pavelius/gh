@@ -667,13 +667,12 @@ void creaturei::paint() const {
 	char temp[16]; stringbuilder sb(temp);
 	sb.add("%1i", hp);
 	auto pf = fore_stroke;
-	if(hp == hp_max)
-		fore_stroke = colors::red;
-	else if(hp > hp_max / 2)
-		fore_stroke = colors::yellow;
-	else
-		fore_stroke = colors::red;
+	auto pp = font;
+	fore_stroke = colors::red;
+	font = metrics::h2;
 	text(x1 - textw(temp) / 2, y1 + 30, temp, -1, TextStroke);
+	fore_stroke = pf;
+	font = pp;
 }
 
 static void paint_grid(bool can_choose, bool show_movement, bool show_index) {
