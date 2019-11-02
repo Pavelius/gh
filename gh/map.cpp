@@ -96,33 +96,29 @@ void map::block(reaction_s i) {
 	}
 }
 
-short unsigned map::getnearest(indext start_index, int range) {
+indext map::getnearest(indext start_index, int range) {
 	if(!range)
 		range = 1;
-	auto stack_end = stack + sizeof(stack) / sizeof(stack[0]);
-	auto push_counter = stack;
-	auto pop_counter = stack;
-	*push_counter++ = start_index;
 	auto start_hex = i2h(start_index);
-	auto result_index = Blocked;
-	auto result_cost = Blocked;
-	while(pop_counter != push_counter) {
-		auto index = *pop_counter++;
-		if(pop_counter >= stack_end)
-			pop_counter = stack;
-		for(auto d : all_around) {
-			auto i1 = to(index, d);
-			if(i1 == Blocked || movement_rate[i1] == Blocked)
+	indext result_index = Blocked;
+	indext result_cost = Blocked;
+	for(auto y = start_hex.y - range; y <= start_hex.y + range; y++) {
+		if(y < 0 || y >= my)
+			continue;
+		for(auto x = start_hex.x - range; x <= start_hex.x + range; x++) {
+			if(x < 0 || x >= mx)
 				continue;
-			if(result_cost >= movement_rate[i1])
+			if(start_hex.x == x && start_hex.y == y)
 				continue;
-			if(getdistance(i2h(i1), start_hex) > range)
+			point h = {(short)x, (short)y};
+			auto i1 = p2i(h);
+			if(result_cost <= movement_rate[i1])
+				continue;
+			auto d = getdistance(h, start_hex);
+			if(d > range)
 				continue;
 			result_index = i1;
 			result_cost = movement_rate[i1];
-			*push_counter++ = i1;
-			if(push_counter >= stack_end)
-				push_counter = stack;
 		}
 	}
 	return result_index;
@@ -208,6 +204,26 @@ static int compare(const void* p1, const void* p2) {
 	auto e1 = *((creaturei**)p1);
 	auto e2 = *((creaturei**)p2);
 	return e1->getinitiative() - e2->getinitiative();
+}
+
+indext map::getbestpos(indext start, indext cost) {
+	while(start != Blocked && movement_rate[start] > cost) {
+		indext i0 = Blocked;
+		auto c1 = movement_rate[start];
+		for(auto d : all_around) {
+			auto i1 = to(start, d);
+			if(i1 == Blocked || movement_rate[i1] == Blocked)
+				continue;
+			if(movement_rate[i1] >= c1)
+				continue;
+			i0 = i1;
+			c1 = movement_rate[i1];
+		}
+		if(i0 == Blocked)
+			return start;
+		start = i0;
+	}
+	return start;
 }
 
 static void selectall() {

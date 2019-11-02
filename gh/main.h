@@ -410,9 +410,10 @@ void							block(reaction_s i);
 void							clearwave();
 void							create();
 inline int						get(element_s i) { return magic_elements[i]; }
+indext							getbestpos(indext start, indext cost);
 int								getdistance(point h1, point h2);
 indext							getmovecost(indext i);
-short unsigned					getnearest(indext start_index, int range);
+indext							getnearest(indext start_index, int range);
 point							h2p(point v);
 point							h2p(indext i);
 constexpr short					i2x(indext i) { return i % mx; }
@@ -434,6 +435,5 @@ void							setmovecost(indext i, indext v);
 void							setwave(indext v);
 unsigned short					to(indext index, direction_s d);
 void							wave(indext start_index);
-void							waverange(indext start_index, int range);
 };
 DECLENUM(area);
