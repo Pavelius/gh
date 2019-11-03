@@ -193,6 +193,8 @@ void playeri::turn() {
 void playeri::choose_tactic() {
 	actions[0] = actions[1] = 0;
 	while(!actions[0] || !actions[1]) {
+		if(!ability_hand)
+			break;
 		char temp[512]; stringbuilder sb(temp);
 		sb.adds("Выбирайте способности на этот ход.");
 		if(actions[0]) {

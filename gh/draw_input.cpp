@@ -628,7 +628,7 @@ static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool sho
 	const rect rc = {0 - 100, 0 - 100, draw::getwidth() + 100, draw::getheight() + 100};
 	if(!pt.in(rc))
 		return;
-	hexagon(pt, hexagon_offset, colors::border);
+	//hexagon(pt, hexagon_offset, colors::border);
 	if(map::is(i, HasBlock))
 		hexagon(pt, hexagon_offset2, colors::green);
 	if(show_index || show_movement) {
