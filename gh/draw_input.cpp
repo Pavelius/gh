@@ -724,7 +724,7 @@ static void paint_floor() {
 void map::paint_screen(bool can_choose, bool show_movement, bool show_index, bool paiint_hilite) {
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
-	rectf(last_window, colors::gray);
+	rectf(last_window, colors::black);
 	hilite_index = Blocked;
 	paint_floor();
 	paint_grid(can_choose, show_movement, show_index);
