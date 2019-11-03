@@ -11,6 +11,7 @@ char					map::magic_elements[Dark + 1];
 indext					map::movement_rate[mx * my];
 static unsigned char	map_tile[mx * my];
 static direction_s		all_around[] = {LeftUp, RightUp, Left, Right, LeftDown, RightDown};
+creaturea				map::combatants;
 
 point map::h2p(indext i) {
 	return h2p({i2x(i), i2y(i)});
@@ -181,7 +182,7 @@ void map::add(variant v, indext i, int level) {
 	case Object:
 		switch(v.object) {
 		case Coin: add(COINS, i, xrand(0, 2), 0); break;
-			//case TreasureChest: add(COINS, i, 0, 0); break;
+		//case TreasureChest: add(COINS, i, 0, 0); break;
 		}
 		break;
 	}
@@ -219,18 +220,100 @@ indext map::getbestpos(indext start, indext cost) {
 	return start;
 }
 
+static int compare_initiative(const void* p1, const void* p2) {
+	auto e1 = *((creaturei**)p1);
+	auto e2 = *((creaturei**)p2);
+	return e1->getinitiative() - e2->getinitiative();
+}
+
+void map::update() {
+	combatants.clear();
+	for(auto& e : bsmeta<creaturei>()) {
+		if(!e)
+			continue;
+		combatants.add(&e);
+	}
+	for(auto& e : bsmeta<playeri>()) {
+		if(!e)
+			continue;
+		combatants.add(&e);
+	}
+	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
+}
+
+static void round_begin() {
+	update();
+	for(auto p : combatants) {
+		if(p->isplayer())
+			p->setinitiative(bsmeta<abilityi>::elements[p->getplayer()->getaction(0)].initiative);
+		else
+			p->setinitiative(p->getmonstermove()->initiative);
+	}
+	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
+}
+
+static void choose_cards() {
+	for(auto& e : bsmeta<playeri>()) {
+		if(!e)
+			continue;
+		e.choose_tactic();
+	}
+}
+
+static void next_monster_card(monstermovei* p) {
+	auto e = p[0];
+	memmove(p, p + 1, sizeof(p[0]));
+	p[7] = e;
+}
+
+static void next_monster_action() {
+	adat<const monstermovei*> single;
+	for(auto p : combatants) {
+		if(p->isplayer())
+			continue;
+		auto d = p->getmonstermove();
+		if(single.is(d))
+			continue;
+		single.add(d);
+		next_monster_card(d);
+	}
+}
+
+void round_end() {
+	next_monster_action();
+}
+
 void map::playround() {
-	creaturei::roundbegin();
 	auto run = true;
 	while(run) {
 		run = false;
-		for(auto p : creaturei::combatants) {
+		for(auto p : combatants) {
 			if(p->ismoved())
 				continue;
 			p->playturn();
-			p->setintitiative(0);
+			p->setinitiative(0);
 			run = true;
 			break;
 		}
+	}
+}
+
+static bool is_allow_play() {
+	for(auto& e : bsmeta<playeri>()) {
+		if(!e)
+			continue;
+		if(!e.isalive())
+			continue;
+		return true;
+	}
+	return false;
+}
+
+void map::play() {
+	while(is_allow_play()) {
+		choose_cards();
+		round_begin();
+		playround();
+		round_end();
 	}
 }

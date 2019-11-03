@@ -94,9 +94,9 @@ static void test_play() {
 	auto& p1 = bsmeta<playeri>::elements[0];
 	p1.setup_standart();
 	//p1.choose_tactic();
-	p1.addaction(1);
-	p1.addaction(3);
-	map::playround();
+	//p1.addaction(1);
+	//p1.addaction(3);
+	map::play();
 }
 
 void util_main();

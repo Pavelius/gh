@@ -5,7 +5,6 @@ DECLBASE(creaturei);
 
 static state_s state_hostile[] = {Disarm, Immobilize, Wound, Muddle, Poison, Stun};
 static state_s state_friendly[] = {Invisibility, Strenght};
-creaturea	creaturei::combatants;
 
 void creaturei::set(action_s i, int v) {
 	if(i <= Guard)
@@ -35,6 +34,7 @@ void creaturei::damage(int v) {
 	if(v > hp) {
 		hp = 0;
 		droploot();
+		map::update();
 	} else
 		hp -= v;
 }
@@ -370,13 +370,18 @@ void creaturei::turn() {
 	if(!pm)
 		return;
 	turnbegin();
-	actiona	actions;
-	actions.parse(pm->commands, *this);
-	for(auto& e : actions.data) {
-		if(e.id)
-			act(e);
-	}
+	play(pm->commands);
 	turnend();
+}
+
+void creaturei::play(const commanda& commands) {
+	actiona	actions;
+	actions.parse(commands, *this);
+	for(auto& e : actions.data) {
+		if(!e)
+			continue;
+		act(e);
+	}
 }
 
 void creaturei::playturn() {
@@ -411,42 +416,10 @@ indext creaturei::getmovepos(char bonus, char range) const {
 	return best_index;
 }
 
-const monstermovei* creaturei::getmonstermove() const {
+monstermovei* creaturei::getmonstermove() const {
 	if(isplayer())
 		return 0;
 	return bsmeta<monsteri>::elements[monster].deck;
-}
-
-static int compare_initiative(const void* p1, const void* p2) {
-	auto e1 = *((creaturei**)p1);
-	auto e2 = *((creaturei**)p2);
-	return e1->getinitiative() - e2->getinitiative();
-}
-
-void creaturei::updatecombatants() {
-	combatants.clear();
-	for(auto& e : bsmeta<creaturei>()) {
-		if(!e)
-			continue;
-		combatants.add(&e);
-	}
-	for(auto& e : bsmeta<playeri>()) {
-		if(!e)
-			continue;
-		combatants.add(&e);
-	}
-	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
-}
-
-void creaturei::roundbegin() {
-	updatecombatants();
-	for(auto p : combatants) {
-		if(p->isplayer())
-			p->initiative = bsmeta<abilityi>::elements[p->getplayer()->getaction(0)].initiative;
-		else
-			p->initiative = p->getmonstermove()->initiative;
-	}
-	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
 }
 
 playeri* creaturei::getplayer() const {

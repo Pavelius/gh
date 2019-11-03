@@ -209,6 +209,7 @@ struct actionf {
 	area_s						area;
 	elementa					consume, elements;
 	statea						states;
+	constexpr operator bool() const { return id || bonus; }
 };
 struct actioni {
 	const char*					id;
@@ -284,7 +285,6 @@ public:
 	void						attack(int bonus, int range, int pierce, statea states);
 	static creaturei*			choose(creaturei** source, unsigned count, const char* format, bool interactive = true, short unsigned start_index = Blocked);
 	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply);
-	static creaturea			combatants;
 	void						create(variant v, int level);
 	void						damage(int v);
 	void						droploot() const;
@@ -296,7 +296,7 @@ public:
 	int							getlevel() const { return level; }
 	int							getinitiative() const { return initiative; }
 	static deck&				getmonstersdeck();
-	const monstermovei*			getmonstermove() const;
+	monstermovei*				getmonstermove() const;
 	indext						getmovepos(char bonus, char range) const;
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
@@ -311,9 +311,9 @@ public:
 	static void					hiliteindex(stringbuilder& sb, int param);
 	void						move(action_s id, char bonus);
 	void						paint() const;
+	void						play(const commanda& commands);
 	void						playturn();
 	void						remove(state_s v) { states.remove(v); }
-	static void					roundbegin();
 	static unsigned				select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target);
 	void						set(action_s i, int v);
 	constexpr void				set(reaction_s i) { reaction = i; }
@@ -322,12 +322,11 @@ public:
 	void						sethostile(const statea v);
 	void						sethp(short unsigned v) { hp = v; }
 	void						sethpmax(short unsigned v) { hp_max = v; hp = v; }
-	void						setintitiative(int v) { initiative = v; }
+	void						setinitiative(int v) { initiative = v; }
 	void						setlevel(int v) { level = v; }
 	void						turn();
 	void						turnbegin();
 	void						turnend();
-	static void					updatecombatants();
 };
 struct classi {
 	const char*					name;
@@ -382,7 +381,6 @@ public:
 	const char*					getname() const { return name; }
 	bool						isallowability(int v) const;
 	bool						isacted() const { return actions[0] == 0 && actions[1] == 0; }
-	void						makeaction(abilityid id);
 	static void					paint_sheet();
 	static void					paint_back();
 	void						prepare();
@@ -406,6 +404,7 @@ const int						my = 24;
 extern char						counter;
 extern char						magic_elements[Dark + 1];
 extern indext					movement_rate[mx * my];
+extern creaturea				combatants;
 //
 void							add(variant v, indext i, int level);
 void							add(res_s r, indext i, int frame, int c, direction_s d = Right);
@@ -429,6 +428,7 @@ void							moverestrict(indext v);
 static point					p2h(point pt);
 void							paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
+void							play();
 void							playround();
 void							set(indext i, map_tile_s v);
 constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
@@ -437,5 +437,6 @@ void							setmovecost(indext i, indext v);
 void							setwave(indext v);
 unsigned short					to(indext index, direction_s d);
 void							wave(indext start_index);
+void							update();
 };
 DECLENUM(area);

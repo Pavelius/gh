@@ -695,6 +695,8 @@ static void paint_monsters() {
 	for(auto& e : bsmeta<creaturei>()) {
 		if(!e)
 			continue;
+		if(!e.isalive())
+			continue;
 		e.paint();
 	}
 }
@@ -706,8 +708,11 @@ static void paint_furnitures() {
 
 static void paint_players() {
 	for(auto& e : bsmeta<playeri>()) {
-		if(e)
-			e.paint();
+		if(!e)
+			continue;
+		if(!e.isalive())
+			continue;
+		e.paint();
 	}
 }
 

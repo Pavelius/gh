@@ -97,12 +97,6 @@ void playeri::create(class_s v, int level) {
 	combat_deck.create();
 }
 
-void playeri::makeaction(abilityid id) {
-	actiona action; action.parse(id.getability(), *this);
-	for(auto& e : action.data)
-		creaturei::act(e);
-}
-
 bool playeri::addaction(short unsigned i) {
 	if(!actions[0])
 		actions[0] = i;
@@ -187,11 +181,11 @@ void playeri::turn() {
 	turnbegin();
 	used_ability = -1;
 	id = choose_action();
-	makeaction(id);
+	play(id.getability());
 	removeaction(id);
 	used_ability = id.upper;
 	id = choose_action();
-	makeaction(id);
+	play(id.getability());
 	removeaction(id);
 	turnend();
 }
