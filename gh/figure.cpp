@@ -12,3 +12,8 @@ void figurei::setpos(short unsigned v) {
 	x = pt.x; y = pt.y;
 	index = v;
 }
+
+void figurei::clear() {
+	memset(this, 0, sizeof(*this));
+	index = Blocked;
+}

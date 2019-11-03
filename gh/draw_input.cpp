@@ -716,11 +716,17 @@ static void paint_players() {
 	}
 }
 
+static void paint_floor() {
+	for(auto& e : bsmeta<drawable>())
+		e.paint();
+}
+
 void map::paint_screen(bool can_choose, bool show_movement, bool show_index, bool paiint_hilite) {
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
 	rectf(last_window, colors::gray);
 	hilite_index = Blocked;
+	paint_floor();
 	paint_grid(can_choose, show_movement, show_index);
 	paint_furnitures();
 	paint_monsters();

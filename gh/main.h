@@ -73,7 +73,7 @@ enum class_s : unsigned char {
 enum res_s : unsigned char {
 	GLOOMHAVEN, DUNGEON,
 	COINS, FURN,
-	MONSTERS, PLAYERS, PLAYERB,
+	MONSTERS, PLAYERS, PLAYERB, TEXTURES,
 };
 enum object_s : unsigned char {
 	NoObject,
@@ -244,6 +244,7 @@ class figurei : public drawable, public variant {
 public:
 	constexpr figurei() : drawable(), variant(), index(Blocked) {}
 	explicit constexpr operator bool() const { return type!=NoVariant; }
+	void						clear();
 	constexpr indext			getindex() const { return index; }
 	constexpr bool				isplayer() const { return type == Class; }
 	void						setpos(short unsigned v);
@@ -291,13 +292,10 @@ public:
 	int							get(action_s id) const;
 	int							getbonus(int bonus) const;
 	deck&						getcombatcards();
-	creaturei*					getenemy() const;
-	creaturei*					getenemy(int range) const;
 	int							getlevel() const { return level; }
 	int							getinitiative() const { return initiative; }
 	static deck&				getmonstersdeck();
 	monstermovei*				getmonstermove() const;
-	indext						getmovepos(char bonus, char range) const;
 	constexpr short unsigned	gethp() const { return hp; }
 	constexpr short unsigned	gethpmax() const { return hp; }
 	reaction_s					getopposed() const;
@@ -314,7 +312,6 @@ public:
 	void						play(const commanda& commands);
 	void						playturn();
 	void						remove(state_s v) { states.remove(v); }
-	static unsigned				select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target);
 	void						set(action_s i, int v);
 	constexpr void				set(reaction_s i) { reaction = i; }
 	void						set(state_s v) { states.add(v); }
@@ -404,10 +401,10 @@ const int						my = 24;
 extern char						counter;
 extern char						magic_elements[Dark + 1];
 extern indext					movement_rate[mx * my];
-extern creaturea				combatants;
 //
 void							add(variant v, indext i, int level);
 void							add(res_s r, indext i, int frame, int c, direction_s d = Right);
+void							add(res_s r, indext i, int frame);
 void							block();
 void							block(reaction_s i);
 void							clearwave();
@@ -415,6 +412,7 @@ void							create();
 inline int						get(element_s i) { return magic_elements[i]; }
 indext							getbestpos(indext start, indext cost);
 int								getdistance(point h1, point h2);
+indext							getmove(indext start, char bonus, int range, reaction_s enemy);
 indext							getmovecost(indext i);
 indext							getnearest(indext start_index, int range);
 point							h2p(point v);
@@ -430,6 +428,8 @@ void							paint_screen(bool can_choose, bool show_movement, bool show_index, bo
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
 void							play();
 void							playround();
+unsigned						select(creaturei** result, creaturei** result_end);
+unsigned						select(creaturei** result, creaturei** result_end, reaction_s reaction, indext index, int range, bool sort_all);
 void							set(indext i, map_tile_s v);
 constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
 void							setcamera(point pt);
@@ -437,6 +437,5 @@ void							setmovecost(indext i, indext v);
 void							setwave(indext v);
 unsigned short					to(indext index, direction_s d);
 void							wave(indext start_index);
-void							update();
 };
 DECLENUM(area);

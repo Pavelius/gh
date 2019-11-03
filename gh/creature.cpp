@@ -31,10 +31,12 @@ void creaturei::droploot() const {
 void creaturei::damage(int v) {
 	if(v < 0)
 		v = 0;
-	if(v > hp) {
+	if(v >= hp) {
 		hp = 0;
-		droploot();
-		map::update();
+		if(!isplayer()) {
+			droploot();
+			clear();
+		}
 	} else
 		hp -= v;
 }
@@ -108,7 +110,7 @@ void creaturei::move(action_s id, char bonus) {
 			ni = choose_index(0, 0,
 				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
 		} else {
-			ni = getmovepos(bonus, get(AttackRange));
+			ni = map::getmove(getindex(), bonus, get(AttackRange), getopposed());
 			if(ni != Blocked)
 				ni = map::getbestpos(ni, get(Move));
 		}
@@ -141,48 +143,6 @@ static int getdistance(point p1, point p2) {
 }
 
 int distance(point p1, point p2);
-
-unsigned creaturei::select(creaturei** result, creaturei** pe, reaction_s reaction, indext index, int range, bool valid_attack_target) {
-	auto pb = result;
-	auto hi = map::i2h(index);
-	if(!range)
-		range = 1;
-	for(auto& e : bsmeta<creaturei>()) {
-		if(!e)
-			continue;
-		if(e.reaction != reaction)
-			continue;
-		if(valid_attack_target) {
-			if(e.is(Invisibility))
-				continue;
-		}
-		if(range!=-1 && index != Blocked) {
-			auto d = map::getdistance(map::i2h(e.getindex()), hi);
-			if(d > range)
-				continue;
-		}
-		if(pb < pe)
-			*pb++ = &e;
-	}
-	for(auto& e : bsmeta<playeri>()) {
-		if(!e)
-			continue;
-		if(e.reaction != reaction)
-			continue;
-		if(valid_attack_target) {
-			if(e.is(Invisibility))
-				continue;
-		}
-		if(range != -1 && index != Blocked) {
-			auto d = map::getdistance(map::i2h(e.getindex()), hi);
-			if(d > range)
-				continue;
-		}
-		if(pb < pe)
-			*pb++ = &e;
-	}
-	return pb - result;
-}
 
 static int sort_index;
 
@@ -235,13 +195,14 @@ creaturei* creaturei::choose(creaturei** source, unsigned count, const char* for
 				return source[i];
 		}
 	} else
-		return getbest(source, count, start_index);
+		return source[0];
 	return 0;
 }
 
 void creaturei::attack(int bonus, int range, int pierce, statea states) {
 	creaturei* targets[32];
-	auto count = select(targets, targets + sizeof(targets) / sizeof(targets[0]), getopposed(), getindex(), range, true);
+	auto count = map::select(targets, zendof(targets));
+	count = map::select(targets, targets + count, getopposed(), getindex(), range, true);
 	auto enemy = choose(targets, count, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex());
 	if(!enemy)
 		return;
@@ -351,20 +312,6 @@ int	creaturei::get(action_s id) const {
 	return r;
 }
 
-creaturei* creaturei::getenemy(int range) const {
-	creaturei* source[32];
-	auto count = select(source, source + sizeof(source) / sizeof(source[0]), getopposed(), getindex(), range, true);
-	qsort(source, count, sizeof(source[0]), compare_creatures);
-	return source[0];
-}
-
-creaturei* creaturei::getenemy() const {
-	auto range = get(AttackRange);
-	if(!range)
-		range = 1;
-	return getenemy(get(Move) + range);
-}
-
 void creaturei::turn() {
 	auto pm = getmonstermove();
 	if(!pm)
@@ -389,31 +336,6 @@ void creaturei::playturn() {
 		static_cast<playeri*>(this)->turn();
 	else
 		turn();
-}
-
-indext creaturei::getmovepos(char bonus, char range) const {
-	creaturei* source[32];
-	if(!range)
-		range = 1;
-	auto count = select(source, zendof(source), getopposed(), getindex(), -1, true);
-	auto start_hex = map::i2h(getindex());
-	creaturei* best_creature = 0;
-	auto best_range = Blocked;
-	auto best_index = Blocked;
-	for(unsigned i = 0; i < count; i++) {
-		auto p = source[i];
-		auto ph = map::i2h(p->getindex());
-		auto d1 = getdistance(start_hex, ph);
-		if(best_range < d1)
-			continue;
-		auto i1 = map::getnearest(p->getindex(), range);
-		if(i1 == Blocked)
-			continue;
-		best_range = d1;
-		best_creature = p;
-		best_index = i1;
-	}
-	return best_index;
 }
 
 monstermovei* creaturei::getmonstermove() const {

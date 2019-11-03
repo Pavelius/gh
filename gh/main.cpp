@@ -40,6 +40,7 @@ static bool test_battle() {
 
 static void test_map() {
 	map::create();
+	map::add(TEXTURES, 76, 0);
 	map::add(FURN, 173 - map::mx, 2, 2, Right);
 	map::add(Coin, 48, 0);
 	map::add(Coin, 17, 0);
@@ -102,7 +103,7 @@ static void test_play() {
 void util_main();
 
 int main() {
-	//util_main();
+	util_main();
 	if(!test_battle())
 		return 0;
 	if(!test_abilities())

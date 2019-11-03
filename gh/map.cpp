@@ -11,7 +11,6 @@ char					map::magic_elements[Dark + 1];
 indext					map::movement_rate[mx * my];
 static unsigned char	map_tile[mx * my];
 static direction_s		all_around[] = {LeftUp, RightUp, Left, Right, LeftDown, RightDown};
-creaturea				map::combatants;
 
 point map::h2p(indext i) {
 	return h2p({i2x(i), i2y(i)});
@@ -175,6 +174,15 @@ void map::add(res_s r, indext i, int frame, int c, direction_s d) {
 	p->setdir(d);
 }
 
+void map::add(res_s r, indext i, int frame) {
+	auto pt = map::h2p(i);
+	auto p = bsmeta<drawable>::add();
+	p->res = r;
+	p->frame = frame;
+	p->x = pt.x;
+	p->y = pt.y;
+}
+
 void map::add(variant v, indext i, int level) {
 	switch(v.type) {
 	case Monster: add_monster(v, i, level); break;
@@ -226,30 +234,93 @@ static int compare_initiative(const void* p1, const void* p2) {
 	return e1->getinitiative() - e2->getinitiative();
 }
 
-void map::update() {
-	combatants.clear();
+unsigned map::select(creaturei** result, creaturei** result_end) {
+	auto pb = result;
 	for(auto& e : bsmeta<creaturei>()) {
 		if(!e)
 			continue;
-		combatants.add(&e);
+		if(!e.isalive())
+			continue;
+		if(pb < result_end)
+			*pb++ = &e;
 	}
 	for(auto& e : bsmeta<playeri>()) {
 		if(!e)
 			continue;
-		combatants.add(&e);
+		if(!e.isalive())
+			continue;
+		if(pb < result_end)
+			*pb++ = &e;
 	}
+	return pb - result;
+}
+
+unsigned map::select(creaturei** result, creaturei** result_end, reaction_s reaction, indext index, int range, bool sort_all) {
+	auto ps = result;
+	auto hi = map::i2h(index);
+	if(!range)
+		range = 1;
+	for(auto pb = result; pb < result_end; pb++) {
+		auto& e = **pb;
+		if(e.getreaction() != reaction)
+			continue;
+		if(e.is(Invisibility))
+			continue;
+		if(range != -1 && index != Blocked) {
+			auto d = getdistance(map::i2h(e.getindex()), hi);
+			if(d > range)
+				continue;
+		}
+		*ps++ = *pb;
+	}
+	if(sort_all)
+		qsort(result, ps - result, sizeof(result[0]), compare_initiative);
+	return ps - result;
+}
+
+indext map::getmove(indext start, char bonus, int range, reaction_s enemy) {
+	creaturei* source[32];
+	auto count = select(source, zendof(source));
+	if(!range)
+		range = 1;
+	count = select(source, source + count, enemy, start, -1, true);
+	auto start_hex = i2h(start);
+	creaturei* best_creature = 0;
+	auto best_range = Blocked;
+	auto best_index = Blocked;
+	for(unsigned i = 0; i < count; i++) {
+		auto p = source[i];
+		auto ph = i2h(p->getindex());
+		auto d1 = getdistance(start_hex, ph);
+		if(best_range < d1)
+			continue;
+		auto i1 = getnearest(p->getindex(), range);
+		if(i1 == Blocked)
+			continue;
+		best_range = d1;
+		best_creature = p;
+		best_index = i1;
+	}
+	return best_index;
+}
+
+static void setup(creaturea& combatants) {
+	combatants.clear();
+	combatants.count = map::select(combatants.data, combatants.endof());
+}
+
+static void sort(creaturea& combatants) {
 	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
 }
 
 static void round_begin() {
-	update();
+	creaturea combatants; setup(combatants);
 	for(auto p : combatants) {
 		if(p->isplayer())
 			p->setinitiative(bsmeta<abilityi>::elements[p->getplayer()->getaction(0)].initiative);
 		else
 			p->setinitiative(p->getmonstermove()->initiative);
 	}
-	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
 }
 
 static void choose_cards() {
@@ -267,6 +338,7 @@ static void next_monster_card(monstermovei* p) {
 }
 
 static void next_monster_action() {
+	creaturea combatants; setup(combatants);
 	adat<const monstermovei*> single;
 	for(auto p : combatants) {
 		if(p->isplayer())
@@ -287,6 +359,9 @@ void map::playround() {
 	auto run = true;
 	while(run) {
 		run = false;
+		creaturea combatants;
+		setup(combatants);
+		sort(combatants); 
 		for(auto p : combatants) {
 			if(p->ismoved())
 				continue;
@@ -298,18 +373,42 @@ void map::playround() {
 	}
 }
 
-static bool is_allow_play() {
+static bool is_players_alive() {
 	for(auto& e : bsmeta<playeri>()) {
 		if(!e)
 			continue;
-		if(!e.isalive())
-			continue;
-		return true;
+		if(e.isalive())
+			return true;
 	}
 	return false;
 }
 
+static bool is_enemy_alive() {
+	for(auto& e : bsmeta<playeri>()) {
+		if(!e)
+			continue;
+		if(e.isalive())
+			return true;
+	}
+	return false;
+}
+
+static bool is_allow_play() {
+	if(!is_players_alive())
+		return false;
+	return true;
+}
+
+static void prepare_decks() {
+	for(auto& e : bsmeta<playeri>()) {
+		if(!e)
+			continue;
+		e.getcombatcards().shuffle();
+	}
+}
+
 void map::play() {
+	prepare_decks();
 	while(is_allow_play()) {
 		choose_cards();
 		round_begin();

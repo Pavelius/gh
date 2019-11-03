@@ -122,45 +122,30 @@ static bool correct(int& x1, int& y1, int& x2, int& y2, const rect& clip, bool i
 	return true;
 }
 
-//char* key2str(char* result, int key) {
-//	result[0] = 0;
-//	if(key&Ctrl)
-//		zcat(result, "Ctrl+");
-//	if(key&Alt)
-//		zcat(result, "Alt+");
-//	if(key&Shift)
-//		zcat(result, "Shift+");
-//	key = key & 0xFFFF;
-//	switch(key) {
-//	case KeyDown: zcat(result, "Down"); break;
-//	case KeyDelete: zcat(result, "Del"); break;
-//	case KeyEnd: zcat(result, "End"); break;
-//	case KeyEnter: zcat(result, "Enter"); break;
-//	case KeyHome: zcat(result, "Home"); break;
-//	case KeyLeft: zcat(result, "Left"); break;
-//	case KeyPageDown: zcat(result, "Page Down"); break;
-//	case KeyPageUp: zcat(result, "Page Up"); break;
-//	case KeyRight: zcat(result, "Right"); break;
-//	case KeyUp: zcat(result, "Up"); break;
-//	case F1: zcat(result, "F1"); break;
-//	case F2: zcat(result, "F2"); break;
-//	case F3: zcat(result, "F3"); break;
-//	case F4: zcat(result, "F4"); break;
-//	case F5: zcat(result, "F5"); break;
-//	case F6: zcat(result, "F6"); break;
-//	case F7: zcat(result, "F7"); break;
-//	case F8: zcat(result, "F8"); break;
-//	case F9: zcat(result, "F9"); break;
-//	case F10: zcat(result, "F10"); break;
-//	case F11: zcat(result, "F11"); break;
-//	case F12: zcat(result, "F12"); break;
-//	case KeySpace: zcat(result, "Space"); break;
-//	default:
-//		zcat(result, char(stringbuilder::upper(key - Alpha)));
-//		break;
-//	}
-//	return result;
-//}
+static void set32(color* p, unsigned count) {
+	auto p2 = p + count;
+	while(p < p2)
+		*p++ = fore;
+}
+
+static void set32a(color* p, unsigned count) {
+	auto p2 = p + count;
+	if(fore.a == 128) {
+		while(p < p2) {
+			p->r = (p->r + fore.r) >> 1;
+			p->g = (p->g + fore.g) >> 1;
+			p->b = (p->b + fore.b) >> 1;
+			p++;
+		}
+	} else {
+		while(p < p2) {
+			p->r = (p->r*(255 - fore.a) + fore.r*fore.a) >> 8;
+			p->g = (p->g*(255 - fore.a) + fore.g*fore.a) >> 8;
+			p->b = (p->b*(255 - fore.a) + fore.b*fore.a) >> 8;
+			p++;
+		}
+	}
+}
 
 static void set32(unsigned char* d, int d_scan, int width, int height, color c1) {
 	while(height-- > 0) {

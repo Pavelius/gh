@@ -122,6 +122,7 @@
     <ClCompile Include="action_count.cpp" />
     <ClCompile Include="answer.cpp" />
     <ClCompile Include="area.cpp" />
+    <ClCompile Include="drawable.cpp" />
     <ClCompile Include="element.cpp" />
     <ClCompile Include="event.cpp" />
     <ClCompile Include="map.cpp" />

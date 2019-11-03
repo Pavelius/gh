@@ -9,8 +9,9 @@ resi bsmeta<resi>::elements[] = {{"gloomhaven", "art/background"},
 {"monsters", "art/creatures"},
 {"players", "art/creatures"},
 {"playerb", "art/creatures"},
+{"textures", "art/objects"},
 };
-assert_enum(res, PLAYERB);
+assert_enum(res, TEXTURES);
 
 const sprite* draw::gres(res_s id) {
 	auto& e = bsmeta<resi>::elements[id];
