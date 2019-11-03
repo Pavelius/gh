@@ -91,7 +91,6 @@ void creaturei::create(variant v, int level) {
 void creaturei::move(action_s id, char bonus) {
 	while(bonus > 0) {
 		indext ni = Blocked;
-		slide(getindex());
 		map::clearwave();
 		if(id == Move) {
 			map::block(getopposed());
@@ -107,6 +106,7 @@ void creaturei::move(action_s id, char bonus) {
 		map::block(reaction);
 		if(isplayer()) {
 			map::moverestrict(bonus);
+			slide(getindex());
 			ni = choose_index(0, 0,
 				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
 		} else {

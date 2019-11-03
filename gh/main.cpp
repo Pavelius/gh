@@ -40,7 +40,7 @@ static bool test_battle() {
 
 static void test_map() {
 	map::create();
-	map::add(TEXTURES, 76, 0);
+	map::add(TEXTURES, 12, 0);
 	map::add(FURN, 173 - map::mx, 2, 2, Right);
 	map::add(Coin, 48, 0);
 	map::add(Coin, 17, 0);
