@@ -438,7 +438,7 @@ bool draw::ismodal() {
 }
 
 void draw::initialize() {
-	colors::active = color::create(172, 128, 0);
+	colors::active = color::create(128, 172, 0);
 	colors::border = color::create(73, 73, 80);
 	colors::button = color::create(0, 122, 204);
 	colors::form = color::create(32, 32, 32);

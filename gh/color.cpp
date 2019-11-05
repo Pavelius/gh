@@ -16,7 +16,7 @@ char* color::getname(char* result, const char* result_maximum) const {
 }
 
 color color::create(unsigned char r, unsigned char g, unsigned char b) {
-	return{b, g, r};
+	return {r, g, b};
 }
 
 color color::gray() const {

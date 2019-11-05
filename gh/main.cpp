@@ -97,7 +97,8 @@ static void test_play() {
 	//p1.choose_tactic();
 	//p1.addaction(1);
 	//p1.addaction(3);
-	map::set(Air, 1);
+	map::set(Air, 2);
+	map::set(Fire, 1);
 	map::play();
 }
 
