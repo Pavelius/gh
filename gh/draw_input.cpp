@@ -581,7 +581,7 @@ static point pixel_to_flat_hex(point pixel) {
 }
 
 static cube axial_to_cube(point pt) {
-	return {(double)pt.x, (double)(- pt.x - pt.y), (double)pt.y};
+	return {(double)pt.x, (double)(-pt.x - pt.y), (double)pt.y};
 }
 
 static point cube_to_axial(cube c) {
@@ -675,6 +675,30 @@ void creaturei::paint() const {
 	font = pp;
 }
 
+static void paint_element(int x, int y, int r, element_s i, int v) {
+	static color element_colors[] = {{235, 90, 70},
+	{0, 194, 224},
+	{179, 186, 197},
+	{97, 189, 79},
+	{242, 214, 0},
+	{52, 69, 79},
+	};
+	circle(x, y, r, element_colors[i]);
+	circlef(x, y, r, element_colors[i], (v==1) ? 96 : 160);
+}
+
+static void paint_elements(int x, int y) {
+	const int r = 16;
+	x += r; y += r;
+	for(auto i = Fire; i <= Dark; i = (element_s)(i + 1)) {
+		auto v = map::get(i);
+		if(!v)
+			continue;
+		paint_element(x, y, r, i, v);
+		x += r * 2 + 8;
+	}
+}
+
 static void paint_grid(bool can_choose, bool show_movement, bool show_index) {
 	auto pf = font;
 	font = metrics::font;
@@ -733,6 +757,7 @@ void map::paint_screen(bool can_choose, bool show_movement, bool show_index, boo
 	paint_players();
 	if(paiint_hilite)
 		paint_hilite_hexagon();
+	paint_elements(metrics::padding, metrics::padding);
 }
 
 void map::setcamera(point pt) {

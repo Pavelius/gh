@@ -97,13 +97,14 @@ static void test_play() {
 	//p1.choose_tactic();
 	//p1.addaction(1);
 	//p1.addaction(3);
+	map::set(Air, 1);
 	map::play();
 }
 
 void util_main();
 
 int main() {
-	util_main();
+	//util_main();
 	if(!test_battle())
 		return 0;
 	if(!test_abilities())
