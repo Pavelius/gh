@@ -277,7 +277,7 @@ class creaturei : public figurei {
 	char						initiative;
 	char						level;
 	char						actions[Guard + 1];
-	statea						states;
+	statea						states, start_states;
 	reaction_s					reaction;
 public:
 	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}

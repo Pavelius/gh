@@ -233,7 +233,8 @@ void creaturei::act(const actionf& e) {
 	case Move:
 	case Jump:
 	case Fly:
-		move(e.id, get(Move) + e.bonus);
+		if(!is(Immobilize))
+			move(e.id, get(Move) + e.bonus);
 		break;
 	case Attack:
 		attack(e.bonus, e.range, e.pierce, e.states);
@@ -277,9 +278,16 @@ void creaturei::loot(int range) {
 void creaturei::turnbegin() {
 	if(is(Wound))
 		damage(1);
+	start_states = states;
 }
 
 void creaturei::turnend() {
+	// Remove one round-lenght states
+	static state_s removable_states[] = {Disarm, Immobilize, Muddle, Invisibility, Stun, Strenght};
+	for(auto i : removable_states) {
+		if(start_states.is(i) && states.is(i))
+			states.remove(i);
+	}
 	loot(0);
 }
 
@@ -317,7 +325,8 @@ void creaturei::turn() {
 	if(!pm)
 		return;
 	turnbegin();
-	play(pm->commands);
+	if(!is(Stun))
+		play(pm->commands);
 	turnend();
 }
 
