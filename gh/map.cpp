@@ -351,8 +351,18 @@ static void next_monster_action() {
 	}
 }
 
+static void lower_elements() {
+	for(auto i = Fire; i <= Dark; i = (element_s)(i + 1)) {
+		auto v = get(i);
+		if(!v)
+			continue;
+		set(i, v - 1);
+	}
+}
+
 void round_end() {
 	next_monster_action();
+	lower_elements();
 }
 
 void map::playround() {
