@@ -23,15 +23,12 @@ void deck::create() {
 
 int deck::nextbonus(int& pierce, statea& states) {
 	auto r = 0;
-	while(true) {
-		auto i = get();
-		auto& ce = bsmeta<battlecardi>::elements[i];
-		r += ce.bonus;
-		if(ce.cless.type == Action && (ce.cless.action==Bless || ce.cless.action == Curse)) {
-			// Discard by default
-		} else
-			dropdown(i);
-		break;
-	}
+	auto i = get();
+	auto& ce = bsmeta<battlecardi>::elements[i];
+	r += bsmeta<commandi>::elements[ce.command].bonus;
+	if(ce.cless.type == Action && (ce.cless.action == Bless || ce.cless.action == Curse)) {
+		// Discard by default
+	} else
+		dropdown(i);
 	return r;
 }

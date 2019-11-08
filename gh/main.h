@@ -21,7 +21,7 @@ enum command_s : unsigned char {
 	Pull1, Pull2, Pull3, Pull4,
 	Heal1, Heal2, Heal3, Heal4, Heal5,
 	// Modifier
-	Bonus1, Bonus2, Bonus3,
+	BonusMiss, BonusM2, BonusM1, Bonus0, Bonus1, Bonus2, Bonus3, BonusX2,
 	Exp1, Exp2, Exp3, Exp1Use, Exp2Use, Exp3Use,
 	Range1, Range2, Range3, Range4, Range5,
 	Pierce1, Pierce2, Pierce3,
@@ -286,6 +286,7 @@ public:
 	void						attack(int bonus, int range, int pierce, statea states);
 	static creaturei*			choose(creaturei** source, unsigned count, const char* format, bool interactive = true, short unsigned start_index = Blocked);
 	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply);
+	void						choose_options(creaturei& enemy, int& attack, statei& states) const;
 	void						create(variant v, int level);
 	void						damage(int v);
 	void						droploot() const;
@@ -332,7 +333,8 @@ struct classi {
 	char						levels[11];
 };
 struct battlecardi {
-	char						bonus, count;
+	command_s					command;
+	int							count;
 	variant						cless;
 	statea						states;
 };

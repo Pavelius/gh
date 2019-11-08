@@ -28,6 +28,7 @@ static point			tooltips_point;
 static short			tooltips_width;
 static char				tooltips_text[4096];
 static short unsigned	hilite_index;
+static short unsigned	special_hilite_index;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
 extern rect				sys_static_area;
@@ -713,6 +714,10 @@ static void paint_grid(bool can_choose, bool show_movement, bool show_index) {
 static void paint_hilite_hexagon() {
 	auto pt = map::h2p(hilite_index) - camera;
 	hexagon(pt, hexagon_offset2, colors::yellow);
+	if(special_hilite_index != Blocked) {
+		pt = map::h2p(special_hilite_index) - camera;
+		hexagon(pt, hexagon_offset3, colors::yellow.mix(colors::border));
+	}
 }
 
 static void paint_monsters() {
@@ -853,6 +858,23 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 		control_standart();
 	}
 	return getresult();
+}
+
+void creaturei::choose_options(creaturei& enemy, int& attack, statei& states) const {
+	char temp[260];
+	stringbuilder sb(temp);
+	while(ismodal()) {
+		paint_board();
+		sb.clear();
+		sb.add("%1 против %2.", getname(), enemy.getname());
+		auto x = getwidth() - gui.window_width - gui.border * 2;
+		auto y = gui.border * 2; auto y1 = y;
+		y += render_report(x, y, sb);
+		x = getwidth() - gui.right_width - gui.border * 2;
+		y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeySpace);
+		domodal();
+		control_standart();
+	}
 }
 
 indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply) {
