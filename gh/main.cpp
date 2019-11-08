@@ -47,6 +47,7 @@ static void test_map() {
 	map::add(AnimatedBones, 77, 1);
 	map::add(AnimatedBones, 78, 1);
 	map::add(Brute, 174, 1);
+	map::add(Scoundrell, 172, 1);
 	map::set(Air, 2);
 }
 
@@ -105,7 +106,7 @@ static void test_play() {
 void util_main();
 
 int main() {
-	//util_main();
+	util_main();
 	if(!test_battle())
 		return 0;
 	if(!test_abilities())

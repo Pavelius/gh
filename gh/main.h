@@ -68,7 +68,7 @@ enum monster_s : unsigned char {
 	AnimatedBones, AnimatedBodies, FireDemon,
 };
 enum class_s : unsigned char {
-	Brute, Tinkerer,
+	Brute, Tinkerer, Scoundrell, Savvas,
 };
 enum res_s : unsigned char {
 	GLOOMHAVEN, DUNGEON,
