@@ -291,6 +291,15 @@ void creaturei::turnend() {
 	loot(0);
 }
 
+int creaturei::getactive(action_s id) const {
+	auto r = 0;
+	for(auto& e : bsmeta<activei>()) {
+		if(e.is(*this))
+			r += e.get(id);
+	}
+	return r;
+}
+
 int	creaturei::get(action_s id) const {
 	auto r = 0;
 	if(type == Monster) {

@@ -36,6 +36,10 @@ enum command_s : unsigned char {
 	// After action
 	DiscardCard
 };
+enum duration_s : unsigned char {
+	DurationInstant,
+	DurationRound, DurationUse, DurationInfinite,
+};
 enum condition_s : unsigned char {
 	AllyNearTarget, EnemyNearTarget,
 };
@@ -48,7 +52,8 @@ enum area_s : unsigned char {
 	Slash, Circle, Ray
 };
 enum action_s : unsigned char {
-	Moved, Attacked, Shield, Retaliate, Guard,
+	Moved, Attacked,
+	Shield, Retaliate, Guard,
 	Move, Jump, Fly, Attack, AttackBoost, Push, Pull, Heal, Loot, AttackRange,
 	Bless, Curse,
 };
@@ -81,7 +86,8 @@ enum object_s : unsigned char {
 };
 enum variant_s : unsigned char {
 	NoVariant,
-	Action, Area, Card, Class, Condition, Element, Modifier, Monster, Object, Player, State,
+	Action, Area, Card, Class, Condition, Creature,
+	Element, Modifier, Monster, Object, Player, State,
 };
 enum special_s : unsigned char {
 	NoSpecial,
@@ -108,7 +114,9 @@ typedef adat<short unsigned, 16> itema;
 typedef unsigned short indext;
 struct variant {
 	variant_s					type;
+	unsigned char				count;
 	union {
+		short					value;
 		action_s				action;
 		area_s					area;
 		card_s					card;
@@ -119,19 +127,19 @@ struct variant {
 		modifier_s				modifier;
 		state_s					state;
 		object_s				object;
-		unsigned char			value;
 	};
-	constexpr variant() : type(NoVariant), value(0) {}
-	constexpr variant(action_s v) : type(Action), value(v) {}
-	constexpr variant(area_s v) : type(Area), value(v) {}
-	constexpr variant(card_s v) : type(Card), value(v) {}
-	constexpr variant(class_s v) : type(Class), value(v) {}
-	constexpr variant(condition_s v) : type(Condition), value(v) {}
-	constexpr variant(element_s v) : type(Element), value(v) {}
-	constexpr variant(modifier_s v) : type(Modifier), value(v) {}
-	constexpr variant(monster_s v) : type(Monster), value(v) {}
-	constexpr variant(object_s v) : type(Object), value(v) {}
-	constexpr variant(state_s v) : type(State), value(v) {}
+	constexpr variant() : type(NoVariant), value(0), count(0) {}
+	constexpr variant(variant_s t, short v) : type(t), value(v), count(0) {}
+	constexpr variant(action_s v) : variant(Action, v) {}
+	constexpr variant(area_s v) : variant(Area, v) {}
+	constexpr variant(card_s v) : variant(Card, v) {}
+	constexpr variant(class_s v) : variant(Class, v) {}
+	constexpr variant(condition_s v) : variant(Condition, v) {}
+	constexpr variant(element_s v) : variant(Element, v) {}
+	constexpr variant(modifier_s v) : variant(Modifier, v) {}
+	constexpr variant(monster_s v) : variant(Monster, v) {}
+	constexpr variant(object_s v) : variant(Object, v) {}
+	constexpr variant(state_s v) : variant(State, v) {}
 	constexpr operator bool() const { return type != NoVariant; }
 	void						clear() { type = NoVariant; value = 0; }
 	const char*					getname() const;
@@ -257,6 +265,22 @@ public:
 	char						getdamage() const { return damage; }
 	const statea&				getstate() const { return states; }
 };
+class activei : variant {
+	char						actions[AttackRange + 1];
+	variant						target;
+	duration_s					duration;
+	action_s					use_experience;
+	char						uses, uses_maximum;
+public:
+	void						clear() { memset(this, 0, sizeof(*this)); }
+	int							get(action_s i) const { return actions[i]; }
+	duration_s					getduration() const { return duration; }
+	int							getuses() const { return uses; }
+	bool						is(const variant& e) const { return target == e; }
+	bool						markuse(action_s v);
+	void						set(duration_s v) { duration = v; }
+	void						setuse(char v) { uses = v; }
+};
 struct monsteri {
 	struct info {
 		char					hits;
@@ -291,6 +315,7 @@ public:
 	void						damage(int v);
 	void						droploot() const;
 	int							get(action_s id) const;
+	int							getactive(action_s id) const;
 	int							getbonus(int bonus) const;
 	deck&						getcombatcards();
 	int							getlevel() const { return level; }
