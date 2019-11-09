@@ -131,7 +131,8 @@ static void add(stringbuilder& sb, area_s a, int b) {
 }
 
 static void add(stringbuilder& sb, const actionf& e) {
-	add(sb, e.id, e.bonus);
+	if(e.id!=Special)
+		add(sb, e.id, e.bonus);
 	add(sb, "Дистанция", " ", e.range);
 	add(sb, "Пробой", " ", e.pierce);
 	add(sb, "Опыт", " ", e.experience);

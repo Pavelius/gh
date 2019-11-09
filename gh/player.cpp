@@ -219,7 +219,7 @@ void playeri::choose_tactic() {
 		answeri an;
 		for(auto index : ability_hand)
 			an.add(index, bsmeta<abilityi>::elements[index].name);
-		auto index = an.choose(false, false, sb, ability_tips);
+		auto index = choose(sb, an, ability_tips);
 		addaction(index);
 	}
 }

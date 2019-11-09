@@ -15,8 +15,11 @@ static bool test_abilities() {
 		if(!a1.data[0].id && !a1.data[0].bonus)
 			return false;
 		a2.parse(e.lower, p1);
-		if(!a2.data[0].id && !a2.data[0].bonus)
+		if(!a2.data[0].id && !a2.data[0].bonus) {
+			a2.clear();
+			a2.parse(e.lower, p1);
 			return false;
+		}
 	}
 	return true;
 }
@@ -86,7 +89,7 @@ static void test_ability() {
 static void test_play() {
 	auto& p1 = bsmeta<playeri>::elements[0];
 	p1.setup_standart();
-	auto& p2 = bsmeta<playeri>::elements[0];
+	auto& p2 = bsmeta<playeri>::elements[1];
 	p2.setup_standart();
 	//p1.choose_tactic();
 	//p1.addaction(1);

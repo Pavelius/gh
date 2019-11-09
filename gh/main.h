@@ -248,6 +248,7 @@ struct actiona {
 	card_s						type;
 	actionf						data[4];
 	constexpr actiona() : type(StandartCard), data{} {}
+	void						clear() { memset(this, 0, sizeof(*this)); }
 	void						parse(const commanda& source, creaturei& player);
 	void						tostring(stringbuilder& sb) const;
 };
@@ -410,6 +411,7 @@ public:
 	bool						addaction(short unsigned i);
 	void						addactive(short unsigned i);
 	void						addcard(short unsigned i) { ability_hand.add(i); }
+	int							choose(const char* format, answeri& aw, answeri::tipspt tips);
 	void						choose_abilities();
 	abilityid					choose_action();
 	void						choose_tactic();

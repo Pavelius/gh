@@ -750,7 +750,7 @@ static void paint_floor() {
 		e.paint();
 }
 
-void map::paint_screen(bool can_choose, bool show_movement, bool show_index, bool paiint_hilite) {
+void map::paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite) {
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
 	rectf(last_window, colors::black);
@@ -760,7 +760,7 @@ void map::paint_screen(bool can_choose, bool show_movement, bool show_index, boo
 	paint_furnitures();
 	paint_monsters();
 	paint_players();
-	if(paiint_hilite)
+	if(paint_hilite)
 		paint_hilite_hexagon();
 	paint_elements(metrics::padding, metrics::padding);
 }
@@ -928,4 +928,38 @@ void drawable::slide(point pt) {
 	}
 	camera.x = x1;
 	camera.y = y1;
+}
+
+static int button(int x, int y, callback proc, int param, const char* format, ...) {
+	char temp[260]; stringbuilder sb(temp);
+	sb.addv(format, xva_start(format));
+	auto result = false;
+	auto h = windowb(x, y, gui.right_width, sb, result, false, true, 0, 0);
+	if(result)
+		execute(proc, param);
+	return h;
+}
+
+int playeri::choose(const char* format, answeri& aw, answeri::tipspt tips) {
+	slide(getindex());
+	while(ismodal()) {
+		special_hilite_index = getindex();
+		map::paint_screen(false, false, false, true);
+		auto x = getwidth() - gui.window_width - gui.border * 2;
+		auto y = gui.border * 2;
+		y += render_report(x, y, format);
+		x = getwidth() - gui.right_width - gui.border * 2;
+		if(aw)
+			y += aw.paint_answers(x, y, false, 0, tips, true);
+		y = draw::getheight() - (gui.border * 2 + draw::texth()) - gui.border;
+		if(ability_discard)
+			y -= button(x, y, buttonok, 0, "Потери (%1i карт)", ability_discard.getcount());
+		if(ability_drop)
+			y -= button(x, y, buttonok, 0, "Сброс (%1i карт)", ability_drop.getcount());
+		domodal();
+		control_standart();
+		if(hot.key == MouseLeft && hot.pressed && hilite_index != Blocked)
+			breakmodal(2);
+	}
+	return getresult();
 }
