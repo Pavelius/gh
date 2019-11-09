@@ -13,8 +13,14 @@ actioni bsmeta<actioni>::elements[] = {{"Moved", "Сколько двигался"},
 {"Push", "Оттолкнуть"},
 {"Pull", "Притянуть"},
 {"Heal", "Лечение"},
+{"HealBoost", "Бонус лечения"},
+{"Disarm Trap", "Обезвредить ловушку"},
+{"Set Trap", "Установить ловушку"},
+{"Summon", "Призвать"},
+{"Evasion", "Уклонение от урона"},
 {"Loot", "Добыча"},
 {"Range", "Дистанция"},
+{"Special", "Специально"},
 {"Bless", "Благословение"},
 {"Curse", "Проклятие"},
 };
@@ -86,10 +92,14 @@ void actiona::parse(const commanda& source, creaturei& player) {
 				true_condition = map::is(ce.id.element);
 				if(true_condition)
 					pa->consume.add(ce.id.element);
+			} else if(ce.id.type==Condition) {
 			}
 			pb = modifiers(pb + 1, pe, pa, this, true_condition);
-		} else
+		} else {
+			if(!pa)
+				pa = data;
 			pb = modifiers(pb, pe, pa, this, true);
+		}
 	}
 }
 

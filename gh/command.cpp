@@ -1,6 +1,7 @@
 #include "main.h"
 
 commandi bsmeta<commandi>::elements[] = {{},
+{Action, Special, 1},
 // Атака
 {Action, Attack, -2},
 {Action, Attack, -1},
@@ -14,6 +15,8 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Action, Attack, 7},
 {Action, Attack, 8},
 {Action, Attack, MovedCount},
+// Увеличение атаки
+{Action, AttackBoost, 0},
 {Action, AttackBoost, 1},
 {Action, AttackBoost, 2},
 {Action, AttackBoost, 3},
@@ -21,6 +24,12 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Action, Loot, 1},
 {Action, Loot, 2},
 {Action, Loot, 3},
+// Ловушки
+{Action, SetTrap, 2},
+{Action, SetTrap, 4},
+{Action, SetTrap, 6},
+//
+{Action, Summon, TinkerHarmless},
 // Движение
 {Action, Move, -2},
 {Action, Move, -1},
@@ -32,6 +41,7 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Action, Move, 5},
 {Action, Move, 6},
 {Action, Move, AttackedCount},
+{Action, Move, 2},
 // Прыжки
 {Action, Jump, 1},
 {Action, Jump, 2},
@@ -75,6 +85,13 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Action, Heal, 3},
 {Action, Heal, 4},
 {Action, Heal, 5},
+// Усиление лечения
+{Action, HealBoost, 0},
+{Action, HealBoost, 1},
+{Action, HealBoost, 2},
+// Навыки
+{Action, DisarmTrap, 1},
+{Action, Evasion, 1},
 //
 {Modifier, Bonus, -10},
 {Modifier, Bonus, -2},
@@ -84,17 +101,20 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Modifier, Bonus, 2},
 {Modifier, Bonus, 3},
 {Modifier, Bonus, 10},
+{Modifier, Bonus, 11}, // Shield X2
 {Modifier, Experience, 1},
 {Modifier, Experience, 2},
 {Modifier, Experience, 3},
 {Modifier, Experience, 1},
 {Modifier, Experience, 2},
 {Modifier, Experience, 3},
+{Modifier, Experience, 1},
 {Modifier, Range, 1},
 {Modifier, Range, 2},
 {Modifier, Range, 3},
 {Modifier, Range, 4},
 {Modifier, Range, 5},
+{Modifier, Range, 1},
 {Modifier, Pierce, 1},
 {Modifier, Pierce, 2},
 {Modifier, Pierce, 3},
@@ -119,6 +139,7 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Modifier, Dark, 1},
 {Modifier, Light, 1},
 //
+{Modifier, Use, 1},
 {Modifier, Use, 2},
 {Modifier, Use, 3},
 {Modifier, Use, 4},
@@ -127,7 +148,9 @@ commandi bsmeta<commandi>::elements[] = {{},
 //
 {Modifier, Slash, 2},
 {Modifier, Slash, 3},
+{Modifier, Splash, 3},
 {Modifier, Circle, 1},
+{Modifier, Spray, 3},
 {Modifier, Ray, 2},
 {Modifier, Ray, 3},
 //
@@ -138,8 +161,12 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Condition, Light},
 {Condition, Dark},
 {Condition, AnyElement},
+//
 {Condition, AllyNearTarget},
+{Condition, NoAllyNearTarget},
 {Condition, EnemyNearTarget},
+//
+{Condition, YouIsInvisible},
 // Действия с картами
 {Modifier, DiscardableCard},
 };

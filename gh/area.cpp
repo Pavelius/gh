@@ -4,5 +4,7 @@ areai bsmeta<areai>::elements[] = {{"NoArea"},
 {"Slash", "Полукруг"},
 {"Circle", "Круг"},
 {"Ray", "Луч"},
+{"Splash", "Взрыв"},
+{"Spray", "Распыление"},
 };
-assert_enum(area, Ray);
+assert_enum(area, Spray);

@@ -97,6 +97,14 @@ void playeri::create(class_s v, int level) {
 	combat_deck.create();
 }
 
+void playeri::addactive(short unsigned i) {
+	if(!i)
+		return;
+	auto p = bsmeta<activei>::add();
+	if(!p)
+		return;
+}
+
 bool playeri::addaction(short unsigned i) {
 	if(!actions[0])
 		actions[0] = i;

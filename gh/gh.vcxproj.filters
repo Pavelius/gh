@@ -141,6 +141,9 @@
     <ClCompile Include="active.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="summon.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">

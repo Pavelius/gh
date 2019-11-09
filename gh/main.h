@@ -9,10 +9,13 @@ const unsigned short Blocked = 0xFFFF;
 enum command_s : unsigned char {
 	NoCommand,
 	// Actions
+	Special1,
 	AttackM2, AttackM1, Attack0, Attack1, Attack2, Attack3, Attack4, Attack5, Attack6, Attack7, Attack8, AttackXMove,
-	AttackBoost1, AttackBoost2, AttackBoost3,
+	AttackBoost0, AttackBoost1, AttackBoost2, AttackBoost3,
 	Loot1, Loot2, Loot3,
-	MoveM2, MoveM1, Move0, Move1, Move2, Move3, Move4, Move5, Move6, MoveXAttack,
+	Trap2, Trap4, Trap6,
+	SummonTinkerHarmless,
+	MoveM2, MoveM1, Move0, Move1, Move2, Move3, Move4, Move5, Move6, MoveXAttack, MoveAndLoot2,
 	Jump1, Jump2, Jump3, Jump4, Jump5, Jump6, Jump4Attack2,
 	Fly1, Fly2, Fly3, Fly4, Fly5, Fly6, Fly7, Fly8,
 	Retaliate1, Retaliate2, Retaliate3,
@@ -20,19 +23,23 @@ enum command_s : unsigned char {
 	Push1, Push2, Push3, Push4,
 	Pull1, Pull2, Pull3, Pull4,
 	Heal1, Heal2, Heal3, Heal4, Heal5,
+	HealBoost0, HealBoost1, HealBoost2,
+	// Skills
+	DisarmTrap1, Evasion1,
 	// Modifier
-	BonusMiss, BonusM2, BonusM1, Bonus0, Bonus1, Bonus2, Bonus3, BonusX2,
-	Exp1, Exp2, Exp3, Exp1Use, Exp2Use, Exp3Use,
-	Range1, Range2, Range3, Range4, Range5,
+	BonusMiss, BonusM2, BonusM1, Bonus0, Bonus1, Bonus2, Bonus3, BonusX2, BonusShieldX2,
+	Exp1, Exp2, Exp3, Exp1Use, Exp2Use, Exp3Use, Exp1pt,
+	Range1, Range2, Range3, Range4, Range5, Range1All,
 	Pierce1, Pierce2, Pierce3,
 	Target2, Target3, AttractAttacks,
 	AddDisarm, AddImmoblize, AddWound, AddMuddle, AddPoison, AddInvisibility, AddStun, AddStrenght,
 	AddAnyElement, AddFire, AddIce, AddAir, AddEarth, AddDark, AddLight,
-	Use2, Use3, Use4, Use6, Use8,
-	Slash2, Slash3, Circle1, Ray2, Ray3,
+	Use1, Use2, Use3, Use4, Use6, Use8,
+	Slash2, Slash3, Spray3, Splash3, Circle1, Ray2, Ray3,
 	// Conditions
 	IfAir, IfEarth, IfFire, IfIce, IfLight, IfDark, IfAnyElement,
-	IfAllyNearTarget, IfEnemyNearTarget,
+	IfAllyNearTarget, IfNoAllyNearTarget, IfEnemyNearTarget,
+	IfInvisible,
 	// After action
 	DiscardCard
 };
@@ -41,7 +48,8 @@ enum duration_s : unsigned char {
 	DurationRound, DurationUse, DurationInfinite,
 };
 enum condition_s : unsigned char {
-	AllyNearTarget, EnemyNearTarget,
+	AllyNearTarget, NoAllyNearTarget, EnemyNearTarget,
+	YouIsInvisible,
 };
 enum card_s : unsigned char {
 	StandartCard,
@@ -49,12 +57,13 @@ enum card_s : unsigned char {
 };
 enum area_s : unsigned char {
 	NoArea,
-	Slash, Circle, Ray
+	Slash, Circle, Ray, Splash, Spray,
 };
 enum action_s : unsigned char {
 	Moved, Attacked,
 	Shield, Retaliate, Guard,
-	Move, Jump, Fly, Attack, AttackBoost, Push, Pull, Heal, Loot, AttackRange,
+	Move, Jump, Fly,
+	Attack, AttackBoost, Push, Pull, Heal, HealBoost, DisarmTrap, SetTrap, Summon, Evasion, Loot, AttackRange, Special,
 	Bless, Curse,
 };
 enum action_bonus_s : char {
@@ -68,6 +77,9 @@ enum state_s : unsigned char {
 };
 enum element_s : unsigned char {
 	Fire, Ice, Air, Earth, Light, Dark, AnyElement,
+};
+enum summon_s : unsigned char {
+	TinkerHarmless,
 };
 enum monster_s : unsigned char {
 	AnimatedBones, AnimatedBodies, FireDemon,
@@ -87,7 +99,7 @@ enum object_s : unsigned char {
 enum variant_s : unsigned char {
 	NoVariant,
 	Action, Area, Card, Class, Condition, Creature,
-	Element, Modifier, Monster, Object, Player, State,
+	Element, Modifier, Monster, MonsterSummon, Object, Player, State,
 };
 enum special_s : unsigned char {
 	NoSpecial,
@@ -138,6 +150,7 @@ struct variant {
 	constexpr variant(element_s v) : variant(Element, v) {}
 	constexpr variant(modifier_s v) : variant(Modifier, v) {}
 	constexpr variant(monster_s v) : variant(Monster, v) {}
+	constexpr variant(summon_s v) : variant(MonsterSummon, v) {}
 	constexpr variant(object_s v) : variant(Object, v) {}
 	constexpr variant(state_s v) : variant(State, v) {}
 	constexpr operator bool() const { return type != NoVariant; }
@@ -183,7 +196,7 @@ struct commandi {
 	special_s					special;
 };
 struct commanda {
-	command_s					data[8];
+	command_s					data[12];
 	bool						is(command_s i) const;
 };
 struct monstermovei {
@@ -210,6 +223,10 @@ struct elementi {
 struct statei {
 	const char*					id;
 	const char*					name;
+};
+struct summoni {
+	const char*					name;
+	char						hits, move, attack, range;
 };
 struct actionf {
 	action_s					id;
@@ -269,7 +286,7 @@ class activei : variant {
 	char						actions[AttackRange + 1];
 	variant						target;
 	duration_s					duration;
-	action_s					use_experience;
+	action_s					use_experiance;
 	char						uses, uses_maximum;
 public:
 	void						clear() { memset(this, 0, sizeof(*this)); }
@@ -391,6 +408,7 @@ public:
 		actions(), used_ability(0), coins(0) {}
 	void						activate();
 	bool						addaction(short unsigned i);
+	void						addactive(short unsigned i);
 	void						addcard(short unsigned i) { ability_hand.add(i); }
 	void						choose_abilities();
 	abilityid					choose_action();

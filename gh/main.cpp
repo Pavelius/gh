@@ -29,15 +29,6 @@ static bool test_deck() {
 		&& d2.getcount() == 20;
 }
 
-static bool test_battle() {
-	creaturei p1, m1;
-	actiona actions;
-	actions.parse(bsmeta<abilityi>::elements[1].lower, p1);
-	char temp[512]; stringbuilder sb(temp);
-	actions.tostring(sb);
-	return true;
-}
-
 static void test_map() {
 	map::create();
 	map::add(TEXTURES, 12, 0);
@@ -95,6 +86,8 @@ static void test_ability() {
 static void test_play() {
 	auto& p1 = bsmeta<playeri>::elements[0];
 	p1.setup_standart();
+	auto& p2 = bsmeta<playeri>::elements[0];
+	p2.setup_standart();
 	//p1.choose_tactic();
 	//p1.addaction(1);
 	//p1.addaction(3);
@@ -106,9 +99,7 @@ static void test_play() {
 void util_main();
 
 int main() {
-	util_main();
-	if(!test_battle())
-		return 0;
+	//util_main();
 	if(!test_abilities())
 		return 0;
 	if(!test_deck())
