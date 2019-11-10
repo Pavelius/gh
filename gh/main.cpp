@@ -4,8 +4,6 @@ using namespace map;
 
 static bool test_abilities() {
 	creaturei p1;
-	p1.set(Moved, 4);
-	p1.set(Attacked, 2);
 	map::set(Air, 2);
 	for(auto& e : bsmeta<abilityi>()) {
 		if(!e)

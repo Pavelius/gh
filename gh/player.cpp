@@ -239,3 +239,12 @@ void playeri::setup_standart() {
 			break;
 	}
 }
+
+int playeri::getbonus(int bonus) const {
+	switch(bonus) {
+	case MovedCount: return actions[Moved];
+	case AttackedCount: return actions[Attacked];
+	case ShieldCount: return actions[Shield];
+	default: return bonus;
+	}
+}

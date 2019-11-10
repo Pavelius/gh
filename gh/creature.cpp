@@ -6,11 +6,6 @@ DECLBASE(creaturei);
 static state_s state_hostile[] = {Disarm, Immobilize, Wound, Muddle, Poison, Stun};
 static state_s state_friendly[] = {Invisibility, Strenght};
 
-void creaturei::set(action_s i, int v) {
-	if(i <= Guard)
-		actions[i] = v;
-}
-
 void creaturei::sethostile(const statea v) {
 	for(auto e : state_hostile) {
 		if(v.is(e))
@@ -41,17 +36,7 @@ void creaturei::damage(int v) {
 		hp -= v;
 }
 
-int creaturei::getbonus(int bonus) const {
-	switch(bonus) {
-	case MovedCount: return actions[Moved];
-	case AttackedCount: return actions[Attacked];
-	case ShieldCount: return actions[Shield];
-	default: return bonus;
-	}
-}
-
 void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states) {
-	bonus = getbonus(bonus);
 	bonus += get(Attack);
 	auto cards = getcombatcards();
 	auto d = cards.nextbonus(pierce, states);
@@ -110,7 +95,7 @@ void creaturei::move(action_s id, char bonus) {
 			ni = choose_index(0, 0,
 				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
 		} else {
-			ni = map::getmove(getindex(), bonus, get(AttackRange), getopposed());
+			ni = map::getmove(getindex(), bonus, get(Range), getopposed());
 			if(ni != Blocked)
 				ni = map::getbestpos(ni, get(Move));
 		}
@@ -224,7 +209,9 @@ deck& creaturei::getcombatcards() {
 }
 
 void creaturei::act(const actionf& e) {
+	int r;
 	creaturei* target;
+	playeri* player = getplayer();
 	for(auto s = Fire; s < AnyElement; s = element_s(s + 1)) {
 		if(e.consume.is(s))
 			map::set(s, 0);
@@ -237,7 +224,10 @@ void creaturei::act(const actionf& e) {
 			move(e.id, get(Move) + e.bonus);
 		break;
 	case Attack:
-		attack(e.bonus, e.range, e.pierce, e.states);
+		r = e.bonus;
+		if(player)
+			r = player->getbonus(r);
+		attack(r, e.range, e.pierce, e.states);
 		break;
 	case Loot:
 		loot(e.bonus);
@@ -306,26 +296,26 @@ int	creaturei::get(action_s id) const {
 		auto& mn = bsmeta<monsteri>::elements[monster];
 		auto& lv = mn.levels[level][0];
 		switch(id) {
-		case Move:
-			r = lv.movement;
-			break;
+		case Move: r = lv.movement; break;
 		case Fly:
 		case Jump:
 			if(mn.move == id)
 				r = lv.movement;
 			break;
-		case Attack:
-			r = lv.attack;
-			break;
-		case AttackRange:
-			r = lv.range;
-			break;
+		case Attack: r = lv.attack; break;
+		case Range: r = lv.range; break;
 		}
 	} else if(type == Class) {
 
+	} else if(type == MonsterSummon) {
+		auto& lv = bsmeta<summoni>::elements[summon];
+		switch(id) {
+		case Move: r = lv.move; break;
+		case Fly: case Jump: r = 0; break;
+		case Attack: r = lv.attack; break;
+		case Range: r = lv.range; break;
+		}
 	}
-	if(id <= Guard)
-		r += actions[id];
 	return r;
 }
 

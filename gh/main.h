@@ -28,7 +28,7 @@ enum command_s : unsigned char {
 	DisarmTrap1, Evasion1,
 	// Modifier
 	BonusMiss, BonusM2, BonusM1, Bonus0, Bonus1, Bonus2, Bonus3, BonusX2, BonusShieldX2,
-	Exp1, Exp2, Exp3, Exp1Use, Exp2Use, Exp3Use, Exp1pt,
+	Exp1, Exp2, Exp3, Exp1Use, Exp2Use, Exp1pt,
 	Range1, Range2, Range3, Range4, Range5, Range1All,
 	Pierce1, Pierce2, Pierce3,
 	Target2, Target3, AttractAttacks,
@@ -59,18 +59,20 @@ enum area_s : unsigned char {
 	NoArea,
 	Slash, Circle, Ray, Splash, Spray,
 };
+enum statistic_s : unsigned char {
+	Moved, Attacked, Coins,
+	ItemsUsed,
+};
 enum action_s : unsigned char {
-	Moved, Attacked,
+	Bonus,
 	Shield, Retaliate, Guard,
 	Move, Jump, Fly,
-	Attack, AttackBoost, Push, Pull, Heal, HealBoost, DisarmTrap, SetTrap, Summon, Evasion, Loot, AttackRange, Special,
+	Attack, AttackBoost, Push, Pull, Heal, HealBoost, DisarmTrap, SetTrap, Summon, Evasion, Loot, Special,
+	Range, Target, Pierce, Experience, Use,
 	Bless, Curse,
 };
 enum action_bonus_s : char {
 	InfiniteCount = 100, MovedCount, AttackedCount, ShieldCount,
-};
-enum modifier_s : unsigned char {
-	Bonus, Range, Target, Pierce, Experience, Use,
 };
 enum state_s : unsigned char {
 	Disarm, Immobilize, Wound, Muddle, Poison, Invisibility, Stun, Strenght,
@@ -136,8 +138,8 @@ struct variant {
 		condition_s				condition;
 		element_s				element;
 		monster_s				monster;
-		modifier_s				modifier;
 		state_s					state;
+		summon_s				summon;
 		object_s				object;
 	};
 	constexpr variant() : type(NoVariant), value(0), count(0) {}
@@ -148,7 +150,6 @@ struct variant {
 	constexpr variant(class_s v) : variant(Class, v) {}
 	constexpr variant(condition_s v) : variant(Condition, v) {}
 	constexpr variant(element_s v) : variant(Element, v) {}
-	constexpr variant(modifier_s v) : variant(Modifier, v) {}
 	constexpr variant(monster_s v) : variant(Monster, v) {}
 	constexpr variant(summon_s v) : variant(MonsterSummon, v) {}
 	constexpr variant(object_s v) : variant(Object, v) {}
@@ -269,7 +270,7 @@ class figurei : public drawable, public variant {
 	indext						index;
 public:
 	constexpr figurei() : drawable(), variant(), index(Blocked) {}
-	explicit constexpr operator bool() const { return type!=NoVariant; }
+	explicit constexpr operator bool() const { return type != NoVariant; }
 	void						clear();
 	constexpr indext			getindex() const { return index; }
 	constexpr bool				isplayer() const { return type == Class; }
@@ -284,7 +285,7 @@ public:
 	const statea&				getstate() const { return states; }
 };
 class activei : variant {
-	char						actions[AttackRange + 1];
+	char						actions[Bless];
 	variant						target;
 	duration_s					duration;
 	action_s					use_experiance;
@@ -318,11 +319,10 @@ class creaturei : public figurei {
 	unsigned short				hp, hp_max;
 	char						initiative;
 	char						level;
-	char						actions[Guard + 1];
 	statea						states, start_states;
 	reaction_s					reaction;
 public:
-	constexpr creaturei() : figurei(), actions(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
+	constexpr creaturei() : figurei(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
 	void						act(const actionf& e);
 	void						attack(creaturei& enemy, int bonus, int pierce, statea states);
 	void						attack(int bonus, int range, int pierce, statea states);
@@ -334,7 +334,6 @@ public:
 	void						droploot() const;
 	int							get(action_s id) const;
 	int							getactive(action_s id) const;
-	int							getbonus(int bonus) const;
 	deck&						getcombatcards();
 	int							getlevel() const { return level; }
 	int							getinitiative() const { return initiative; }
@@ -356,7 +355,6 @@ public:
 	void						play(const commanda& commands);
 	void						playturn();
 	void						remove(state_s v) { states.remove(v); }
-	void						set(action_s i, int v);
 	constexpr void				set(reaction_s i) { reaction = i; }
 	void						set(state_s v) { states.add(v); }
 	void						setfriendly(const statea v);
@@ -393,6 +391,12 @@ union abilityid {
 	constexpr abilityid(short unsigned index, unsigned char upper, unsigned char standart) : index(index), standart(standart), upper(upper) {}
 	const commanda&				getability() const;
 };
+class statistic {
+	unsigned char				data[ItemsUsed + 1];
+public:
+	int							get(statistic_s i) const { return data[i]; }
+	void						set(statistic_s i, int v) { data[i] = v; }
+};
 class playeri : public creaturei {
 	char						name[16];
 	deck						combat_deck;
@@ -403,10 +407,11 @@ class playeri : public creaturei {
 	itema						items;
 	itema						items_used;
 	short unsigned				actions[2];
-	short						coins;
+	statistic					scenario_statistic;
 public:
 	constexpr playeri() : creaturei(), name(), combat_deck(), ability_hand(), ability_discard(), ability_drop(),
-		actions(), used_ability(0), coins(0) {}
+		actions(), used_ability(0) {
+	}
 	void						activate();
 	bool						addaction(short unsigned i);
 	void						addactive(short unsigned i);
@@ -419,7 +424,7 @@ public:
 	short unsigned				getaction(int i) const { return actions[i]; }
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
-	int							getcoins() const { return coins; }
+	int							getbonus(int bonus) const;
 	deck&						getcombatcards() { return combat_deck; }
 	static playeri*				getcurrent();
 	const char*					getname() const { return name; }
@@ -431,7 +436,6 @@ public:
 	void						removeaction(abilityid id);
 	constexpr void				set(class_s v) { type = Class; cless = v; }
 	constexpr void				set(reaction_s i) { creaturei::set(i); }
-	void						setcoins(int v) { coins = v; }
 	void						setup_standart();
 	void						turn();
 };

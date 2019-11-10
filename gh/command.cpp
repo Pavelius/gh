@@ -105,10 +105,9 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Modifier, Experience, 1},
 {Modifier, Experience, 2},
 {Modifier, Experience, 3},
-{Modifier, Experience, 1},
-{Modifier, Experience, 2},
-{Modifier, Experience, 3},
-{Modifier, Experience, 1},
+{Modifier, Experience, 1}, // Per 1 use
+{Modifier, Experience, 2}, // Per 2 use
+{Modifier, Experience, 1}, // Per Target
 {Modifier, Range, 1},
 {Modifier, Range, 2},
 {Modifier, Range, 3},

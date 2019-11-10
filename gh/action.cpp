@@ -1,7 +1,6 @@
 #include "main.h"
 
-actioni bsmeta<actioni>::elements[] = {{"Moved", "Сколько двигался"},
-{"Attacked", "Сколько атаковал"},
+actioni bsmeta<actioni>::elements[] = {{"Bonus", "Бонус"},
 {"Shield", "Щит"},
 {"Retaliate", "Ответный удар"},
 {"Guard", "Принять урон на себя"},
@@ -19,8 +18,12 @@ actioni bsmeta<actioni>::elements[] = {{"Moved", "Сколько двигался"},
 {"Summon", "Призвать"},
 {"Evasion", "Уклонение от урона"},
 {"Loot", "Добыча"},
-{"Range", "Дистанция"},
 {"Special", "Специально"},
+{"Range", "Дистанция"},
+{"Target", "Целей"},
+{"Pierce", "Пробой"},
+{"Experience", "Опыт"},
+{"Use", "Раз"},
 {"Bless", "Благословение"},
 {"Curse", "Проклятие"},
 };
@@ -50,8 +53,8 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 			case State:
 				pa->states.add(ce.id.state);
 				break;
-			case Modifier:
-				switch(ce.id.modifier) {
+			case Action:
+				switch(ce.id.action) {
 				case Bonus: pa->bonus += ce.bonus; break;
 				case Range: pa->range += ce.bonus; break;
 				case Pierce: pa->pierce += ce.bonus; break;
@@ -130,14 +133,23 @@ static void add(stringbuilder& sb, area_s a, int b) {
 		sb.add(":%1i", b);
 }
 
+static void add_use(stringbuilder& sb, int b) {
+	if(!b)
+		return;
+	if(b >= 5)
+		sb.adds("(%1i раз)", b);
+	else
+		sb.adds("(%1i раза)", b);
+}
+
 static void add(stringbuilder& sb, const actionf& e) {
 	if(e.id!=Special)
 		add(sb, e.id, e.bonus);
+	add_use(sb, e.use);
 	add(sb, "Дистанция", " ", e.range);
 	add(sb, "Пробой", " ", e.pierce);
 	add(sb, "Опыт", " ", e.experience);
 	add(sb, "Цели", ":", e.target);
-	add(sb, "Применений", ":", e.use);
 	add(sb, e.area, e.area_size);
 	for(auto s = Disarm; s <= Strenght; s = (state_s)(s+1)) {
 		if(e.states.is(s)) {
@@ -172,7 +184,7 @@ void actiona::tostring(stringbuilder& sb) const {
 		if(sb)
 			sb.add(", ");
 		switch(type) {
-		case DiscardableCard: sb.add("Сброс"); break;
+		case DiscardableCard: sb.add("Потери"); break;
 		}
 	}
 }
