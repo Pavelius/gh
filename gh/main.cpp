@@ -97,10 +97,34 @@ static void test_play() {
 	map::play();
 }
 
+static bool test_inherance() {
+	class test1 : public stringbuilder {
+		class_s		cless;
+		action_s	action;
+	public:
+		constexpr test1(const stringbuilder& e) : stringbuilder(e), cless(Brute), action(Attack) {}
+		void addidentifier(const char* identifier) {
+			if(strcmp(identifier, "class") == 0)
+				add("Brute");
+		}
+	};
+	char temp[260];
+	stringbuilder sb(temp);
+	sb.adds("Some text.");
+	test1 t1(sb);
+	t1.adds("Some class: %class.");
+	sb = t1;
+	sb.adds("Another class.");
+	auto i = zlen(temp);
+	return i != 128;
+}
+
 void util_main();
 
 int main() {
 	//util_main();
+	if(!test_inherance())
+		return 0;
 	if(!test_abilities())
 		return 0;
 	if(!test_deck())
