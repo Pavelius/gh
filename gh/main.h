@@ -90,7 +90,7 @@ enum class_s : unsigned char {
 	Brute, Tinkerer, Scoundrell, Savvas,
 };
 enum res_s : unsigned char {
-	GLOOMHAVEN, DUNGEON,
+	GLOOMHAVEN, DUNGEON, ELEMENTS,
 	COINS, CONDITIONS, FURN,
 	MONSTERS, PLAYERS, PLAYERB, TEXTURES,
 };

@@ -250,6 +250,8 @@ void creaturei::act(const actionf& e) {
 		target->heal(e.bonus);
 		break;
 	case Special:
+		setfriendly(e.states);
+		sethostile(e.states);
 		break;
 	}
 }
