@@ -233,76 +233,14 @@ indext map::getbestpos(indext start, indext cost) {
 	return start;
 }
 
-static int compare_initiative(const void* p1, const void* p2) {
-	auto e1 = *((creaturei**)p1);
-	auto e2 = *((creaturei**)p2);
-	return e1->getinitiative() - e2->getinitiative();
-}
-
-void map::sort(creaturea& result) {
-	qsort(result.begin(), result.count, sizeof(result.data[0]), compare_initiative);
-}
-
-void map::select(creaturea& result) {
-	auto pb = result.data;
-	auto pe = result.endof();
-	for(auto& e : bsmeta<creaturei>()) {
-		if(!e)
-			continue;
-		if(!e.isalive())
-			continue;
-		if(pb < pe)
-			*pb++ = &e;
-	}
-	for(auto& e : bsmeta<playeri>()) {
-		if(!e)
-			continue;
-		if(!e.isalive())
-			continue;
-		if(pb < pe)
-			*pb++ = &e;
-	}
-	result.count = pb - result.begin();
-}
-
-void map::filter(creaturea& result, reaction_s reaction, indext index, int range, bool sort_all) {
-	auto ps = result.begin();
-	auto hi = map::i2h(index);
+indext map::getmove(indext start, char bonus, int range, reaction_s reaction) {
+	creaturea source;
 	if(!range)
 		range = 1;
-	for(auto p : result) {
-		if(p->getreaction() != reaction)
-			continue;
-		if(p->is(Invisibility))
-			continue;
-		if(range != -1 && index != Blocked) {
-			auto d = getdistance(map::i2h(p->getindex()), hi);
-			if(d > range)
-				continue;
-		}
-		*ps++ = p;
-	}
-	result.count = ps - result.begin();
-	if(sort_all)
-		qsort(result.begin(), result.count, sizeof(result.data[0]), compare_initiative);
-}
-
-void map::filter(creaturea& result, const indexa& indecies) {
-	auto ps = result.begin();
-	for(auto p : result) {
-		auto i = p->getindex();
-		if(!indecies.is(i))
-			continue;
-		*ps++ = p;
-	}
-	result.count = ps - result.begin();
-}
-
-indext map::getmove(indext start, char bonus, int range, reaction_s enemy) {
-	creaturea source; select(source);
-	if(!range)
-		range = 1;
-	filter(source, enemy, start, -1, true);
+	source.select();
+	source.remove(Invisibility);
+	source.remove(reaction);
+	source.sort();
 	auto start_hex = i2h(start);
 	creaturei* best_creature = 0;
 	auto best_range = Blocked;
@@ -324,7 +262,7 @@ indext map::getmove(indext start, char bonus, int range, reaction_s enemy) {
 
 static void setup(creaturea& combatants) {
 	combatants.clear();
-	map::select(combatants);
+	combatants.select();
 }
 
 static void round_begin() {
@@ -385,7 +323,7 @@ void map::playround() {
 		run = false;
 		creaturea combatants;
 		setup(combatants);
-		sort(combatants);
+		combatants.sort();
 		for(auto p : combatants) {
 			if(p->ismoved())
 				continue;
@@ -464,9 +402,10 @@ void map::set(indext i, statea s, area_s a, int count, reaction_s reaction) {
 	if(!s)
 		return;
 	indexa indecies; select_all_around(indecies, i);
-	creaturea creatures; select(creatures);
-	filter(creatures, indecies);
-	sort(creatures);
+	creaturea creatures;
+	creatures.select();
+	creatures.match(indecies);
+	creatures.sort();
 	if(a == NoArea) {
 		creatures.remove(reaction);
 		creatures.count = 1;

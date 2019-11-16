@@ -100,7 +100,7 @@ void creaturei::move(action_s id, char bonus) {
 			ni = choose_index(0, 0,
 				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
 		} else {
-			ni = map::getmove(getindex(), bonus, get(Range), getopposed());
+			ni = map::getmove(getindex(), bonus, get(Range), getreaction());
 			if(ni != Blocked)
 				ni = map::getbestpos(ni, get(Move));
 		}
@@ -190,8 +190,12 @@ creaturei* creaturei::choose(creaturea& source, const char* format, bool interac
 }
 
 void creaturei::attack(int bonus, int range, int pierce, statea states) {
-	creaturea targets; map::select(targets);
-	map::filter(targets, getopposed(), getindex(), range, true);
+	creaturea targets;
+	targets.select();
+	targets.remove(getreaction());
+	targets.remove(Invisibility);
+	targets.match(getindex(), range);
+	targets.sort();
 	auto enemy = choose(targets, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex());
 	if(!enemy)
 		return;

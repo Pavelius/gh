@@ -128,6 +128,11 @@ typedef unsigned short indext;
 typedef adat<indext, 32> indexa;
 struct creaturea : adat<creaturei*, 31> {
 	void						remove(reaction_s v);
+	void						remove(state_s v);
+	void						match(indext index, int range);
+	void						match(const indexa& indecies);
+	void						select();
+	void						sort();
 };
 struct variant {
 	variant_s					type;
@@ -453,8 +458,6 @@ void							block(reaction_s i);
 void							clearwave();
 void							create();
 void							editor();
-void							filter(creaturea& result, reaction_s reaction, indext index, int range, bool sort_all);
-void							filter(creaturea& result, const indexa& indecies);
 inline int						get(element_s i) { return magic_elements[i]; }
 indext							getbestpos(indext start, indext cost);
 int								getdistance(point h1, point h2);
@@ -473,8 +476,6 @@ static point					p2h(point pt);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
 void							play();
 void							playround();
-void							remove(creaturea& result, reaction_s reaction);
-void							select(creaturea& result);
 void							set(indext i, map_tile_s v);
 void							set(indext i, statea s, area_s a, int count, reaction_s reaction);
 constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
@@ -482,7 +483,6 @@ void							set(indext i, short width, short height, map_tile_s id);
 void							setcamera(point pt);
 void							setmovecost(indext i, indext v);
 void							setwave(indext v);
-void							sort(creaturea& result);
 unsigned short					to(indext index, direction_s d);
 void							wave(indext start_index);
 };
