@@ -75,7 +75,7 @@ enum action_bonus_s : char {
 	InfiniteCount = 100, MovedCount, AttackedCount, ShieldCount,
 };
 enum state_s : unsigned char {
-	Disarm, Immobilize, Wound, Muddle, Poison, Invisibility, Stun, Strenght,
+	Disarmed, Immobilize, Wound, Muddle, Poison, Invisibility, Stun, Strenght,
 };
 enum element_s : unsigned char {
 	Fire, Ice, Air, Earth, Light, Dark, AnyElement,
@@ -126,6 +126,7 @@ typedef adat<short unsigned, 24> abilitya;
 typedef adat<creaturei*, 31> creaturea;
 typedef adat<short unsigned, 16> itema;
 typedef unsigned short indext;
+typedef adat<indext, 32> indexa;
 struct variant {
 	variant_s					type;
 	unsigned char				count;
@@ -314,7 +315,7 @@ public:
 	void						act(const actionf& e);
 	void						attack(creaturei& enemy, int bonus, int pierce, statea states);
 	void						attack(int bonus, int range, int pierce, statea states);
-	static creaturei*			choose(creaturei** source, unsigned count, const char* format, bool interactive = true, short unsigned start_index = Blocked);
+	static creaturei*			choose(creaturea& source, const char* format, bool interactive = true, short unsigned start_index = Blocked);
 	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply);
 	void						choose_options(creaturei& enemy, int& attack, statei& states) const;
 	void						create(variant v, int level);
@@ -345,6 +346,7 @@ public:
 	void						remove(state_s v) { states.remove(v); }
 	constexpr void				set(reaction_s i) { reaction = i; }
 	void						set(state_s v) { states.add(v); }
+	void						set(const statea v);
 	void						setfriendly(const statea v);
 	void						sethostile(const statea v);
 	void						sethp(short unsigned v) { hp = v; }
@@ -448,6 +450,7 @@ void							block();
 void							block(reaction_s i);
 void							clearwave();
 void							create();
+creaturei*						findcreature(indext i);
 inline int						get(element_s i) { return magic_elements[i]; }
 indext							getbestpos(indext start, indext cost);
 int								getdistance(point h1, point h2);
@@ -466,9 +469,11 @@ static point					p2h(point pt);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
 void							play();
 void							playround();
-unsigned						select(creaturei** result, creaturei** result_end);
-unsigned						select(creaturei** result, creaturei** result_end, reaction_s reaction, indext index, int range, bool sort_all);
+void							select(creaturea& result);
+void							select(creaturea& result, reaction_s reaction, indext index, int range, bool sort_all);
+void							select(creaturea& result, indexa& indecies);
 void							set(indext i, map_tile_s v);
+void							set(indext i, statea s, area_s a, int count);
 constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
 void							setcamera(point pt);
 void							setmovecost(indext i, indext v);

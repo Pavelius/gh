@@ -3,8 +3,13 @@
 creaturei bsmeta<creaturei>::elements[32];
 DECLBASE(creaturei);
 
-static state_s state_hostile[] = {Disarm, Immobilize, Wound, Muddle, Poison, Stun};
+static state_s state_hostile[] = {Disarmed, Immobilize, Wound, Muddle, Poison, Stun};
 static state_s state_friendly[] = {Invisibility, Strenght};
+
+void creaturei::set(const statea v) {
+	sethostile(v);
+	setfriendly(v);
+}
 
 void creaturei::sethostile(const statea v) {
 	for(auto e : state_hostile) {
@@ -163,32 +168,31 @@ static creaturei* getbest(creaturei** source, unsigned count, short unsigned sta
 	return source[result_index];
 }
 
-creaturei* creaturei::choose(creaturei** source, unsigned count, const char* format, bool interactive, short unsigned start_index) {
-	if(!count)
+creaturei* creaturei::choose(creaturea& source, const char* format, bool interactive, short unsigned start_index) {
+	if(!source)
 		return 0;
 	if(interactive) {
 		answeri an;
 		map::setwave(Blocked);
-		for(unsigned i = 0; i < count; i++) {
-			auto index = source[i]->getindex();
+		for(auto p : source) {
+			auto index = p->getindex();
 			map::setmovecost(index, 0);
-			an.add(index, "%1 (%2i хитов)", source[i]->getname(), source[i]->gethp());
+			an.add(index, "%1 (%2i хитов)", p->getname(), p->gethp());
 		}
 		auto index = choose_index(&an, 0, format, false, false);
-		for(unsigned i = 0; i < count; i++) {
-			if(source[i]->getindex() == index)
-				return source[i];
+		for(auto p : source) {
+			if(p->getindex() == index)
+				return p;
 		}
 	} else
-		return source[0];
+		return source.data[0];
 	return 0;
 }
 
 void creaturei::attack(int bonus, int range, int pierce, statea states) {
-	creaturei* targets[32];
-	auto count = map::select(targets, zendof(targets));
-	count = map::select(targets, targets + count, getopposed(), getindex(), range, true);
-	auto enemy = choose(targets, count, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex());
+	creaturea targets; map::select(targets);
+	map::select(targets, getopposed(), getindex(), range, true);
+	auto enemy = choose(targets, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex());
 	if(!enemy)
 		return;
 	attack(*enemy, bonus, pierce, states);
@@ -212,9 +216,15 @@ void creaturei::act(const actionf& e) {
 	int r;
 	creaturei* target;
 	playeri* player = getplayer();
+	// Поглатим элемент
 	for(auto s = Fire; s < AnyElement; s = element_s(s + 1)) {
 		if(e.consume.is(s))
 			map::set(s, 0);
+	}
+	// Установим элемент
+	for(auto s = Fire; s < AnyElement; s = element_s(s + 1)) {
+		if(e.elements.is(s))
+			map::set(s, 2);
 	}
 	switch(e.id) {
 	case Move:
@@ -222,6 +232,7 @@ void creaturei::act(const actionf& e) {
 	case Fly:
 		if(!is(Immobilize))
 			move(e.id, get(Move) + e.bonus);
+		map::set(getindex(), e.states, e.area, e.area_size);
 		break;
 	case Attack:
 		r = e.bonus;
@@ -237,6 +248,8 @@ void creaturei::act(const actionf& e) {
 		if(e.range > 0) {
 		}
 		target->heal(e.bonus);
+		break;
+	case Special:
 		break;
 	}
 }
@@ -273,7 +286,7 @@ void creaturei::turnbegin() {
 
 void creaturei::turnend() {
 	// Remove one round-lenght states
-	static state_s removable_states[] = {Disarm, Immobilize, Muddle, Invisibility, Stun, Strenght};
+	static state_s removable_states[] = {Disarmed, Immobilize, Muddle, Invisibility, Stun, Strenght};
 	for(auto i : removable_states) {
 		if(start_states.is(i) && states.is(i))
 			states.remove(i);

@@ -659,9 +659,14 @@ void creaturei::paint() const {
 	static const point states_pos[] = {{-16, 16}, {-16, -16}, {16, 16}, {16, -16}};
 	short x1 = x - camera.x;
 	short y1 = y - camera.y;
-	image(x1, y1, gres(res), frame, flags);
+	if(is(Invisibility))
+		image(x1, y1, gres(res), frame, flags, 128);
+	else
+		image(x1, y1, gres(res), frame, flags);
 	auto spi = 0;
-	for(auto i = Disarm; i <= Strenght; i = (state_s)(i + 1)) {
+	for(auto i = Disarmed; i <= Strenght; i = (state_s)(i + 1)) {
+		if(i == Invisibility)
+			continue;
 		if(is(i)) {
 			image(x1 + states_pos[spi].x, y1 + states_pos[spi].y,
 				gres(CONDITIONS), i, 0);

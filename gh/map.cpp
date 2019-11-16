@@ -234,14 +234,15 @@ static int compare_initiative(const void* p1, const void* p2) {
 	return e1->getinitiative() - e2->getinitiative();
 }
 
-unsigned map::select(creaturei** result, creaturei** result_end) {
-	auto pb = result;
+void map::select(creaturea& result) {
+	auto pb = result.data;
+	auto pe = result.endof();
 	for(auto& e : bsmeta<creaturei>()) {
 		if(!e)
 			continue;
 		if(!e.isalive())
 			continue;
-		if(pb < result_end)
+		if(pb < pe)
 			*pb++ = &e;
 	}
 	for(auto& e : bsmeta<playeri>()) {
@@ -249,47 +250,55 @@ unsigned map::select(creaturei** result, creaturei** result_end) {
 			continue;
 		if(!e.isalive())
 			continue;
-		if(pb < result_end)
+		if(pb < pe)
 			*pb++ = &e;
 	}
-	return pb - result;
+	result.count = pb - result.begin();
 }
 
-unsigned map::select(creaturei** result, creaturei** result_end, reaction_s reaction, indext index, int range, bool sort_all) {
-	auto ps = result;
+void map::select(creaturea& result, reaction_s reaction, indext index, int range, bool sort_all) {
+	auto ps = result.begin();
 	auto hi = map::i2h(index);
 	if(!range)
 		range = 1;
-	for(auto pb = result; pb < result_end; pb++) {
-		auto& e = **pb;
-		if(e.getreaction() != reaction)
+	for(auto p : result) {
+		if(p->getreaction() != reaction)
 			continue;
-		if(e.is(Invisibility))
+		if(p->is(Invisibility))
 			continue;
 		if(range != -1 && index != Blocked) {
-			auto d = getdistance(map::i2h(e.getindex()), hi);
+			auto d = getdistance(map::i2h(p->getindex()), hi);
 			if(d > range)
 				continue;
 		}
-		*ps++ = *pb;
+		*ps++ = p;
 	}
+	result.count = ps - result.begin();
 	if(sort_all)
-		qsort(result, ps - result, sizeof(result[0]), compare_initiative);
-	return ps - result;
+		qsort(result.begin(), result.count, sizeof(result.data[0]), compare_initiative);
+}
+
+void map::select(creaturea& result, indexa& indecies) {
+	auto ps = result.begin();
+	for(auto p : result) {
+		auto i = p->getindex();
+		if(!indecies.is(i))
+			continue;
+		*ps++ = p;
+	}
+	result.count = ps - result.begin();
 }
 
 indext map::getmove(indext start, char bonus, int range, reaction_s enemy) {
-	creaturei* source[32];
-	auto count = select(source, zendof(source));
+	creaturea source; select(source);
 	if(!range)
 		range = 1;
-	count = select(source, source + count, enemy, start, -1, true);
+	select(source, enemy, start, -1, true);
 	auto start_hex = i2h(start);
 	creaturei* best_creature = 0;
 	auto best_range = Blocked;
 	auto best_index = Blocked;
-	for(unsigned i = 0; i < count; i++) {
-		auto p = source[i];
+	for(auto p : source) {
 		auto ph = i2h(p->getindex());
 		auto d1 = getdistance(start_hex, ph);
 		if(best_range < d1)
@@ -306,7 +315,7 @@ indext map::getmove(indext start, char bonus, int range, reaction_s enemy) {
 
 static void setup(creaturea& combatants) {
 	combatants.clear();
-	combatants.count = map::select(combatants.data, combatants.endof());
+	map::select(combatants);
 }
 
 static void sort(creaturea& combatants) {
@@ -425,4 +434,55 @@ void map::play() {
 		playround();
 		round_end();
 	}
+}
+
+static unsigned getindecies(indext* pb, indext i, area_s a, int count) {
+	auto p = pb;
+	switch(a) {
+	case Circle:
+		for(auto d : all_around) {
+			auto i1 = to(i, d);
+			if(i1 == Blocked)
+				*p++ = i1;
+		}
+		break;
+	default:
+		break;
+	}
+	return p - pb;
+}
+
+static void setstates(indexa& indecies, statea s) {
+	for(auto i : indecies) {
+		auto p = map::findcreature(i);
+		if(!p)
+			continue;
+		p->set(s);
+	}
+}
+
+void map::set(indext i, statea s, area_s a, int count) {
+	indexa source;
+	source.count = getindecies(source.begin(), i, a, count);
+	setstates(source, s);
+}
+
+static void find(creaturea& source, indext i, area_s a, int area_count) {
+
+}
+
+creaturei* map::findcreature(indext i) {
+	for(auto& e : bsmeta<creaturei>()) {
+		if(!e)
+			continue;
+		if(e.getindex() == i)
+			return &e;
+	}
+	for(auto& e : bsmeta<playeri>()) {
+		if(!e)
+			continue;
+		if(e.getindex() == i)
+			return &e;
+	}
+	return 0;
 }

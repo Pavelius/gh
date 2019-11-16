@@ -151,7 +151,7 @@ static void add(stringbuilder& sb, const actionf& e) {
 	add(sb, "Опыт", " ", e.experience);
 	add(sb, "Цели", ":", e.target);
 	add(sb, e.area, e.area_size);
-	for(auto s = Disarm; s <= Strenght; s = (state_s)(s+1)) {
+	for(auto s = Disarmed; s <= Strenght; s = (state_s)(s+1)) {
 		if(e.states.is(s)) {
 			if(sb)
 				sb.add(", ");

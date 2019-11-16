@@ -121,7 +121,7 @@ commandi bsmeta<commandi>::elements[] = {{},
 {Modifier, Target, 3},
 {Action, Guard},
 // Добавить состояние
-{Modifier, Disarm, 1},
+{Modifier, Disarmed, 1},
 {Modifier, Immobilize, 1},
 {Modifier, Wound, 1},
 {Modifier, Muddle, 1},
