@@ -58,9 +58,9 @@ void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states) {
 void creaturei::create(variant v, int level) {
 	memset(this, 0, sizeof(*this));
 	this->type = v.type;
-	this->monster = v.monster;
+	this->value = v.value;
 	this->level = level;
-	auto& mn = bsmeta<monsteri>::elements[monster];
+	auto& mn = bsmeta<monsteri>::elements[value];
 	hp = mn.levels[level][0].hits;
 	hp_max = mn.levels[level][0].hits;
 	res = MONSTERS;
@@ -259,7 +259,7 @@ void creaturei::loot(int range) {
 	for(auto& e : bsmeta<figurei>()) {
 		if(e.type != Object)
 			continue;
-		if(e.object == Coin) {
+		if(e.value == Coin) {
 
 		}
 	}
@@ -293,7 +293,7 @@ int creaturei::getactive(action_s id) const {
 int	creaturei::get(action_s id) const {
 	auto r = 0;
 	if(type == Monster) {
-		auto& mn = bsmeta<monsteri>::elements[monster];
+		auto& mn = bsmeta<monsteri>::elements[value];
 		auto& lv = mn.levels[level][0];
 		switch(id) {
 		case Move: r = lv.movement; break;
@@ -308,7 +308,7 @@ int	creaturei::get(action_s id) const {
 	} else if(type == Class) {
 
 	} else if(type == MonsterSummon) {
-		auto& lv = bsmeta<summoni>::elements[summon];
+		auto& lv = bsmeta<summoni>::elements[value];
 		switch(id) {
 		case Move: r = lv.move; break;
 		case Fly: case Jump: r = 0; break;
@@ -349,7 +349,7 @@ void creaturei::playturn() {
 monstermovei* creaturei::getmonstermove() const {
 	if(isplayer())
 		return 0;
-	return bsmeta<monsteri>::elements[monster].deck;
+	return bsmeta<monsteri>::elements[value].deck;
 }
 
 playeri* creaturei::getplayer() const {

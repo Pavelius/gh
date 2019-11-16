@@ -2,8 +2,8 @@
 
 const char* variant::getname() const {
 	switch(type) {
-	case Monster: return bsmeta<monsteri>::elements[monster].name;
-	case Class: return bsmeta<classi>::elements[cless].name;
+	case Monster: return bsmeta<monsteri>::elements[value].name;
+	case Class: return bsmeta<classi>::elements[value].name;
 	default: return "Безимянный";
 	}
 }

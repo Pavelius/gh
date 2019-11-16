@@ -629,7 +629,7 @@ static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool sho
 	const rect rc = {0 - 100, 0 - 100, draw::getwidth() + 100, draw::getheight() + 100};
 	if(!pt.in(rc))
 		return;
-	//hexagon(pt, hexagon_offset, colors::border);
+	hexagon(pt, hexagon_offset, colors::black);
 	if(map::is(i, HasBlock))
 		hexagon(pt, hexagon_offset2, colors::green);
 	if(show_index || show_movement) {
@@ -656,9 +656,18 @@ static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool sho
 }
 
 void creaturei::paint() const {
+	static const point states_pos[] = {{-16, 16}, {-16, -16}, {16, 16}, {16, -16}};
 	short x1 = x - camera.x;
 	short y1 = y - camera.y;
 	image(x1, y1, gres(res), frame, flags);
+	auto spi = 0;
+	for(auto i = Disarm; i <= Strenght; i = (state_s)(i + 1)) {
+		if(is(i)) {
+			image(x1 + states_pos[spi].x, y1 + states_pos[spi].y,
+				gres(CONDITIONS), i, 0);
+			spi++;
+		}
+	}
 	auto c1 = colors::blue;
 	switch(type) {
 	case Class: c1 = colors::red; break;
@@ -750,7 +759,8 @@ static void paint_floor() {
 		e.paint();
 }
 
-void map::paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite) {
+static void paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite, short unsigned index = Blocked) {
+	special_hilite_index = index;
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
 	rectf(last_window, colors::black);
@@ -762,7 +772,7 @@ void map::paint_screen(bool can_choose, bool show_movement, bool show_index, boo
 	paint_players();
 	if(paint_hilite)
 		paint_hilite_hexagon();
-	paint_elements(metrics::padding, metrics::padding);
+	paint_elements(metrics::padding, getheight() - 16*2 - metrics::padding);
 }
 
 void map::setcamera(point pt) {
@@ -792,7 +802,7 @@ void playeri::paint_sheet() {
 static void paint_player_avatar() {
 	auto p = playeri::getcurrent();
 	if(p)
-		image(590, 106, gres(PLAYERS), p->cless, 0);
+		image(590, 106, gres(PLAYERS), p->value, 0);
 }
 
 void playeri::paint_back() {
@@ -801,7 +811,7 @@ void playeri::paint_back() {
 }
 
 static void paint_board() {
-	map::paint_screen(false, false, false, true);
+	paint_screen(false, false, false, true);
 }
 
 void creaturei::hiliteindex(stringbuilder& sb, int param) {
@@ -879,7 +889,7 @@ void creaturei::choose_options(creaturei& enemy, int& attack, statei& states) co
 
 indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply) {
 	while(ismodal()) {
-		map::paint_screen(true, show_movement, false, false);
+		paint_screen(true, show_movement, false, false);
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2;
 		y += render_report(x, y, format);
@@ -918,7 +928,7 @@ void drawable::slide(point pt) {
 	auto dx = x1 - x0;
 	auto dy = y1 - y0;
 	while(start < lenght && ismodal()) {
-		map::paint_screen(false, false, false, false);
+		paint_screen(false, false, false, false);
 		sysredraw();
 		start += step;
 		short x2 = x0 + dx * start / lenght;
@@ -934,7 +944,7 @@ static int button(int x, int y, callback proc, int param, const char* format, ..
 	char temp[260]; stringbuilder sb(temp);
 	sb.addv(format, xva_start(format));
 	auto result = false;
-	auto h = windowb(x, y, gui.right_width, sb, result, false, true, 0, 0);
+	auto h = windowb(x, y, gui.right_width, sb, result, false);
 	if(result)
 		execute(proc, param);
 	return h;
@@ -943,23 +953,22 @@ static int button(int x, int y, callback proc, int param, const char* format, ..
 int playeri::choose(const char* format, answeri& aw, answeri::tipspt tips) {
 	slide(getindex());
 	while(ismodal()) {
-		special_hilite_index = getindex();
-		map::paint_screen(false, false, false, true);
+		paint_screen(false, false, false, true, getindex());
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2;
 		y += render_report(x, y, format);
 		x = getwidth() - gui.right_width - gui.border * 2;
 		if(aw)
-			y += aw.paint_answers(x, y, false, 0, tips, true);
+			y += aw.paint_answers(x, y, false, breakparam, tips, true);
 		y = draw::getheight() - (gui.border * 2 + draw::texth()) - gui.border;
 		if(ability_discard)
 			y -= button(x, y, buttonok, 0, "Потери (%1i карт)", ability_discard.getcount());
 		if(ability_drop)
 			y -= button(x, y, buttonok, 0, "Сброс (%1i карт)", ability_drop.getcount());
-		domodal();
-		control_standart();
 		if(hot.key == MouseLeft && hot.pressed && hilite_index != Blocked)
 			breakmodal(2);
+		domodal();
+		control_standart();
 	}
 	return getresult();
 }

@@ -26,7 +26,7 @@ int deck::nextbonus(int& pierce, statea& states) {
 	auto i = get();
 	auto& ce = bsmeta<battlecardi>::elements[i];
 	r += bsmeta<commandi>::elements[ce.command].bonus;
-	if(ce.cless.type == Action && (ce.cless.action == Bless || ce.cless.action == Curse)) {
+	if(ce.cless.type == Action && (ce.cless.value == Bless || ce.cless.value == Curse)) {
 		// Discard by default
 	} else
 		dropdown(i);

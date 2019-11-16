@@ -186,9 +186,9 @@ void map::add(res_s r, indext i, int frame) {
 void map::add(variant v, indext i, int level) {
 	switch(v.type) {
 	case Monster: add_monster(v, i, level); break;
-	case Class: add_class(v.cless, i, level); break;
+	case Class: add_class(class_s(v.value), i, level); break;
 	case Object:
-		switch(v.object) {
+		switch(v.value) {
 		case Coin: add(COINS, i, xrand(0, 2), 0); break;
 		//case TreasureChest: add(COINS, i, 0, 0); break;
 		}

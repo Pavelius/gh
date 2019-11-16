@@ -91,7 +91,7 @@ enum class_s : unsigned char {
 };
 enum res_s : unsigned char {
 	GLOOMHAVEN, DUNGEON,
-	COINS, FURN,
+	COINS, CONDITIONS, FURN,
 	MONSTERS, PLAYERS, PLAYERB, TEXTURES,
 };
 enum object_s : unsigned char {
@@ -129,19 +129,7 @@ typedef unsigned short indext;
 struct variant {
 	variant_s					type;
 	unsigned char				count;
-	union {
-		short					value;
-		action_s				action;
-		area_s					area;
-		card_s					card;
-		class_s					cless;
-		condition_s				condition;
-		element_s				element;
-		monster_s				monster;
-		state_s					state;
-		summon_s				summon;
-		object_s				object;
-	};
+	short						value;
 	constexpr variant() : type(NoVariant), value(0), count(0) {}
 	constexpr variant(variant_s t, short v) : type(t), value(v), count(0) {}
 	constexpr variant(action_s v) : variant(Action, v) {}
@@ -169,7 +157,7 @@ class answeri : stringbuilder {
 public:
 	typedef void(*tipspt)(stringbuilder& sb, int param);
 	typedef void(*callback)();
-	constexpr explicit operator bool() const { return elements.count != 0; }
+	explicit operator bool() const { return elements.count != 0; }
 	answeri();
 	void						add(int param, const char* format, ...);
 	void						addv(int param, const char* format, const char* format_param);
@@ -423,7 +411,7 @@ public:
 	void						create(class_s v, int level);
 	short unsigned				getaction(int i) const { return actions[i]; }
 	unsigned					getabilities() const { return ability_hand.getcount(); }
-	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[cless].abilities_cap; }
+	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[value].abilities_cap; }
 	int							getbonus(int bonus) const;
 	deck&						getcombatcards() { return combat_deck; }
 	static playeri*				getcurrent();
@@ -434,7 +422,7 @@ public:
 	static void					paint_back();
 	void						prepare();
 	void						removeaction(abilityid id);
-	constexpr void				set(class_s v) { type = Class; cless = v; }
+	constexpr void				set(class_s v) { type = Class; value = v; }
 	constexpr void				set(reaction_s i) { creaturei::set(i); }
 	void						setup_standart();
 	void						turn();
@@ -475,7 +463,6 @@ constexpr bool					is(element_s i) { return magic_elements[i] > 0; }
 bool							is(indext i, map_tile_s v);
 void							moverestrict(indext v);
 static point					p2h(point pt);
-void							paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite);
 static unsigned short			p2i(point pt) { return pt.y*mx + pt.x; }
 void							play();
 void							playround();

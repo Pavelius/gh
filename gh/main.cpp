@@ -49,7 +49,7 @@ static void test_answer() {
 	creaturei p1, m1;
 	auto p2 = bsmeta<playeri>::add();
 	p2->type = Class;
-	p2->cless = Brute;
+	p2->value = Brute;
 	p2->res = FURN;
 	p2->frame = 0;
 	p2->setpos(142);
@@ -122,7 +122,7 @@ static bool test_inherance() {
 void util_main();
 
 int main() {
-	//util_main();
+	util_main();
 	if(!test_inherance())
 		return 0;
 	if(!test_abilities())

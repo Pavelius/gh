@@ -75,7 +75,7 @@ bool playeri::isallowability(int v) const {
 	auto& e = bsmeta<abilityi>::elements[v];
 	if(e.level == 0)
 		return false;
-	if(e.type != cless)
+	if(e.type != value)
 		return false;
 	if(e.level > getlevel())
 		return false;
@@ -85,7 +85,7 @@ bool playeri::isallowability(int v) const {
 void playeri::create(class_s v, int level) {
 	memset(this, 0, sizeof(*this));
 	this->type = Class;
-	this->cless = v;
+	this->value = v;
 	setlevel(level);
 	auto& mn = bsmeta<classi>::elements[v];
 	sethp(mn.levels[level]);
@@ -226,13 +226,13 @@ void playeri::choose_tactic() {
 
 void playeri::setup_standart() {
 	ability_hand.clear();
-	auto cap = bsmeta<classi>::elements[cless].abilities_cap;
+	auto cap = bsmeta<classi>::elements[value].abilities_cap;
 	for(auto& e : bsmeta<abilityi>()) {
 		if(!e)
 			continue;
 		if(e.level > getlevel())
 			continue;
-		if(e.type != cless)
+		if(e.type != value)
 			continue;
 		ability_hand.add(bsmeta<abilityi>::indexof(e));
 		if(--cap <= 0)

@@ -41,20 +41,20 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 		if(run) {
 			switch(ce.id.type) {
 			case Area:
-				pa->area = ce.id.area;
+				pa->area = area_s(ce.id.value);
 				pa->area_size = ce.bonus;
 				break;
 			case Card:
-				pp->type = ce.id.card;
+				pp->type = card_s(ce.id.value);
 				break;
 			case Element:
-				pa->elements.add(ce.id.element);
+				pa->elements.add(element_s(ce.id.value));
 				break;
 			case State:
-				pa->states.add(ce.id.state);
+				pa->states.add(state_s(ce.id.value));
 				break;
 			case Action:
-				switch(ce.id.action) {
+				switch(ce.id.value) {
 				case Bonus: pa->bonus += ce.bonus; break;
 				case Range: pa->range += ce.bonus; break;
 				case Pierce: pa->pierce += ce.bonus; break;
@@ -85,16 +85,16 @@ void actiona::parse(const commanda& source, creaturei& player) {
 			if(pa >= data + sizeof(data) / sizeof(data[0]))
 				return;
 			if(ce.id.type == Action) {
-				pa->id = ce.id.action;
+				pa->id = action_s(ce.id.value);
 				pa->bonus = ce.bonus;
 			}
 			pb++;
 		} else if(ce.type == Condition) {
 			auto true_condition = false;
 			if(ce.id.type == Element) {
-				true_condition = map::is(ce.id.element);
+				true_condition = map::is(element_s(ce.id.value));
 				if(true_condition)
-					pa->consume.add(ce.id.element);
+					pa->consume.add(element_s(ce.id.value));
 			} else if(ce.id.type==Condition) {
 			}
 			pb = modifiers(pb + 1, pe, pa, this, true_condition);
