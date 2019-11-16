@@ -745,7 +745,7 @@ static void paint_monsters() {
 	}
 }
 
-static void paint_furnitures() {
+static void paint_figures() {
 	for(auto& e : bsmeta<figurei>())
 		e.paint();
 }
@@ -773,7 +773,7 @@ static void paint_screen(bool can_choose, bool show_movement, bool show_index, b
 	hilite_index = Blocked;
 	paint_floor();
 	paint_grid(can_choose, show_movement, show_index);
-	paint_furnitures();
+	paint_figures();
 	paint_monsters();
 	paint_players();
 	if(paint_hilite)
@@ -977,4 +977,20 @@ int playeri::choose(const char* format, answeri& aw, answeri::tipspt tips) {
 		control_standart();
 	}
 	return getresult();
+}
+
+void map::editor() {
+	const indext start = 12;
+	while(ismodal()) {
+		last_window = {0, 0, draw::getwidth(), draw::getheight()};
+		area(last_window);
+		rectf(last_window, colors::black);
+		hilite_index = Blocked;
+		paint_floor();
+		paint_grid(true, true, true);
+		paint_figures();
+		paint_hilite_hexagon();
+		domodal();
+		control_standart();
+	}
 }

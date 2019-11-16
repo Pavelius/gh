@@ -123,6 +123,7 @@
     <ClCompile Include="active.cpp" />
     <ClCompile Include="answer.cpp" />
     <ClCompile Include="area.cpp" />
+    <ClCompile Include="creaturea.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="element.cpp" />
     <ClCompile Include="event.cpp" />

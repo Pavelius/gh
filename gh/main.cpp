@@ -4,7 +4,6 @@ using namespace map;
 
 static bool test_abilities() {
 	creaturei p1;
-	map::set(Air, 2);
 	for(auto& e : bsmeta<abilityi>()) {
 		if(!e)
 			continue;
@@ -33,6 +32,7 @@ static bool test_deck() {
 static void test_map() {
 	map::create();
 	map::add(TEXTURES, 12, 0);
+	map::set(12, 5, 8, Passable);
 	map::add(FURN, 173 - map::mx, 2, 2, Right);
 	map::add(Coin, 48, 0);
 	map::add(Coin, 17, 0);
@@ -40,7 +40,6 @@ static void test_map() {
 	map::add(AnimatedBones, 78, 1);
 	map::add(Brute, 174, 1);
 	map::add(Scoundrell, 172, 1);
-	map::set(Air, 2);
 }
 
 static void test_answer() {
@@ -138,6 +137,7 @@ int main() {
 	//test_players();
 	//test_ability();
 	test_play();
+	//map::editor();
 	return 0;
 }
 

@@ -232,7 +232,7 @@ void creaturei::act(const actionf& e) {
 	case Fly:
 		if(!is(Immobilize))
 			move(e.id, get(Move) + e.bonus);
-		map::set(getindex(), e.states, e.area, e.area_size);
+		map::set(getindex(), e.states, e.area, e.area_size, getreaction());
 		break;
 	case Attack:
 		r = e.bonus;

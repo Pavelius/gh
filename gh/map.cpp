@@ -17,12 +17,17 @@ point map::h2p(indext i) {
 }
 
 void map::create() {
-	for(short y = my; y > 0; y--) {
-		for(short x = 0; x < y / 2; x++)
-			set(p2i({x, my - y}), HasWall);
-		for(short x = 0; x < y / 2; x++)
-			set(p2i({mx - x - 1, y - 1}), HasWall);
-	}
+	memset(magic_elements, 0, sizeof(magic_elements));
+	memset(movement_rate, 0, sizeof(movement_rate));
+	//memset(map_tile, 0, sizeof(map_tile));
+	//for(short y = my; y > 0; y--) {
+	//	for(short x = 0; x < y / 2; x++)
+	//		set(p2i({x, my - y}), HasWall);
+	//	for(short x = 0; x < y / 2; x++)
+	//		set(p2i({mx - x - 1, y - 1}), HasWall);
+	//}
+	for(auto& e : map_tile)
+		e = HasWall;
 }
 
 unsigned short map::to(indext index, direction_s d) {
@@ -190,7 +195,7 @@ void map::add(variant v, indext i, int level) {
 	case Object:
 		switch(v.value) {
 		case Coin: add(COINS, i, xrand(0, 2), 0); break;
-		//case TreasureChest: add(COINS, i, 0, 0); break;
+			//case TreasureChest: add(COINS, i, 0, 0); break;
 		}
 		break;
 	}
@@ -380,7 +385,7 @@ void map::playround() {
 		run = false;
 		creaturea combatants;
 		setup(combatants);
-		sort(combatants); 
+		sort(combatants);
 		for(auto p : combatants) {
 			if(p->ismoved())
 				continue;
@@ -455,19 +460,42 @@ static void select_ray(indexa& result, indext i, direction_s d, int count) {
 	}
 }
 
-static void setstates(creaturea& source, statea s) {
-	for(auto p : source)
-		p->set(s);
-}
-
-void map::set(indext i, statea s, area_s a, int count) {
+void map::set(indext i, statea s, area_s a, int count, reaction_s reaction) {
 	if(!s)
 		return;
 	indexa indecies; select_all_around(indecies, i);
 	creaturea creatures; select(creatures);
 	filter(creatures, indecies);
 	sort(creatures);
-	if(a == NoArea)
+	if(a == NoArea) {
+		creatures.remove(reaction);
 		creatures.count = 1;
-	setstates(creatures, s);
+	}
+	for(auto p : creatures) {
+		if(p->getreaction()==reaction)
+			p->setfriendly(s);
+		else
+			p->sethostile(s);
+	}
+}
+
+void map::set(indext i0, short width, short height, map_tile_s id) {
+	auto x1 = i2x(i0);
+	auto y1 = i2y(i0);
+	for(short y = 0; y < height / 2; y++) {
+		for(short x = 0; x < width; x++) {
+			auto i = p2i({x1 + x - y, y1 + y * 2 + 1});
+			if(i >= mx*my)
+				continue;
+			set(i, id);
+		}
+		if(y * 2 + 2 < height) {
+			for(short x = 0; x < width - 1; x++) {
+				auto i = p2i({x1 + x - y, y1 + y * 2 + 2});
+				if(i >= mx*my)
+					continue;
+				set(i, id);
+			}
+		}
+	}
 }
