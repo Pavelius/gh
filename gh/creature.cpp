@@ -191,7 +191,7 @@ creaturei* creaturei::choose(creaturea& source, const char* format, bool interac
 
 void creaturei::attack(int bonus, int range, int pierce, statea states) {
 	creaturea targets; map::select(targets);
-	map::select(targets, getopposed(), getindex(), range, true);
+	map::filter(targets, getopposed(), getindex(), range, true);
 	auto enemy = choose(targets, "”кажите цель атаки. ўелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex());
 	if(!enemy)
 		return;

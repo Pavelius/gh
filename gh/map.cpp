@@ -234,6 +234,10 @@ static int compare_initiative(const void* p1, const void* p2) {
 	return e1->getinitiative() - e2->getinitiative();
 }
 
+void map::sort(creaturea& result) {
+	qsort(result.begin(), result.count, sizeof(result.data[0]), compare_initiative);
+}
+
 void map::select(creaturea& result) {
 	auto pb = result.data;
 	auto pe = result.endof();
@@ -256,7 +260,7 @@ void map::select(creaturea& result) {
 	result.count = pb - result.begin();
 }
 
-void map::select(creaturea& result, reaction_s reaction, indext index, int range, bool sort_all) {
+void map::filter(creaturea& result, reaction_s reaction, indext index, int range, bool sort_all) {
 	auto ps = result.begin();
 	auto hi = map::i2h(index);
 	if(!range)
@@ -278,7 +282,7 @@ void map::select(creaturea& result, reaction_s reaction, indext index, int range
 		qsort(result.begin(), result.count, sizeof(result.data[0]), compare_initiative);
 }
 
-void map::select(creaturea& result, indexa& indecies) {
+void map::filter(creaturea& result, const indexa& indecies) {
 	auto ps = result.begin();
 	for(auto p : result) {
 		auto i = p->getindex();
@@ -293,7 +297,7 @@ indext map::getmove(indext start, char bonus, int range, reaction_s enemy) {
 	creaturea source; select(source);
 	if(!range)
 		range = 1;
-	select(source, enemy, start, -1, true);
+	filter(source, enemy, start, -1, true);
 	auto start_hex = i2h(start);
 	creaturei* best_creature = 0;
 	auto best_range = Blocked;
@@ -316,10 +320,6 @@ indext map::getmove(indext start, char bonus, int range, reaction_s enemy) {
 static void setup(creaturea& combatants) {
 	combatants.clear();
 	map::select(combatants);
-}
-
-static void sort(creaturea& combatants) {
-	qsort(combatants.data, combatants.count, sizeof(combatants.data[0]), compare_initiative);
 }
 
 static void round_begin() {
@@ -436,53 +436,38 @@ void map::play() {
 	}
 }
 
-static unsigned getindecies(indext* pb, indext i, area_s a, int count) {
-	auto p = pb;
-	switch(a) {
-	case Circle:
-		for(auto d : all_around) {
-			auto i1 = to(i, d);
-			if(i1 == Blocked)
-				*p++ = i1;
-		}
-		break;
-	default:
-		break;
+static void select_all_around(indexa& result, indext i) {
+	for(auto d : all_around) {
+		auto i1 = to(i, d);
+		if(i1 == Blocked)
+			continue;
+		result.add(i1);
 	}
-	return p - pb;
 }
 
-static void setstates(indexa& indecies, statea s) {
-	for(auto i : indecies) {
-		auto p = map::findcreature(i);
-		if(!p)
-			continue;
-		p->set(s);
+static void select_ray(indexa& result, indext i, direction_s d, int count) {
+	auto i1 = i;
+	for(auto n = 0; n < count; n++) {
+		i1 = to(i1, d);
+		if(i1 == Blocked)
+			break;
+		result.add(i1);
 	}
+}
+
+static void setstates(creaturea& source, statea s) {
+	for(auto p : source)
+		p->set(s);
 }
 
 void map::set(indext i, statea s, area_s a, int count) {
-	indexa source;
-	source.count = getindecies(source.begin(), i, a, count);
-	setstates(source, s);
-}
-
-static void find(creaturea& source, indext i, area_s a, int area_count) {
-
-}
-
-creaturei* map::findcreature(indext i) {
-	for(auto& e : bsmeta<creaturei>()) {
-		if(!e)
-			continue;
-		if(e.getindex() == i)
-			return &e;
-	}
-	for(auto& e : bsmeta<playeri>()) {
-		if(!e)
-			continue;
-		if(e.getindex() == i)
-			return &e;
-	}
-	return 0;
+	if(!s)
+		return;
+	indexa indecies; select_all_around(indecies, i);
+	creaturea creatures; select(creatures);
+	filter(creatures, indecies);
+	sort(creatures);
+	if(a == NoArea)
+		creatures.count = 1;
+	setstates(creatures, s);
 }
