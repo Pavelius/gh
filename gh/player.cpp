@@ -87,7 +87,7 @@ void playeri::create(class_s v, int level) {
 	this->type = Class;
 	this->value = v;
 	setlevel(level);
-	auto& mn = bsmeta<classi>::elements[v];
+	auto& mn = getclass();
 	sethp(mn.levels[level]);
 	sethpmax(mn.levels[level]);
 	res = PLAYERS;
@@ -179,7 +179,7 @@ abilityid playeri::choose_action() {
 			addc(an, actions[1], 0, 1);
 	}
 	char temp[260]; stringbuilder sb(temp);
-	sb.add("Выбирайте [левой кнопкой мышки] одно действие из списка ниже");
+	sb.add("[%1] готов действовать. Что будем делать?", getclass().name);
 	abilityid id = an.choose(false, false, sb, combat_ability_tips, 0, 0, 0, 0);
 	return id;
 }
@@ -204,7 +204,6 @@ void playeri::choose_tactic() {
 		if(!ability_hand)
 			break;
 		char temp[512]; stringbuilder sb(temp);
-		sb.adds("Выбирайте способности на этот ход.");
 		if(actions[0]) {
 			sb.adds("Первая способность [%1]. Ваша инициатива на этот ход будет [%2i]",
 				bsmeta<abilityi>::elements[actions[0]].name,
@@ -215,7 +214,7 @@ void playeri::choose_tactic() {
 				sb.adds("Выбирайте вторую способность.");
 		}
 		else
-			sb.adds("Каждый ход вы можете разыграть две свои способности из списка ниже. После этого они пойдут в сброс.");
+			sb.adds("Каждый ход [%1] можете разыграть две свои способности из списка ниже. После этого они пойдут в сброс.", getclass().name);
 		answeri an;
 		for(auto index : ability_hand)
 			an.add(index, bsmeta<abilityi>::elements[index].name);

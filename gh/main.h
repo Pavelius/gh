@@ -84,7 +84,7 @@ enum summon_s : unsigned char {
 	TinkerHarmless,
 };
 enum monster_s : unsigned char {
-	AnimatedBones, AnimatedBodies, FireDemon,
+	AnimatedBones, AnimatedBodies, FireDemon, BanditGuard,
 };
 enum class_s : unsigned char {
 	Brute, Tinkerer, Scoundrell, Savvas,
@@ -420,9 +420,10 @@ public:
 	void						create(class_s v, int level);
 	short unsigned				getaction(int i) const { return actions[i]; }
 	unsigned					getabilities() const { return ability_hand.getcount(); }
-	unsigned					getabilitiesmax() const { return bsmeta<classi>::elements[value].abilities_cap; }
+	unsigned					getabilitiesmax() const { return getclass().abilities_cap; }
 	int							getbonus(int bonus) const;
 	deck&						getcombatcards() { return combat_deck; }
+	constexpr const classi&		getclass() const { return bsmeta<classi>::elements[value]; }
 	static playeri*				getcurrent();
 	const char*					getname() const { return name; }
 	bool						isallowability(int v) const;

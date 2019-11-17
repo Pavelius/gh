@@ -33,13 +33,13 @@ static void test_map() {
 	map::create();
 	map::add(TEXTURES, 12, 0);
 	map::set(12, 5, 8, Passable);
-	map::add(FURN, 173 - map::mx, 2, 2, Right);
+	map::add(FURN, 140, 2, 2, Right);
 	map::add(Coin, 48, 0);
-	map::add(Coin, 17, 0);
-	map::add(AnimatedBones, 77, 1);
-	map::add(AnimatedBones, 78, 1);
-	map::add(Brute, 174, 1);
-	map::add(Scoundrell, 172, 1);
+	map::add(Coin, 47, 0);
+	map::add(BanditGuard, 111, 1);
+	map::add(BanditGuard, 174, 1);
+	map::add(Brute, 76, 1);
+	map::add(Scoundrell, 202, 1);
 }
 
 static void test_answer() {

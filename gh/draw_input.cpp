@@ -35,12 +35,13 @@ extern rect				sys_static_area;
 int						distance(point p1, point p2);
 callback				draw::domodal;
 const int				size = 50;
+const int				right_width = 220;
 
 struct guii {
 	unsigned char		border;
 	unsigned char		opacity, opacity_disabled, opacity_hilighted;
 	short				button_width, window_width, window_height, hero_width;
-	short				tips_width, control_border, right_width;
+	short				tips_width, control_border;
 	short				padding;
 	void initialize() {
 		memset(this, 0, sizeof(*this));
@@ -50,7 +51,6 @@ struct guii {
 		padding = 4;
 		window_width = 400;
 		hero_width = 64;
-		right_width = 220;
 		tips_width = 200;
 		button_width = 64;
 		opacity_hilighted = 200;
@@ -244,15 +244,15 @@ static int windowf(int x, int y, int width, const char* string) {
 	return height + gui.border * 2 + gui.padding;
 }
 
-static int window(int x, int y, int width, const char* string, int right_width = 0, areas* pa = 0, bool only_height = false) {
-	auto right_side = (right_width != 0);
+static int window(int x, int y, int width, const char* string, int widthr = 0, areas* pa = 0, bool only_height = false) {
+	auto right_side = (widthr != 0);
 	rect rc = {x, y, x + width, y};
 	draw::state push;
 	draw::font = metrics::font;
 	auto height = textf(rc, string);
 	if(right_side) {
 		auto w1 = rc.width();
-		x = x + right_width - w1;
+		x = x + widthr - w1;
 		rc.x1 = x;
 		rc.x2 = rc.x1 + w1;
 	}
@@ -648,8 +648,8 @@ static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool sho
 	if(use_hilite) {
 		auto m = getmovecost(i);
 		if(m != Blocked) {
-			const rect rc = {pt.x - size / 2, pt.y - size / 2, pt.x + size / 2, pt.y + size / 2};
-			if(areb(rc))
+			const rect rch = {pt.x - size / 2, pt.y - size / 2, pt.x + size / 2, pt.y + size / 2};
+			if(areb(rch))
 				hilite_index = i;
 		}
 	}
@@ -828,7 +828,7 @@ int answeri::paint_answers(int x, int y, bool cancel_button, callback proc, answ
 	auto y1 = y;
 	for(auto& e : elements) {
 		bool run; areas pa; auto y1 = y;
-		y += windowb(x, y, gui.right_width, e.getname(), run, false, 0, 0, 0, &pa);
+		y += windowb(x, y, right_width, e.getname(), run, false, 0, 0, 0, &pa);
 		if((pa == AreaHilited || pa == AreaHilitedPressed)) {
 			if(hilite_answer)
 				hilite_index = e.param;
@@ -836,7 +836,7 @@ int answeri::paint_answers(int x, int y, bool cancel_button, callback proc, answ
 				stringbuilder sb(tooltips_text);
 				tooltips_point.x = x;
 				tooltips_point.y = y1;
-				tooltips_width = gui.right_width + metrics::padding * 2;
+				tooltips_width = right_width + metrics::padding * 2;
 				tips(sb, e.param);
 			}
 		}
@@ -844,7 +844,7 @@ int answeri::paint_answers(int x, int y, bool cancel_button, callback proc, answ
 			execute(proc, e.param);
 	}
 	if(cancel_button)
-		y += windowb(x, y, gui.right_width, "Отмена", buttoncancel, false, 0, KeyEscape);
+		y += windowb(x, y, right_width, "Отмена", buttoncancel, false, 0, KeyEscape);
 	return y - y1;
 }
 
@@ -862,7 +862,7 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2; auto y1 = y;
 		y += render_report(x, y, format);
-		x = getwidth() - gui.right_width - gui.border * 2;
+		x = getwidth() - right_width - gui.border * 2;
 		if(proc)
 			proc();
 		y += paint_answers(x, y, cancel_button, breakparam, tips, false);
@@ -886,8 +886,8 @@ void creaturei::choose_options(creaturei& enemy, int& attack, statei& states) co
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2; auto y1 = y;
 		y += render_report(x, y, sb);
-		x = getwidth() - gui.right_width - gui.border * 2;
-		y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeySpace);
+		x = getwidth() - right_width - gui.border * 2;
+		y += windowb(x, y, right_width, "Готово", buttonok, false, 0, KeySpace);
 		domodal();
 		control_standart();
 	}
@@ -899,11 +899,11 @@ indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, con
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2;
 		y += render_report(x, y, format);
-		x = getwidth() - gui.right_width - gui.border * 2;
+		x = getwidth() - right_width - gui.border * 2;
 		if(answers)
 			y += answers->paint_answers(x, y, false, 0, tips, true);
 		if(show_apply)
-			y += windowb(x, y, gui.right_width, "Готово", buttonok, false, 0, KeySpace);
+			y += windowb(x, y, right_width, "Готово", buttonok, false, 0, KeySpace);
 		paint_hilite_hexagon();
 		domodal();
 		control_standart();
@@ -950,7 +950,7 @@ static int button(int x, int y, callback proc, int param, const char* format, ..
 	char temp[260]; stringbuilder sb(temp);
 	sb.addv(format, xva_start(format));
 	auto result = false;
-	auto h = windowb(x, y, gui.right_width, sb, result, false);
+	auto h = windowb(x, y, right_width, sb, result, false);
 	if(result)
 		execute(proc, param);
 	return h;
@@ -963,7 +963,7 @@ int playeri::choose(const char* format, answeri& aw, answeri::tipspt tips) {
 		auto x = getwidth() - gui.window_width - gui.border * 2;
 		auto y = gui.border * 2;
 		y += render_report(x, y, format);
-		x = getwidth() - gui.right_width - gui.border * 2;
+		x = getwidth() - right_width - gui.border * 2;
 		if(aw)
 			y += aw.paint_answers(x, y, false, breakparam, tips, true);
 		y = draw::getheight() - (gui.border * 2 + draw::texth()) - gui.border;
