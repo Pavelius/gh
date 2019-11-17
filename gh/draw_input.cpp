@@ -36,26 +36,13 @@ int						distance(point p1, point p2);
 callback				draw::domodal;
 const int				size = 50;
 const int				right_width = 220;
-
-struct guii {
-	unsigned char		border;
-	unsigned char		opacity, opacity_disabled, opacity_hilighted;
-	short				button_width, window_width, window_height, hero_width;
-	short				tips_width, control_border;
-	short				padding;
-	void initialize() {
-		memset(this, 0, sizeof(*this));
-		opacity = 220;
-		opacity_disabled = 50;
-		border = 8;
-		padding = 4;
-		window_width = 400;
-		hero_width = 64;
-		tips_width = 200;
-		button_width = 64;
-		opacity_hilighted = 200;
-	}
-} gui;
+const unsigned char		opacity_button = 220;
+const unsigned char		opacity_disabled = 50;
+const unsigned char		opacity_hilighted = 200;
+const int				tips_width = 200;
+const int				window_width = 400;
+const int				gui_border = 8;
+const int				gui_padding = 4;
 
 static void set_focus_callback() {
 	auto id = getnext(draw::getfocus(), hot.param);
@@ -193,12 +180,12 @@ int draw::getresult() {
 }
 
 static areas hilite(rect rc) {
-	auto border = gui.border;
+	auto border = gui_border;
 	rc.offset(-border, -border);
 	color c = colors::form;
 	auto rs = draw::area(rc);
 	if(rs == AreaHilited) {
-		auto op = gui.opacity;
+		auto op = opacity_button;
 		draw::rectf(rc, c, op);
 		draw::rectb(rc, c);
 	}
@@ -207,12 +194,12 @@ static areas hilite(rect rc) {
 
 static areas window(rect rc, bool disabled = false, bool hilight = true, int border = 0) {
 	if(border == 0)
-		border = gui.border;
+		border = gui_border;
 	rc.offset(-border, -border);
 	color c = colors::form;
 	color b = colors::form;
 	auto rs = draw::area(rc);
-	auto op = gui.opacity;
+	auto op = opacity_button;
 	if(disabled)
 		op = op / 2;
 	else if(hilight && (rs == AreaHilited || rs == AreaHilitedPressed)) {
@@ -241,7 +228,7 @@ static int windowf(int x, int y, int width, const char* string) {
 	rc.x2 = rc.x1 + width;
 	window(rc, false);
 	render_text(x, y, rc.width(), string);
-	return height + gui.border * 2 + gui.padding;
+	return height + gui_border * 2 + gui_padding;
 }
 
 static int window(int x, int y, int width, const char* string, int widthr = 0, areas* pa = 0, bool only_height = false) {
@@ -262,14 +249,14 @@ static int window(int x, int y, int width, const char* string, int widthr = 0, a
 			*pa = a;
 		render_text(x, y, rc.width(), string);
 	}
-	return height + gui.border * 2;
+	return height + gui_border * 2;
 }
 
 static int window(int x, int y, int width_picture, int width_text, const char* picture, const char* string, areas* pa = 0, bool only_height = false) {
 	x -= width_picture;
 	auto width = width_picture + width_text;
 	rect rc = {x, y, x + width, y};
-	rect rc1 = {x + width_picture + gui.padding, y, x + width, y};
+	rect rc1 = {x + width_picture + gui_padding, y, x + width, y};
 	draw::state push;
 	draw::font = metrics::font;
 	auto height = textf(rc1, string);
@@ -279,10 +266,9 @@ static int window(int x, int y, int width_picture, int width_text, const char* p
 		auto a = window({x, y, x + width, y + height}, false, false);
 		if(pa)
 			*pa = a;
-		//render_picture(x, y, picture);
-		render_text(x + width_picture + gui.padding, y, width_text, string);
+		render_text(x + width_picture + gui_padding, y, width_text, string);
 	}
-	return height + gui.border * 2;
+	return height + gui_border * 2;
 }
 
 static int windowb(int x, int y, int width, const char* string, bool& result, bool disabled, int border = 0, unsigned key = 0, const char* tips = 0, areas* ppa = 0) {
@@ -302,7 +288,7 @@ static int windowb(int x, int y, int width, const char* string, bool& result, bo
 		if(key && key == hot.key)
 			result = true;
 	}
-	return rc.height() + gui.border * 2;
+	return rc.height() + gui_border * 2;
 }
 
 static int windowb(int x, int y, int width, const char* string, callback proc, bool disabled, int border = 0, unsigned key = 0, const char* tips = 0) {
@@ -385,14 +371,14 @@ static void render_tooltips(const char* format, int x, int y, int w) {
 	if(!draw::font)
 		return;
 	rect rc;
-	rc.x1 = x + w + gui.border * 2 + gui.padding;
+	rc.x1 = x + w + gui_border * 2 + gui_padding;
 	rc.y1 = y;
-	rc.x2 = rc.x1 + gui.tips_width;
+	rc.x2 = rc.x1 + tips_width;
 	rc.y2 = rc.y1;
 	draw::textf(rc, format);
-	if(rc.x2 > getwidth() - gui.border - gui.padding) {
+	if(rc.x2 > getwidth() - gui_border - gui_padding) {
 		auto w = rc.width();
-		rc.x1 = x - gui.border * 2 - gui.padding - w;
+		rc.x1 = x - gui_border * 2 - gui_padding - w;
 		rc.x2 = rc.x1 + w;
 	}
 	// Correct border
@@ -458,7 +444,6 @@ void draw::initialize() {
 	draw::font = metrics::font;
 	draw::fore = colors::text;
 	draw::fore_stroke = colors::blue;
-	gui.initialize();
 }
 
 static bool read_sprite(sprite** result, const char* name) {
@@ -474,21 +459,21 @@ static void end_turn() {
 }
 
 static int render_left() {
-	int x = gui.border;
-	int y = gui.border;
+	int x = gui_border;
+	int y = gui_border;
 	return y;
 }
 
 static int render_report(int x, int y, const char* format) {
 	if(!format)
 		return 0;
-	return window(x, y, gui.window_width, format, gui.window_width) + gui.padding;
+	return window(x, y, window_width, format, window_width) + gui_padding;
 }
 
 static int render_right(int x, int y, const char* format) {
 	if(!format)
 		return 0;
-	return window(x, y, gui.window_width, format) + gui.padding;
+	return window(x, y, window_width, format) + gui_padding;
 }
 
 void drawable::paint() const {
@@ -796,7 +781,7 @@ static void hexagonf(short x, short y) {
 }
 
 void playeri::paint_sheet() {
-	auto x = gui.border, y = gui.border;
+	auto x = gui_border, y = gui_border;
 	auto p = playeri::getcurrent();
 	if(!p)
 		return;
@@ -859,16 +844,16 @@ int	answeri::choose(bool cancel_button, bool random_choose, const char* format, 
 		back = paint_board;
 	while(ismodal()) {
 		back();
-		auto x = getwidth() - gui.window_width - gui.border * 2;
-		auto y = gui.border * 2; auto y1 = y;
+		auto x = getwidth() - window_width - gui_border * 2;
+		auto y = gui_border * 2; auto y1 = y;
 		y += render_report(x, y, format);
-		x = getwidth() - right_width - gui.border * 2;
+		x = getwidth() - right_width - gui_border * 2;
 		if(proc)
 			proc();
 		y += paint_answers(x, y, cancel_button, breakparam, tips, false);
 		if(format2) {
-			y1 += render_right(gui.border * 2, y1, format2);
-			y1 += an2->paint_answers(gui.border * 2, y1, false, breakparam, tips, false);
+			y1 += render_right(gui_border * 2, y1, format2);
+			y1 += an2->paint_answers(gui_border * 2, y1, false, breakparam, tips, false);
 		}
 		domodal();
 		control_standart();
@@ -883,10 +868,10 @@ void creaturei::choose_options(creaturei& enemy, int& attack, statei& states) co
 		paint_board();
 		sb.clear();
 		sb.add("%1 против %2.", getname(), enemy.getname());
-		auto x = getwidth() - gui.window_width - gui.border * 2;
-		auto y = gui.border * 2; auto y1 = y;
+		auto x = getwidth() - window_width - gui_border * 2;
+		auto y = gui_border * 2; auto y1 = y;
 		y += render_report(x, y, sb);
-		x = getwidth() - right_width - gui.border * 2;
+		x = getwidth() - right_width - gui_border * 2;
 		y += windowb(x, y, right_width, "Готово", buttonok, false, 0, KeySpace);
 		domodal();
 		control_standart();
@@ -896,10 +881,10 @@ void creaturei::choose_options(creaturei& enemy, int& attack, statei& states) co
 indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply) {
 	while(ismodal()) {
 		paint_screen(true, show_movement, false, false);
-		auto x = getwidth() - gui.window_width - gui.border * 2;
-		auto y = gui.border * 2;
+		auto x = getwidth() - window_width - gui_border * 2;
+		auto y = gui_border * 2;
 		y += render_report(x, y, format);
-		x = getwidth() - right_width - gui.border * 2;
+		x = getwidth() - right_width - gui_border * 2;
 		if(answers)
 			y += answers->paint_answers(x, y, false, 0, tips, true);
 		if(show_apply)
@@ -960,13 +945,13 @@ int playeri::choose(const char* format, answeri& aw, answeri::tipspt tips) {
 	slide(getindex());
 	while(ismodal()) {
 		paint_screen(false, false, false, true, getindex());
-		auto x = getwidth() - gui.window_width - gui.border * 2;
-		auto y = gui.border * 2;
+		auto x = getwidth() - window_width - gui_border * 2;
+		auto y = gui_border * 2;
 		y += render_report(x, y, format);
-		x = getwidth() - right_width - gui.border * 2;
+		x = getwidth() - right_width - gui_border * 2;
 		if(aw)
 			y += aw.paint_answers(x, y, false, breakparam, tips, true);
-		y = draw::getheight() - (gui.border * 2 + draw::texth()) - gui.border;
+		y = draw::getheight() - (gui_border * 2 + draw::texth()) - gui_border;
 		if(ability_discard)
 			y -= button(x, y, buttonok, 0, "Потери (%1i карт)", ability_discard.getcount());
 		if(ability_drop)
