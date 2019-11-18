@@ -125,7 +125,9 @@ typedef cflags<card_s, unsigned char> carda;
 typedef adat<short unsigned, 24> abilitya;
 typedef adat<short unsigned, 16> itema;
 typedef unsigned short indext;
-typedef adat<indext, 32> indexa;
+struct indexa : adat<indext, 32> {
+	void						select(indext i, area_s a, direction_s d, int count);
+};
 struct creaturea : adat<creaturei*, 31> {
 	void						remove(reaction_s v);
 	void						remove(state_s v);
@@ -322,8 +324,8 @@ public:
 	void						act(const actionf& e);
 	void						attack(creaturei& enemy, int bonus, int pierce, statea states);
 	void						attack(int bonus, int range, int pierce, statea states);
-	static creaturei*			choose(creaturea& source, const char* format, bool interactive = true, short unsigned start_index = Blocked);
-	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply);
+	static creaturei*			choose(creaturea& source, const char* format, bool interactive, short unsigned start_index, action_s action);
+	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply, action_s action);
 	void						choose_options(creaturei& enemy, int& attack, statei& states) const;
 	void						create(variant v, int level);
 	void						damage(int v);
@@ -485,6 +487,7 @@ void							setcamera(point pt);
 void							setmovecost(indext i, indext v);
 void							setwave(indext v);
 unsigned short					to(indext index, direction_s d);
+direction_s						to(direction_s d1, direction_s d);
 void							wave(indext start_index);
 };
 DECLENUM(area);

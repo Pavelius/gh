@@ -27,15 +27,18 @@ static rect				last_window = {0, 0, 900, 600};
 static point			tooltips_point;
 static short			tooltips_width;
 static char				tooltips_text[4096];
-static short unsigned	hilite_index;
+static indext			hilite_index;
+static indexa			hilite_indecies;
 static short unsigned	special_hilite_index;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
+static color			fore_hilite = colors::white;
 extern rect				sys_static_area;
 int						distance(point p1, point p2);
 callback				draw::domodal;
 const int				size = 50;
 const int				right_width = 220;
+const bool				show_map_index = false;
 const unsigned char		opacity_button = 220;
 const unsigned char		opacity_disabled = 50;
 const unsigned char		opacity_hilighted = 200;
@@ -609,7 +612,7 @@ static void hexagon(point pt, const point* points, color c1, float lw) {
 	fore = push_fore;
 }
 
-static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool show_movement) {
+static void hexagon(short unsigned i, bool use_hilite, bool show_movement) {
 	auto pt = map::h2p(i) - camera;
 	const rect rc = {0 - 100, 0 - 100, draw::getwidth() + 100, draw::getheight() + 100};
 	if(!pt.in(rc))
@@ -617,13 +620,13 @@ static void hexagon(short unsigned i, bool use_hilite, bool show_index, bool sho
 	hexagon(pt, hexagon_offset, colors::black);
 	if(map::is(i, HasBlock))
 		hexagon(pt, hexagon_offset2, colors::green);
-	if(show_index || show_movement) {
+	if(show_map_index || show_movement) {
 		auto m = getmovecost(i);
 		char temp[32]; stringbuilder sb(temp); temp[0] = 0;
 		if(show_movement) {
 			if(m && m != Blocked)
 				sb.add("%1i", m);
-		} else if(show_index)
+		} else
 			sb.add("%1i", i);
 		if(temp[0])
 			text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
@@ -700,22 +703,37 @@ static void paint_elements(int x, int y) {
 	}
 }
 
-static void paint_grid(bool can_choose, bool show_movement, bool show_index) {
+static void paint_grid(bool can_choose, bool show_movement) {
 	auto pf = font;
 	font = metrics::font;
 	for(short unsigned i = 0; i < map::mx*map::my; i++) {
 		if(map::is(i, HasWall))
 			continue;
-		hexagon(i, can_choose, show_index, show_movement);
+		hexagon(i, can_choose, show_movement);
 	}
 	font = pf;
 }
 
+static void hexagonf(short x, short y) {
+	auto p1 = hexagon_offset[4];
+	auto p2 = hexagon_offset[1];
+	rectf({x + p1.x, y + p1.y + 1, x + p2.x + 1, y + p2.y});
+	triangle({x + p2.x, y + p2.y}, {x, y + size});
+	triangle({x + p2.x, y + p1.y}, {x, y - size});
+}
+
 static void paint_hilite_hexagon() {
-	auto pt = map::h2p(hilite_index) - camera;
-	hexagon(pt, hexagon_offset2, colors::yellow);
+	if(hilite_index != Blocked) {
+		auto pf = fore;
+		auto pt = map::h2p(hilite_index) - camera;
+		fore = fore_hilite;
+		fore.a = 64;
+		hexagonf(pt.x, pt.y);
+		fore = pf;
+		hexagon(pt, hexagon_offset2, colors::yellow);
+	}
 	if(special_hilite_index != Blocked) {
-		pt = map::h2p(special_hilite_index) - camera;
+		auto pt = map::h2p(special_hilite_index) - camera;
 		hexagon(pt, hexagon_offset3, colors::yellow.mix(colors::border));
 	}
 }
@@ -750,14 +768,14 @@ static void paint_floor() {
 		e.paint();
 }
 
-static void paint_screen(bool can_choose, bool show_movement, bool show_index, bool paint_hilite, short unsigned index = Blocked) {
+static void paint_screen(bool can_choose, bool show_movement, bool paint_hilite, short unsigned index) {
 	special_hilite_index = index;
 	last_window = {0, 0, draw::getwidth(), draw::getheight()};
 	area(last_window);
 	rectf(last_window, colors::black);
 	hilite_index = Blocked;
 	paint_floor();
-	paint_grid(can_choose, show_movement, show_index);
+	paint_grid(can_choose, show_movement);
 	paint_figures();
 	paint_monsters();
 	paint_players();
@@ -770,14 +788,6 @@ void map::setcamera(point pt) {
 	pt.x -= last_window.width() / 2;
 	pt.y -= last_window.height() / 2;
 	camera = pt;
-}
-
-static void hexagonf(short x, short y) {
-	auto p1 = hexagon_offset[4];
-	auto p2 = hexagon_offset[1];
-	rectf({x + p1.x, y + p1.y, x + p2.x + 1, y + p2.y});
-	triangle({x + p2.x, y + p2.y}, {x, y + size});
-	triangle({x + p2.x, y + p1.y}, {x, y - size});
 }
 
 void playeri::paint_sheet() {
@@ -802,7 +812,7 @@ void playeri::paint_back() {
 }
 
 static void paint_board() {
-	paint_screen(false, false, false, true);
+	paint_screen(false, false, true, Blocked);
 }
 
 void creaturei::hiliteindex(stringbuilder& sb, int param) {
@@ -878,7 +888,14 @@ void creaturei::choose_options(creaturei& enemy, int& attack, statei& states) co
 	}
 }
 
-indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply) {
+indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply, action_s action) {
+	auto pf = fore_hilite;
+	switch(action) {
+	case Attack: fore_hilite = colors::red; break;
+	case Move: fore_hilite = colors::blue; break;
+	case Heal: fore_hilite = colors::green; break;
+	default: fore_hilite = colors::yellow; break;
+	}
 	while(ismodal()) {
 		paint_screen(true, show_movement, false, false);
 		auto x = getwidth() - window_width - gui_border * 2;
@@ -895,6 +912,7 @@ indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, con
 		if(hot.key == MouseLeft && hot.pressed && hilite_index != Blocked)
 			breakmodal(2);
 	}
+	fore_hilite = pf;
 	if(getresult() == 2)
 		return hilite_index;
 	return Blocked;
@@ -944,7 +962,7 @@ static int button(int x, int y, callback proc, int param, const char* format, ..
 int playeri::choose(const char* format, answeri& aw, answeri::tipspt tips) {
 	slide(getindex());
 	while(ismodal()) {
-		paint_screen(false, false, false, true, getindex());
+		paint_screen(false, false, true, getindex());
 		auto x = getwidth() - window_width - gui_border * 2;
 		auto y = gui_border * 2;
 		y += render_report(x, y, format);
@@ -972,7 +990,7 @@ void map::editor() {
 		rectf(last_window, colors::black);
 		hilite_index = Blocked;
 		paint_floor();
-		paint_grid(true, true, true);
+		paint_grid(true, true);
 		paint_figures();
 		paint_hilite_hexagon();
 		domodal();

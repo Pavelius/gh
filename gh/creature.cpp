@@ -98,7 +98,7 @@ void creaturei::move(action_s id, char bonus) {
 			map::moverestrict(bonus);
 			slide(getindex());
 			ni = choose_index(0, 0,
-				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true);
+				"Укажите конечную клетку движения. Нажмите [левой кнопкой] мышки в центр клетки.", true, true, Move);
 		} else {
 			ni = map::getmove(getindex(), bonus, get(Range), getreaction());
 			if(ni != Blocked)
@@ -168,7 +168,7 @@ static creaturei* getbest(creaturei** source, unsigned count, short unsigned sta
 	return source[result_index];
 }
 
-creaturei* creaturei::choose(creaturea& source, const char* format, bool interactive, short unsigned start_index) {
+creaturei* creaturei::choose(creaturea& source, const char* format, bool interactive, short unsigned start_index, action_s action) {
 	if(!source)
 		return 0;
 	if(interactive) {
@@ -179,7 +179,7 @@ creaturei* creaturei::choose(creaturea& source, const char* format, bool interac
 			map::setmovecost(index, 0);
 			an.add(index, "%1 (%2i хитов)", p->getname(), p->gethp());
 		}
-		auto index = choose_index(&an, 0, format, false, false);
+		auto index = choose_index(&an, 0, format, false, false, action);
 		for(auto p : source) {
 			if(p->getindex() == index)
 				return p;
@@ -196,7 +196,7 @@ void creaturei::attack(int bonus, int range, int pierce, statea states) {
 	targets.remove(Invisibility);
 	targets.match(getindex(), range);
 	targets.sort();
-	auto enemy = choose(targets, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex());
+	auto enemy = choose(targets, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex(), Attack);
 	if(!enemy)
 		return;
 	attack(*enemy, bonus, pierce, states);

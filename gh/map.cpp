@@ -399,7 +399,7 @@ static void select_ray(indexa& result, indext i, direction_s d, int count) {
 }
 
 void map::set(indext i, statea s, area_s a, int count, reaction_s reaction) {
-	if(!s)
+	///////////////if(!s)
 		return;
 	indexa indecies; select_all_around(indecies, i);
 	creaturea creatures;
@@ -435,6 +435,29 @@ void map::set(indext i0, short width, short height, map_tile_s id) {
 					continue;
 				set(i, id);
 			}
+		}
+	}
+}
+
+direction_s map::to(direction_s d1, direction_s d) {
+	switch(d) {
+	case Left:
+		switch(d) {
+		case RightUp: return LeftUp;
+		case Right: return RightUp;
+		case RightDown: return Right;
+		case LeftDown: return RightDown;
+		case Left: return LeftDown;
+		default:  return Left;
+		}
+	default:
+		switch(d) {
+		case RightUp: return Right;
+		case Right: return RightDown;
+		case RightDown: return LeftDown;
+		case LeftDown: return Left;
+		case Left: return LeftUp;
+		default:  return RightUp;
 		}
 	}
 }

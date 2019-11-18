@@ -38,6 +38,7 @@ static void test_map() {
 	map::add(Coin, 47, 0);
 	map::add(BanditGuard, 111, 1);
 	map::add(BanditGuard, 174, 1);
+	map::add(BanditGuard, 142, 1);
 	map::add(Brute, 76, 1);
 	map::add(Scoundrell, 202, 1);
 }
