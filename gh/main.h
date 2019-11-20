@@ -116,6 +116,11 @@ enum map_tile_s : unsigned char {
 enum reaction_s : unsigned char {
 	Enemy, Friend
 };
+enum region_s : unsigned char {
+	CooperneckMountains, DaggerForest, StoneRoad, StillRiver, CorpseWood,
+	Gloomhaven, CastRoad, SerpentsKissRiver, LingeringSwamp, WatcherMountains,
+	MerchantsBay, MistySea,
+};
 class creaturei;
 class playeri;
 struct actionf;
@@ -218,6 +223,18 @@ struct monsterability {
 struct elementi {
 	const char*					id;
 	const char*					name;
+};
+struct regioni {
+	const char*					id;
+	const char*					name;
+	point						pos;
+	const char*					description;
+};
+struct scenarioi {
+	const char*					id;
+	const char*					name;
+	region_s					region;
+	point						pos;
 };
 struct statei {
 	const char*					id;
@@ -445,6 +462,10 @@ struct treasurei : drawable {
 struct eventi {
 	const char*					text;
 	const char*					variants[2];
+};
+struct squadi {
+	char						prosperity;
+	char						reputation;
 };
 namespace map {
 const int						mx = 32;

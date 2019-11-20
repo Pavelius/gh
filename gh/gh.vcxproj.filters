@@ -24,9 +24,6 @@
     <ClCompile Include="ability.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="point.cpp">
-      <Filter>Логика</Filter>
-    </ClCompile>
     <ClCompile Include="draw.cpp">
       <Filter>Графика</Filter>
     </ClCompile>
@@ -150,15 +147,18 @@
     <ClCompile Include="indexa.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="point.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="squad.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="region.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
-      <Filter>Логика</Filter>
-    </ClInclude>
-    <ClInclude Include="point.h">
-      <Filter>Логика</Filter>
-    </ClInclude>
-    <ClInclude Include="rect.h">
       <Filter>Логика</Filter>
     </ClInclude>
     <ClInclude Include="draw.h">
@@ -186,6 +186,12 @@
       <Filter>Поддержка</Filter>
     </ClInclude>
     <ClInclude Include="crt.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="point.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="rect.h">
       <Filter>Поддержка</Filter>
     </ClInclude>
   </ItemGroup>
