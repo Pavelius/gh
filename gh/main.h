@@ -90,7 +90,7 @@ enum class_s : unsigned char {
 	Brute, Tinkerer, Scoundrell, Savvas,
 };
 enum res_s : unsigned char {
-	GLOOMHAVEN, DUNGEON, ELEMENTS,
+	GHMAP, GLOOMHAVEN, DUNGEON, ELEMENTS,
 	COINS, CONDITIONS, FURN,
 	MONSTERS, PLAYERS, PLAYERB, TEXTURES,
 };
@@ -466,6 +466,8 @@ struct eventi {
 struct squadi {
 	char						prosperity;
 	char						reputation;
+	void						moveto() const;
+	static void					paintmap();
 };
 namespace map {
 const int						mx = 32;

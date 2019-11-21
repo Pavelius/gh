@@ -122,7 +122,7 @@ static bool test_inherance() {
 void util_main();
 
 int main() {
-	//util_main();
+	util_main();
 	if(!test_inherance())
 		return 0;
 	if(!test_abilities())
@@ -137,8 +137,10 @@ int main() {
 	//test_movement();
 	//test_players();
 	//test_ability();
-	test_play();
+	//test_play();
 	//map::editor();
+	squadi sq;
+	sq.moveto();
 	return 0;
 }
 

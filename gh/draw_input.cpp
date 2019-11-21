@@ -997,3 +997,13 @@ void map::editor() {
 		control_standart();
 	}
 }
+
+void squadi::paintmap() {
+	last_window = {0, 0, draw::getwidth(), draw::getheight()};
+	area(last_window);
+	rectf(last_window, colors::gray);
+	hilite_index = Blocked;
+	auto x1 = - camera.x;
+	auto y1 = - camera.y;
+	image(x1, y1, gres(GHMAP), 0, 0);
+}
