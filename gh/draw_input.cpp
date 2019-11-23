@@ -918,7 +918,9 @@ indext creaturei::choose_index(const answeri* answers, answeri::tipspt tips, con
 	return Blocked;
 }
 
-void drawable::slide(point pt) {
+void drawable::slide(point pt, void(*proc)()) {
+	if(!proc)
+		proc = paint_board;
 	const auto step = 16;
 	auto x0 = camera.x;
 	auto y0 = camera.y;
@@ -937,7 +939,7 @@ void drawable::slide(point pt) {
 	auto dx = x1 - x0;
 	auto dy = y1 - y0;
 	while(start < lenght && ismodal()) {
-		paint_screen(false, false, false, false);
+		proc();
 		sysredraw();
 		start += step;
 		short x2 = x0 + dx * start / lenght;
@@ -1006,4 +1008,7 @@ void squadi::paintmap() {
 	auto x1 = - camera.x;
 	auto y1 = - camera.y;
 	image(x1, y1, gres(GHMAP), 0, 0);
+	char temp[260]; stringbuilder sb(temp);
+	sb.add("Mouse %1i, %2i", hot.mouse.x + camera.x, hot.mouse.y + camera.y);
+	text(10, 10, temp);
 }

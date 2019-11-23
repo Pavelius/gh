@@ -4,7 +4,7 @@ figurei bsmeta<figurei>::elements[32];
 DECLBASE(figurei);
 
 void drawable::slide(indext i ) {
-	slide(map::h2p(i));
+	slide(map::h2p(i), 0);
 }
 
 void figurei::setpos(short unsigned v) {

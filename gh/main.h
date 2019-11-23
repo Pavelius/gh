@@ -161,6 +161,21 @@ struct variant {
 	void						clear() { type = NoVariant; value = 0; }
 	const char*					getname() const;
 };
+template<unsigned last>
+class flagable {
+	static constexpr unsigned s = 8;
+	static constexpr unsigned c = 1 + last / s;
+	unsigned char				data[c];
+public:
+	constexpr flagable() : data{0} {}
+	template<class T> constexpr flagable(const std::initializer_list<T>& v) : data{0} { for(auto e : v) set(e); }
+	constexpr void				add(const flagable& e) { for(unsigned i = 0; i < c; i++) data[i] |= e.data[i]; }
+	void						clear() { memset(this, 0, sizeof(*this)); }
+	constexpr bool				is(short unsigned v) const { return (data[v / s] & (1 << (v%s))) != 0; }
+	constexpr void				remove(short unsigned v) { data[v / s] &= ~(1 << (v%s)); }
+	constexpr void				set(short unsigned v) { data[v / s] |= 1 << (v%s); }
+	constexpr void				set(short unsigned v, bool activate) { if(activate) set(v); else remove(v); }
+};
 class answeri : stringbuilder {
 	struct element {
 		int						param;
@@ -234,7 +249,9 @@ struct scenarioi {
 	const char*					id;
 	const char*					name;
 	region_s					region;
+	unsigned char				open[8];
 	point						pos;
+	constexpr explicit operator bool() const { return name!=0; }
 };
 struct statei {
 	const char*					id;
@@ -278,7 +295,7 @@ struct drawable : point {
 	short unsigned				flags;
 	void						paint() const;
 	void						setdir(direction_s v);
-	static void					slide(point pt);
+	static void					slide(point pt, void(*proc)());
 	static void					slide(indext i);
 };
 class figurei : public drawable, public variant {
@@ -466,7 +483,11 @@ struct eventi {
 struct squadi {
 	char						prosperity;
 	char						reputation;
-	void						moveto() const;
+	flagable<128>				scenaries;
+	static squadi&				getactive();
+	bool						isopen(unsigned char v) const { return scenaries.is(v); }
+	void						openscenarion(unsigned char v) { scenaries.set(v); }
+	int							moveto() const;
 	static void					paintmap();
 };
 namespace map {

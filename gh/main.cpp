@@ -119,6 +119,12 @@ static bool test_inherance() {
 	return i != 128;
 }
 
+static void test_worldmap() {
+	squadi sq;
+	sq.openscenarion(1);
+	sq.moveto();
+}
+
 void util_main();
 
 int main() {
@@ -137,10 +143,8 @@ int main() {
 	//test_movement();
 	//test_players();
 	//test_ability();
-	//test_play();
+	test_play();
 	//map::editor();
-	squadi sq;
-	sq.moveto();
 	return 0;
 }
 
