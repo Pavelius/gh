@@ -316,16 +316,33 @@ public:
 	char						getdamage() const { return damage; }
 	const statea&				getstate() const { return states; }
 };
+union abilityid {
+	int							i;
+	struct {
+		short unsigned			index;
+		unsigned char			upper;
+		unsigned char			standart;
+	};
+	constexpr abilityid() : i(0) {}
+	constexpr abilityid(int i) : i(i) {}
+	constexpr abilityid(short unsigned index, unsigned char upper, unsigned char standart) : index(index), standart(standart), upper(upper) {}
+	const commanda&				getability() const;
+};
 class activei : variant {
+	abilityid					card;
 	char						actions[Bless];
 	variant						target;
 	duration_s					duration;
 	action_s					use_experiance;
 	char						uses, uses_maximum;
 public:
+	explicit operator bool() const { return card.index != 0; }
 	void						clear() { memset(this, 0, sizeof(*this)); }
+	void						discard();
 	int							get(action_s i) const { return actions[i]; }
 	duration_s					getduration() const { return duration; }
+	const char*					getname() const;
+	playeri*					getplayer() const;
 	int							getuses() const { return uses; }
 	bool						is(const variant& e) const { return target == e; }
 	bool						markuse(action_s v);
@@ -411,18 +428,6 @@ struct battlecardi {
 	int							count;
 	variant						cless;
 	statea						states;
-};
-union abilityid {
-	int							i;
-	struct {
-		short unsigned			index;
-		unsigned char			upper;
-		unsigned char			standart;
-	};
-	constexpr abilityid() : i(0) {}
-	constexpr abilityid(int i) : i(i) {}
-	constexpr abilityid(short unsigned index, unsigned char upper, unsigned char standart) : index(index), standart(standart), upper(upper) {}
-	const commanda&				getability() const;
 };
 class statistic {
 	unsigned char				data[ItemsUsed + 1];

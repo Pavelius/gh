@@ -87,7 +87,7 @@ void creaturei::move(action_s id, char bonus) {
 			map::block();
 			map::wave(getindex());
 		} else {
-			// ≈сли полет, то вначале двигаемс€ так, как будто
+			// ≈сли полет или прыжек, то вначале двигаемс€ так, как будто
 			// преград нету, затем блокируем клетки
 			map::wave(getindex());
 			map::block(getopposed());

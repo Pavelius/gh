@@ -312,6 +312,16 @@ static void lower_elements() {
 	}
 }
 
+static void clear_activity() {
+	for(auto& e : bsmeta<activei>()) {
+		if(!e)
+			continue;
+		if(e.getduration() == DurationRound) {
+			e.clear();
+		}
+	}
+}
+
 void round_end() {
 	next_monster_action();
 	lower_elements();

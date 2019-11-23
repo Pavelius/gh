@@ -1,6 +1,6 @@
 #include "main.h"
 
-activei bsmeta<activei>::elements[32];
+activei bsmeta<activei>::elements[16];
 DECLBASE(activei);
 
 bool activei::markuse(action_s id) {
@@ -12,4 +12,17 @@ bool activei::markuse(action_s id) {
 			uses--;
 	}
 	return result;
+}
+
+playeri* activei::getplayer() const {
+	auto type = bsmeta<abilityi>::elements[card.index].type;
+	return bsmeta<playeri>::elements + type;
+}
+
+void activei::discard() {
+	auto player = getplayer();
+	if(player) {
+
+	}
+		
 }
