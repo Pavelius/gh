@@ -27,8 +27,8 @@ static void ability_tips(stringbuilder& sb, int param) {
 	param = param & 0xFFF;
 	auto& ab = bsmeta<abilityi>::elements[param];
 	actiona a1, a2;
-	a1.parse(ab.upper, *current_player);
-	a2.parse(ab.lower, *current_player);
+	a1.parse(ab.upper);
+	a2.parse(ab.lower);
 	a1.tostring(sb);
 	sb.add("\n[Инициатива: %1i]\n", ab.initiative);
 	a2.tostring(sb);
@@ -125,7 +125,7 @@ void playeri::removeaction(abilityid id) {
 		actions[1] = 0;
 	else
 		return;
-	actiona ac; ac.parse(id.getability(), *this);
+	actiona ac; ac.parse(id.getability());
 	if(ac.type == DiscardableCard)
 		ability_discard.add(id.i);
 	else
@@ -136,7 +136,7 @@ static void combat_ability_tips(stringbuilder& sb, int param) {
 	abilityid id = param;
 	auto& cm = id.getability();
 	actiona action;
-	action.parse(cm, *current_player);
+	action.parse(cm);
 	action.tostring(sb);
 }
 

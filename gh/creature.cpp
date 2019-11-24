@@ -335,6 +335,7 @@ int	creaturei::get(action_s id) const {
 		case Range: r = lv.range; break;
 		}
 	}
+	r += getactive(id);
 	return r;
 }
 
@@ -350,7 +351,7 @@ void creaturei::turn() {
 
 void creaturei::play(const commanda& commands) {
 	actiona	actions;
-	actions.parse(commands, *this);
+	actions.parse(commands);
 	for(auto& e : actions.data) {
 		if(!e)
 			continue;

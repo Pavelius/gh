@@ -19,10 +19,19 @@ playeri* activei::getplayer() const {
 	return bsmeta<playeri>::elements + type;
 }
 
+int activei::get(action_s id) const {
+	actiona action;
+	action.parse(card.getability());
+	for(auto& e : action.data) {
+		if(e.id == id)
+			return e.bonus;
+	}
+	return 0;
+}
+
 void activei::discard() {
 	auto player = getplayer();
 	if(player) {
 
 	}
-		
 }

@@ -70,7 +70,7 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 	return pb;
 }
 
-void actiona::parse(const commanda& source, creaturei& player) {
+void actiona::parse(const commanda& source) {
 	memset(this, 0, sizeof(*this));
 	actionf* pa = 0;
 	auto pb = source.data;

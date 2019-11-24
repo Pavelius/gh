@@ -282,7 +282,7 @@ struct actiona {
 	actionf						data[4];
 	constexpr actiona() : type(StandartCard), data{} {}
 	void						clear() { memset(this, 0, sizeof(*this)); }
-	void						parse(const commanda& source, creaturei& player);
+	void						parse(const commanda& source);
 	void						tostring(stringbuilder& sb) const;
 };
 struct areai {
@@ -330,7 +330,6 @@ union abilityid {
 };
 class activei : variant {
 	abilityid					card;
-	char						actions[Bless];
 	variant						target;
 	duration_s					duration;
 	action_s					use_experiance;
@@ -339,7 +338,7 @@ public:
 	explicit operator bool() const { return card.index != 0; }
 	void						clear() { memset(this, 0, sizeof(*this)); }
 	void						discard();
-	int							get(action_s i) const { return actions[i]; }
+	int							get(action_s id) const;
 	duration_s					getduration() const { return duration; }
 	const char*					getname() const;
 	playeri*					getplayer() const;

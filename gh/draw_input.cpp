@@ -612,6 +612,14 @@ static void hexagon(point pt, const point* points, color c1, float lw) {
 	fore = push_fore;
 }
 
+static void hexagonf(short x, short y) {
+	auto p1 = hexagon_offset[4];
+	auto p2 = hexagon_offset[1];
+	rectf({x + p1.x, y + p1.y + 1, x + p2.x + 1, y + p2.y});
+	triangle({x + p2.x, y + p2.y}, {x, y + size});
+	triangle({x + p2.x, y + p1.y}, {x, y - size});
+}
+
 static void hexagon(short unsigned i, bool use_hilite, bool show_movement) {
 	auto pt = map::h2p(i) - camera;
 	const rect rc = {0 - 100, 0 - 100, draw::getwidth() + 100, draw::getheight() + 100};
@@ -620,18 +628,21 @@ static void hexagon(short unsigned i, bool use_hilite, bool show_movement) {
 	hexagon(pt, hexagon_offset, colors::black);
 	if(map::is(i, HasBlock))
 		hexagon(pt, hexagon_offset2, colors::green);
-	if(show_map_index || show_movement) {
-		auto m = getmovecost(i);
-		char temp[32]; stringbuilder sb(temp); temp[0] = 0;
-		if(show_movement) {
-			if(m && m != Blocked)
-				sb.add("%1i", m);
-		} else
+	auto m = getmovecost(i);
+	if(m == Blocked)
+		use_hilite = false;
+	if(show_movement && use_hilite && m) {
+		auto pf = fore;
+		fore = colors::black;
+		fore.a = 128;
+		hexagonf(pt.x, pt.y);
+		fore = pf;
+	} else if(show_map_index) {
+		if(m != Blocked) {
+			char temp[32]; stringbuilder sb(temp);
 			sb.add("%1i", i);
-		if(temp[0])
 			text(pt.x - textw(temp) / 2, pt.y - texth() / 2, temp);
-		else
-			use_hilite = false;
+		}
 	}
 	if(use_hilite) {
 		auto m = getmovecost(i);
@@ -712,14 +723,6 @@ static void paint_grid(bool can_choose, bool show_movement) {
 		hexagon(i, can_choose, show_movement);
 	}
 	font = pf;
-}
-
-static void hexagonf(short x, short y) {
-	auto p1 = hexagon_offset[4];
-	auto p2 = hexagon_offset[1];
-	rectf({x + p1.x, y + p1.y + 1, x + p2.x + 1, y + p2.y});
-	triangle({x + p2.x, y + p2.y}, {x, y + size});
-	triangle({x + p2.x, y + p1.y}, {x, y - size});
 }
 
 static void paint_hilite_hexagon() {

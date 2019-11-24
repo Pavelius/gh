@@ -3,18 +3,17 @@
 using namespace map;
 
 static bool test_abilities() {
-	creaturei p1;
 	for(auto& e : bsmeta<abilityi>()) {
 		if(!e)
 			continue;
 		actiona a1, a2;
-		a1.parse(e.upper, p1);
+		a1.parse(e.upper);
 		if(!a1.data[0].id && !a1.data[0].bonus)
 			return false;
-		a2.parse(e.lower, p1);
+		a2.parse(e.lower);
 		if(!a2.data[0].id && !a2.data[0].bonus) {
 			a2.clear();
-			a2.parse(e.lower, p1);
+			a2.parse(e.lower);
 			return false;
 		}
 	}
@@ -46,7 +45,7 @@ static void test_map() {
 static void test_answer() {
 	char temp[260]; stringbuilder sb(temp);
 	sb.add("Внезапно все потемнело и вы увидели свет в дальнем краю прохода.");
-	creaturei p1, m1;
+	creaturei m1;
 	auto p2 = bsmeta<playeri>::add();
 	p2->type = Class;
 	p2->value = Brute;
@@ -54,7 +53,7 @@ static void test_answer() {
 	p2->frame = 0;
 	p2->setpos(142);
 	answeri an;
-	actiona actions; actions.parse(bsmeta<abilityi>::elements[2].upper, p1);
+	actiona actions; actions.parse(bsmeta<abilityi>::elements[2].upper);
 	char tem1[260]; stringbuilder sa(tem1); tem1[0] = 0;
 	actions.tostring(sa);
 	an.add(1, tem1);
