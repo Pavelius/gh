@@ -21,14 +21,22 @@ void deck::create() {
 	shuffle();
 }
 
-int deck::nextbonus(int& pierce, statea& states) {
-	auto r = 0;
+void deck::modify(int& bonus, int& pierce, statea& states) {
+	char temp[512]; stringbuilder sb(temp);
 	auto i = get();
 	auto& ce = bsmeta<battlecardi>::elements[i];
-	r += bsmeta<commandi>::elements[ce.command].bonus;
+	while(true) {
+		auto b = bsmeta<commandi>::elements[ce.command].bonus;
+		bonus += b;
+		answeri an;
+		sb.addn("Вы вытянули %+1i", b);
+		sb.addn("Вы нанесете урон [%1i]", bonus);
+		an.add(1, "Принять");
+		an.choose(false, false, sb);
+		break;
+	}
 	if(ce.cless.type == Action && (ce.cless.value == Bless || ce.cless.value == Curse)) {
 		// Discard by default
 	} else
 		dropdown(i);
-	return r;
 }

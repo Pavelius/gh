@@ -205,7 +205,7 @@ struct deck : adat<unsigned short, 46> {
 	void						dropdown(unsigned short v) { adat::add(v); }
 	unsigned short				get();
 	unsigned					getcount() { return adat::getcount(); }
-	int							nextbonus(int& pierce, statea& states);
+	void						modify(int& bonus, int& pierce, statea& states);
 	void						shuffle() { zshuffle(data, count); }
 };
 struct commandi {

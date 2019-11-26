@@ -43,8 +43,7 @@ void creaturei::damage(int v) {
 
 void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states) {
 	bonus += get(Attack);
-	auto cards = getcombatcards();
-	auto d = cards.nextbonus(pierce, states);
+	getcombatcards().modify(bonus, pierce, states);
 	auto s = enemy.get(Shield) - pierce;
 	if(s < 0)
 		s = 0;
