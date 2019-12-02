@@ -126,7 +126,7 @@ extern color			button;
 extern color			form;
 extern color			window;
 extern color			border;
-extern color			text, edit, h1, h2, h3, special;
+extern color			text, edit, h1, h2, h3, special, special2;
 namespace tips {
 extern color			back;
 extern color			text;

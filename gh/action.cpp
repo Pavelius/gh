@@ -33,7 +33,7 @@ static const commandi& getop(const command_s* pb) {
 	return bsmeta<commandi>::elements[*pb];
 }
 
-static const command_s* modifiers(const command_s* pb, const command_s* pe, actionf* pa, actiona* pp, bool run) {
+static const command_s* modifiers(const command_s* pb, const command_s* pe, actionf* pa, actiona* pp, bool run, condition_s* pcd) {
 	while(*pb && pb < pe) {
 		auto& ce = getop(pb);
 		if(ce.type != Modifier)
@@ -55,12 +55,31 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 				break;
 			case Action:
 				switch(ce.id.value) {
-				case Bonus: pa->bonus += ce.bonus; break;
-				case Range: pa->range += ce.bonus; break;
-				case Pierce: pa->pierce += ce.bonus; break;
-				case Experience: pa->experience += ce.bonus; break;
-				case Target: pa->target += ce.bonus; break;
-				case Use: pa->use += ce.bonus; break;
+				case Bonus:
+					if(pcd)
+						pa->vary_bonus[*pcd] += ce.bonus;
+					else
+						pa->bonus += ce.bonus;
+					break;
+				case Range:
+					pa->range += ce.bonus;
+					break;
+				case Pierce:
+					if(pcd)
+						pa->vary_pierce[*pcd] += ce.bonus;
+					else
+						pa->pierce += ce.bonus;
+					break;
+				case Experience:
+					if(pcd)
+						pa->vary_exp[*pcd] += ce.bonus;
+					else
+						pa->experience += ce.bonus;
+					break;
+				case Target: pa->target += ce.bonus;
+					break;
+				case Use: pa->use += ce.bonus;
+					break;
 				}
 				break;
 			}
@@ -68,6 +87,10 @@ static const command_s* modifiers(const command_s* pb, const command_s* pe, acti
 		pb++;
 	}
 	return pb;
+}
+
+static bool iscondition(const actionf& e, condition_s v) {
+	return e.vary_bonus[v] || e.vary_exp[v] || e.vary_pierce[v];
 }
 
 void actiona::parse(const commanda& source) {
@@ -91,17 +114,22 @@ void actiona::parse(const commanda& source) {
 			pb++;
 		} else if(ce.type == Condition) {
 			auto true_condition = false;
+			auto parse_modifiers = true;
 			if(ce.id.type == Element) {
 				true_condition = map::is(element_s(ce.id.value));
 				if(true_condition)
 					pa->consume.add(element_s(ce.id.value));
 			} else if(ce.id.type==Condition) {
+				auto c = (condition_s)ce.id.value;
+				pb = modifiers(pb + 1, pe, pa, this, true, &c);
+				parse_modifiers = false;
 			}
-			pb = modifiers(pb + 1, pe, pa, this, true_condition);
+			if(parse_modifiers)
+				pb = modifiers(pb + 1, pe, pa, this, true_condition, 0);
 		} else {
 			if(!pa)
 				pa = data;
-			pb = modifiers(pb, pe, pa, this, true);
+			pb = modifiers(pb, pe, pa, this, true, 0);
 		}
 	}
 }
@@ -116,10 +144,14 @@ static void add(stringbuilder& sb, action_s e, int b) {
 	}
 }
 
-static void add(stringbuilder& sb, const char* modifier, const char* sep, int b) {
+static void add(stringbuilder& sb, const char* modifier, const char* sep, int b, bool explicit_sep = false) {
 	if(b) {
 		sb.addsep(", ");
-		sb.add("%1%3%2i", modifier, b, sep);
+		if(explicit_sep) {
+			sb.add(modifier);
+			sb.add(sep, b);
+		} else
+			sb.add("%1%3%2i", modifier, b, sep);
 	}
 }
 
@@ -131,6 +163,20 @@ static void add(stringbuilder& sb, area_s a, int b) {
 	sb.add(bsmeta<areai>::elements[a].name);
 	if(b)
 		sb.add(":%1i", b);
+}
+
+static void add(stringbuilder& sb_origin, condition_s a, const char* text, const actionf& e) {
+	if(!iscondition(e, a))
+		return;
+	sb_origin.addn("[!");
+	sb_origin.add(text);
+	sb_origin.add(" ");
+	stringbuilder sb(sb_origin.get(), sb_origin.end());
+	add(sb, bsmeta<actioni>::elements[e.id].name, "%+1i", e.vary_bonus[a], true);
+	add(sb, "Опыт", " ", e.vary_exp[a]);
+	add(sb, "Пробой", " ", e.vary_pierce[a]);
+	sb.add("]");
+	sb_origin.set(sb.get());
 }
 
 static void add_use(stringbuilder& sb, int b) {
@@ -172,6 +218,10 @@ static void add(stringbuilder& sb, const actionf& e) {
 			sb.add(bsmeta<elementi>::elements[s].name);
 		}
 	}
+	add(sb, AllyNearTarget, "Если союзник рядом с целью", e);
+	add(sb, NoAllyNearTarget, "Если союзника нет рядом с целью", e);
+	add(sb, EnemyNearTarget, "Если враг рядом с целью", e);
+	add(sb, YouIsInvisible, "Если вы невидимы", e);
 }
 
 void actiona::tostring(stringbuilder& sb) const {
@@ -182,7 +232,7 @@ void actiona::tostring(stringbuilder& sb) const {
 	}
 	if(type != StandartCard) {
 		if(sb)
-			sb.add(", ");
+			sb.add("\n");
 		switch(type) {
 		case DiscardableCard: sb.add("Потери"); break;
 		}

@@ -115,10 +115,21 @@ static void test_worldmap() {
 	sq.moveto();
 }
 
+static void test_actionf() {
+	char temp[260]; stringbuilder sb(temp);
+	actiona a;
+	auto s = sizeof(a.data[0]);
+	a.clear();
+	a.parse(bsmeta<abilityi>::elements[16].upper);
+	a.tostring(sb);
+	a.clear();
+}
+
 void util_main();
 
 int main() {
 	//util_main();
+	test_actionf();
 	if(!test_inherance())
 		return 0;
 	if(!test_abilities())

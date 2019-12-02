@@ -436,6 +436,7 @@ void draw::initialize() {
 	colors::text = color::create(255, 255, 255);
 	colors::edit = color::create(38, 79, 120);
 	colors::special = color::create(255, 244, 32);
+	colors::special2 = color::create(32, 244, 32);
 	colors::border = colors::window.mix(colors::text, 128);
 	colors::tips::text = color::create(255, 255, 255);
 	colors::tips::back = color::create(100, 100, 120);

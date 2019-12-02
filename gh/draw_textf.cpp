@@ -273,7 +273,7 @@ static int textfln(int x0, int y0, int width, const char** string, color c1, int
 				break;
 			case '!':
 				p++;
-				draw::fore = colors::yellow;
+				draw::fore = colors::special2;
 				break;
 			case '#':
 				p++;

@@ -25,6 +25,7 @@ color				colors::h1;
 color				colors::h2;
 color				colors::h3;
 color				colors::special;
+color				colors::special2;
 color				colors::tips::text;
 color				colors::tips::back;
 color				colors::tabs::text;

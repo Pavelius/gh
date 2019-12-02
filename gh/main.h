@@ -61,7 +61,7 @@ enum area_s : unsigned char {
 };
 enum statistic_s : unsigned char {
 	Moved, Attacked, Coins,
-	ItemsUsed,
+	MonstersKilled, ItemsUsed,
 };
 enum action_s : unsigned char {
 	Bonus,
@@ -130,6 +130,13 @@ typedef cflags<card_s, unsigned char> carda;
 typedef adat<short unsigned, 24> abilitya;
 typedef adat<short unsigned, 16> itema;
 typedef unsigned short indext;
+template<unsigned c>
+class storage {
+	char						data[c];
+public:
+	int							get(int v) const { return data[v]; }
+	void						set(int i, int v) const { data[i] = v; }
+};
 struct indexa : adat<indext, 32> {
 	void						select(indext i, area_s a, direction_s d, int count);
 };
@@ -266,6 +273,9 @@ struct actionf {
 	area_s						area;
 	elementa					consume, elements;
 	statea						states;
+	char						vary_bonus[YouIsInvisible + 1];
+	char						vary_exp[YouIsInvisible + 1];
+	char						vary_pierce[YouIsInvisible + 1];
 	constexpr operator bool() const { return id || bonus; }
 };
 struct actioni {
@@ -427,11 +437,7 @@ struct battlecardi {
 	variant						cless;
 	statea						states;
 };
-class statistic {
-	unsigned char				data[ItemsUsed + 1];
-public:
-	int							get(statistic_s i) const { return data[i]; }
-	void						set(statistic_s i, int v) { data[i] = v; }
+class statistic : public storage<ItemsUsed + 1> {
 };
 class playeri : public creaturei {
 	char						name[16];
@@ -486,7 +492,7 @@ struct eventi {
 struct squadi {
 	char						prosperity;
 	char						reputation;
-	flagable<128 / 8>				scenaries;
+	flagable<128 / 8>			scenaries;
 	static squadi&				getactive();
 	bool						isopen(unsigned char v) const { return scenaries.is(v); }
 	void						openscenarion(unsigned char v) { scenaries.set(v); }
@@ -537,4 +543,3 @@ unsigned short					to(indext index, direction_s d);
 direction_s						to(direction_s d1, direction_s d);
 void							wave(indext start_index);
 };
-DECLENUM(area);
