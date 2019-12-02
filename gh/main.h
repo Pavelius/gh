@@ -460,7 +460,7 @@ public:
 	short unsigned				getaction(int i) const { return actions[i]; }
 	unsigned					getabilities() const { return ability_hand.getcount(); }
 	unsigned					getabilitiesmax() const { return getclass().abilities_cap; }
-	int							getbonus(int bonus) const;
+	int							getbonus(int bonus, const creaturei* target) const;
 	deck&						getcombatcards() { return combat_deck; }
 	constexpr const classi&		getclass() const { return bsmeta<classi>::elements[value]; }
 	static playeri*				getcurrent();

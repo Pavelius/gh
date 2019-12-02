@@ -239,7 +239,7 @@ void creaturei::act(const actionf& action) {
 		break;
 	case Attack:
 		if(player)
-			ai.bonus = player->getbonus(ai.bonus);
+			ai.bonus = player->getbonus(ai.bonus, 0);
 		attack(ai);
 		break;
 	case Loot:

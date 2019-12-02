@@ -159,7 +159,7 @@ abilityid playeri::choose_action() {
 	activate();
 	answeri an;
 	if(actions[0]) {
-		if(used_ability==-1 || used_ability == 0)
+		if(used_ability == -1 || used_ability == 0)
 			addc(an, actions[0], 1, 0);
 		if(used_ability == -1 || used_ability == 1)
 			addc(an, actions[0], 0, 0);
@@ -212,8 +212,7 @@ void playeri::choose_tactic() {
 				sb.adds("Вторая способность будет [%1].", bsmeta<abilityi>::elements[actions[1]].name);
 			else
 				sb.adds("Выбирайте вторую способность.");
-		}
-		else
+		} else
 			sb.adds("Каждый ход [%1] можете разыграть две свои способности из списка ниже. После этого они пойдут в сброс.", getclass().name);
 		answeri an;
 		for(auto index : ability_hand)
@@ -239,11 +238,14 @@ void playeri::setup_standart() {
 	}
 }
 
-int playeri::getbonus(int bonus) const {
+int playeri::getbonus(int bonus, const creaturei* target) const {
 	switch(bonus) {
-	case MovedCount: return actions[Moved];
-	case AttackedCount: return actions[Attacked];
-	case ShieldCount: return actions[Shield];
-	default: return bonus;
+	case MovedCount: return scenario_statistic.get(Moved);
+	case AttackedCount: return scenario_statistic.get(Attacked);
+	case ShieldCount:
+		if(target)
+			return target->get(Shield) * 2;
+		break;
 	}
+	return bonus;
 }
