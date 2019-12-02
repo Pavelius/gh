@@ -21,16 +21,16 @@ void deck::create() {
 	shuffle();
 }
 
-void deck::modify(int& bonus, int& pierce, statea& states) {
+void deck::modify(actionf& ai) {
 	char temp[512]; stringbuilder sb(temp);
 	auto i = get();
 	auto& ce = bsmeta<battlecardi>::elements[i];
 	while(true) {
 		auto b = bsmeta<commandi>::elements[ce.command].bonus;
-		bonus += b;
+		ai.bonus += b;
 		answeri an;
 		sb.addn("Вы вытянули %+1i", b);
-		sb.addn("Вы нанесете урон [%1i]", bonus);
+		sb.addn("Вы нанесете урон [%1i]", ai.bonus);
 		an.add(1, "Принять");
 		an.choose(false, false, sb);
 		break;

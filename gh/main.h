@@ -161,11 +161,10 @@ struct variant {
 	void						clear() { type = NoVariant; value = 0; }
 	const char*					getname() const;
 };
-template<unsigned last>
+template<unsigned N>
 class flagable {
+	unsigned char				data[N];
 	static constexpr unsigned s = 8;
-	static constexpr unsigned c = 1 + last / s;
-	unsigned char				data[c];
 public:
 	constexpr flagable() : data{0} {}
 	template<class T> constexpr flagable(const std::initializer_list<T>& v) : data{0} { for(auto e : v) set(e); }
@@ -205,7 +204,7 @@ struct deck : adat<unsigned short, 46> {
 	void						dropdown(unsigned short v) { adat::add(v); }
 	unsigned short				get();
 	unsigned					getcount() { return adat::getcount(); }
-	void						modify(int& bonus, int& pierce, statea& states);
+	void						modify(actionf& ai);
 	void						shuffle() { zshuffle(data, count); }
 };
 struct commandi {
@@ -251,7 +250,7 @@ struct scenarioi {
 	region_s					region;
 	unsigned char				open[8];
 	point						pos;
-	constexpr explicit operator bool() const { return name!=0; }
+	constexpr explicit operator bool() const { return name != 0; }
 };
 struct statei {
 	const char*					id;
@@ -372,8 +371,8 @@ class creaturei : public figurei {
 public:
 	constexpr creaturei() : figurei(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
 	void						act(const actionf& e);
-	void						attack(creaturei& enemy, int bonus, int pierce, statea states);
-	void						attack(int bonus, int range, int pierce, statea states);
+	void						attack(creaturei& enemy, actionf& ai);
+	void						attack(actionf& e);
 	static creaturei*			choose(creaturea& source, const char* format, bool interactive, short unsigned start_index, action_s action);
 	static indext				choose_index(const answeri* answers, answeri::tipspt tips, const char* format, bool show_movement, bool show_apply, action_s action);
 	void						choose_options(creaturei& enemy, int& attack, statei& states) const;
@@ -487,7 +486,7 @@ struct eventi {
 struct squadi {
 	char						prosperity;
 	char						reputation;
-	flagable<128>				scenaries;
+	flagable<128 / 8>				scenaries;
 	static squadi&				getactive();
 	bool						isopen(unsigned char v) const { return scenaries.is(v); }
 	void						openscenarion(unsigned char v) { scenaries.set(v); }

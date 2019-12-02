@@ -41,20 +41,20 @@ void creaturei::damage(int v) {
 		hp -= v;
 }
 
-void creaturei::attack(creaturei& enemy, int bonus, int pierce, statea states) {
-	bonus += get(Attack);
-	getcombatcards().modify(bonus, pierce, states);
-	auto s = enemy.get(Shield) - pierce;
+void creaturei::attack(creaturei& enemy, actionf& ai) {
+	ai.bonus += get(Attack);
+	getcombatcards().modify(ai);
+	auto s = enemy.get(Shield) - ai.pierce;
 	if(s < 0)
 		s = 0;
-	auto v = bonus - s;
+	auto v = ai.bonus - s;
 	if(enemy.is(Poison))
 		v++;
 	enemy.damage(v);
 	if(!enemy.isalive())
 		return;
-	enemy.sethostile(states);
-	setfriendly(states);
+	enemy.sethostile(ai.states);
+	setfriendly(ai.states);
 	if(enemy.get(Retaliate) > 0)
 		damage(enemy.get(Retaliate));
 }
@@ -188,17 +188,18 @@ creaturei* creaturei::choose(creaturea& source, const char* format, bool interac
 	return 0;
 }
 
-void creaturei::attack(int bonus, int range, int pierce, statea states) {
+void creaturei::attack(actionf& ai) {
 	creaturea targets;
 	targets.select();
 	targets.remove(getreaction());
 	targets.remove(Invisibility);
-	targets.match(getindex(), range);
+	targets.match(getindex(), ai.range);
 	targets.sort();
-	auto enemy = choose(targets, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.", isplayer(), getindex(), Attack);
+	auto enemy = choose(targets, "Укажите цель атаки. Щелкайте [левой кнопкой мышки] по карте, либо выбирайте из списка ниже.",
+		isplayer(), getindex(), Attack);
 	if(!enemy)
 		return;
-	attack(*enemy, bonus, pierce, states);
+	attack(*enemy, ai);
 }
 
 deck& creaturei::getmonstersdeck() {
@@ -215,46 +216,44 @@ deck& creaturei::getcombatcards() {
 	}
 }
 
-void creaturei::act(const actionf& e) {
-	int r;
-	creaturei* target;
+void creaturei::act(const actionf& action) {
 	playeri* player = getplayer();
+	actionf ai = action;
 	// Поглатим элемент
 	for(auto s = Fire; s < AnyElement; s = element_s(s + 1)) {
-		if(e.consume.is(s))
+		if(ai.consume.is(s))
 			map::set(s, 0);
 	}
 	// Установим элемент
 	for(auto s = Fire; s < AnyElement; s = element_s(s + 1)) {
-		if(e.elements.is(s))
+		if(ai.elements.is(s))
 			map::set(s, 2);
 	}
-	switch(e.id) {
+	switch(ai.id) {
 	case Move:
 	case Jump:
 	case Fly:
 		if(!is(Immobilize))
-			move(e.id, get(Move) + e.bonus);
-		map::set(getindex(), e.states, e.area, e.area_size, getreaction());
+			move(ai.id, get(Move) + ai.bonus);
+		map::set(getindex(), ai.states, ai.area, ai.area_size, getreaction());
 		break;
 	case Attack:
-		r = e.bonus;
 		if(player)
-			r = player->getbonus(r);
-		attack(r, e.range, e.pierce, e.states);
+			ai.bonus = player->getbonus(ai.bonus);
+		attack(ai);
 		break;
 	case Loot:
-		loot(e.bonus);
+		loot(ai.bonus);
 		break;
 	case Heal:
-		target = this;
-		if(e.range > 0) {
+		if(ai.range > 0) {
+		} else {
+			heal(ai.bonus);
 		}
-		target->heal(e.bonus);
 		break;
 	case Special:
-		setfriendly(e.states);
-		sethostile(e.states);
+		setfriendly(ai.states);
+		sethostile(ai.states);
 		break;
 	}
 }

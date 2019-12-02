@@ -409,7 +409,7 @@ static void select_ray(indexa& result, indext i, direction_s d, int count) {
 }
 
 void map::set(indext i, statea s, area_s a, int count, reaction_s reaction) {
-	///////////////if(!s)
+	if(!s)
 		return;
 	indexa indecies; select_all_around(indecies, i);
 	creaturea creatures;
