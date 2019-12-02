@@ -42,6 +42,7 @@ void creaturei::damage(int v) {
 }
 
 void creaturei::attack(creaturei& enemy, actionf& ai) {
+	modify(ai, &enemy);
 	ai.bonus += get(Attack);
 	getcombatcards().modify(ai);
 	auto s = enemy.get(Shield) - ai.pierce;
@@ -161,7 +162,7 @@ static creaturei* getbest(creaturei** source, unsigned count, short unsigned sta
 		return source[0];
 	auto result_index = 0;
 	for(unsigned i = 1; i < count; i++) {
-		if(compare_creatures(&source[i], &source[result_index])<0)
+		if(compare_creatures(&source[i], &source[result_index]) < 0)
 			result_index = i;
 	}
 	return source[result_index];
@@ -374,4 +375,34 @@ playeri* creaturei::getplayer() const {
 	if(type == Class)
 		return (playeri*)this;
 	return 0;
+}
+
+void creaturei::modify(actionf& e, const creaturei* target) const {
+	creaturea source;
+	for(auto i = AllyNearTarget; i <= YouIsInvisible; i = (condition_s)(i + 1)) {
+		if(!e.is(i))
+			continue;
+		switch(i) {
+		case AllyNearTarget:
+		case NoAllyNearTarget:
+			source.clear();
+			source.select();
+			source.remove(target->getopposed());
+			source.remove(target);
+			source.match(target->getindex(), 1);
+			if((i == AllyNearTarget && source.getcount() != 0)
+				|| (i == NoAllyNearTarget && source.getcount() == 0))
+				e.apply(i);
+			break;
+		case EnemyNearTarget:
+			source.clear();
+			source.select();
+			source.remove(target->getreaction());
+			source.remove(target);
+			source.match(target->getindex(), 1);
+			if(source.getcount() != 0)
+				e.apply(i);
+			break;
+		}
+	}
 }

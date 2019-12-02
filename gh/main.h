@@ -143,6 +143,7 @@ struct indexa : adat<indext, 32> {
 struct creaturea : adat<creaturei*, 31> {
 	void						remove(reaction_s v);
 	void						remove(state_s v);
+	void						remove(const creaturei* v);
 	void						match(indext index, int range);
 	void						match(const indexa& indecies);
 	void						select();
@@ -277,6 +278,8 @@ struct actionf {
 	char						vary_exp[YouIsInvisible + 1];
 	char						vary_pierce[YouIsInvisible + 1];
 	constexpr operator bool() const { return id || bonus; }
+	void						apply(condition_s v);
+	bool						is(condition_s v) const { return vary_bonus[v] || vary_exp[v] || vary_pierce[v]; }
 };
 struct actioni {
 	const char*					id;
@@ -378,6 +381,7 @@ class creaturei : public figurei {
 	char						level;
 	statea						states, start_states;
 	reaction_s					reaction;
+	void						modify(actionf& e, const creaturei* target) const;
 public:
 	constexpr creaturei() : figurei(), hp(0), hp_max(0), level(0), reaction(Enemy), initiative(0) {}
 	void						act(const actionf& e);

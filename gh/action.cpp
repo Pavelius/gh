@@ -93,6 +93,12 @@ static bool iscondition(const actionf& e, condition_s v) {
 	return e.vary_bonus[v] || e.vary_exp[v] || e.vary_pierce[v];
 }
 
+void actionf::apply(condition_s v) {
+	bonus += vary_bonus[v];
+	experience += vary_exp[v];
+	pierce += vary_pierce[v];
+}
+
 void actiona::parse(const commanda& source) {
 	memset(this, 0, sizeof(*this));
 	actionf* pa = 0;
@@ -234,7 +240,7 @@ void actiona::tostring(stringbuilder& sb) const {
 		if(sb)
 			sb.add("\n");
 		switch(type) {
-		case DiscardableCard: sb.add("Потери"); break;
+		case DiscardableCard: sb.add("[-Потери]"); break;
 		}
 	}
 }

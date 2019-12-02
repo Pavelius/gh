@@ -38,6 +38,16 @@ void creaturea::remove(reaction_s v) {
 	count = ps - data;
 }
 
+void creaturea::remove(const creaturei* v) {
+	auto ps = data;
+	for(auto p : *this) {
+		if(p == v)
+			continue;
+		*ps++ = p;
+	}
+	count = ps - data;
+}
+
 void creaturea::remove(state_s v) {
 	auto ps = data;
 	for(auto p : *this) {
