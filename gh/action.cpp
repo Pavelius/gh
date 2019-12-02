@@ -178,7 +178,10 @@ static void add(stringbuilder& sb_origin, condition_s a, const char* text, const
 	sb_origin.add(text);
 	sb_origin.add(" ");
 	stringbuilder sb(sb_origin.get(), sb_origin.end());
-	add(sb, bsmeta<actioni>::elements[e.id].name, "%+1i", e.vary_bonus[a], true);
+	if(e.vary_bonus[a]==10)
+		add(sb, bsmeta<actioni>::elements[e.id].name, "x2", 2, true);
+	else
+		add(sb, bsmeta<actioni>::elements[e.id].name, "%+1i", e.vary_bonus[a], true);
 	add(sb, "Опыт", " ", e.vary_exp[a]);
 	add(sb, "Пробой", " ", e.vary_pierce[a]);
 	sb.add("]");
