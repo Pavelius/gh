@@ -168,7 +168,7 @@ class flagable {
 public:
 	constexpr flagable() : data{0} {}
 	template<class T> constexpr flagable(const std::initializer_list<T>& v) : data{0} { for(auto e : v) set(e); }
-	constexpr void				add(const flagable& e) { for(unsigned i = 0; i < c; i++) data[i] |= e.data[i]; }
+	constexpr void				add(const flagable& e) { for(unsigned i = 0; i < N; i++) data[i] |= e.data[i]; }
 	void						clear() { memset(this, 0, sizeof(*this)); }
 	constexpr bool				is(short unsigned v) const { return (data[v / s] & (1 << (v%s))) != 0; }
 	constexpr void				remove(short unsigned v) { data[v / s] &= ~(1 << (v%s)); }

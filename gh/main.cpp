@@ -118,7 +118,7 @@ static void test_worldmap() {
 void util_main();
 
 int main() {
-	util_main();
+	//util_main();
 	if(!test_inherance())
 		return 0;
 	if(!test_abilities())
