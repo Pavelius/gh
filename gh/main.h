@@ -503,11 +503,21 @@ struct squadi {
 	int							moveto() const;
 	static void					paintmap();
 };
+class gamei {
+	char						counter;
+	char						magic[Dark + 1];
+	adat<variant, 16>			parcipants;
+public:
+	void						clear();
+	constexpr int				get(element_s i) const { return magic[i]; }
+	constexpr bool				is(element_s i) const { return magic[i] > 0; }
+	constexpr void				set(element_s i, int v) { magic[i] = v; }
+	void						update();
+};
+extern gamei					game;
 namespace map {
 const int						mx = 32;
 const int						my = 24;
-extern char						counter;
-extern char						magic_elements[Dark + 1];
 extern indext					movement_rate[mx * my];
 //
 void							add(variant v, indext i, int level);
@@ -518,7 +528,6 @@ void							block(reaction_s i);
 void							clearwave();
 void							create();
 void							editor();
-inline int						get(element_s i) { return magic_elements[i]; }
 indext							getbestpos(indext start, indext cost);
 int								getdistance(point h1, point h2);
 indext							getmove(indext start, char bonus, int range, reaction_s enemy);
@@ -529,7 +538,6 @@ point							h2p(indext i);
 constexpr short					i2x(indext i) { return i % mx; }
 constexpr short					i2y(indext i) { return i / mx; }
 constexpr point					i2h(indext i) { return {i2x(i), i2y(i)}; }
-constexpr bool					is(element_s i) { return magic_elements[i] > 0; }
 bool							is(indext i, map_tile_s v);
 void							moverestrict(indext v);
 static point					p2h(point pt);
@@ -538,7 +546,6 @@ void							play();
 void							playround();
 void							set(indext i, map_tile_s v);
 void							set(indext i, statea s, area_s a, int count, reaction_s reaction);
-constexpr void					set(element_s i, int v) { magic_elements[i] = v; }
 void							set(indext i, short width, short height, map_tile_s id);
 void							setcamera(point pt);
 void							setmovecost(indext i, indext v);

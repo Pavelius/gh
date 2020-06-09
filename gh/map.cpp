@@ -7,7 +7,6 @@ enum movement_cost_s : indext {
 };
 
 static unsigned short	stack[256 * 256];
-char					map::magic_elements[Dark + 1];
 indext					map::movement_rate[mx * my];
 static unsigned char	map_tile[mx * my];
 static direction_s		all_around[] = {LeftUp, RightUp, Left, Right, LeftDown, RightDown};
@@ -17,7 +16,6 @@ point map::h2p(indext i) {
 }
 
 void map::create() {
-	memset(magic_elements, 0, sizeof(magic_elements));
 	memset(movement_rate, 0, sizeof(movement_rate));
 	//memset(map_tile, 0, sizeof(map_tile));
 	//for(short y = my; y > 0; y--) {
@@ -305,10 +303,10 @@ static void next_monster_action() {
 
 static void lower_elements() {
 	for(auto i = Fire; i <= Dark; i = (element_s)(i + 1)) {
-		auto v = get(i);
+		auto v = game.get(i);
 		if(!v)
 			continue;
-		set(i, v - 1);
+		game.set(i, v - 1);
 	}
 }
 

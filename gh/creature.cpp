@@ -223,12 +223,12 @@ void creaturei::act(const actionf& action) {
 	// Поглатим элемент
 	for(auto s = Fire; s < AnyElement; s = element_s(s + 1)) {
 		if(ai.consume.is(s))
-			map::set(s, 0);
+			game.set(s, 0);
 	}
 	// Установим элемент
 	for(auto s = Fire; s < AnyElement; s = element_s(s + 1)) {
 		if(ai.elements.is(s))
-			map::set(s, 2);
+			game.set(s, 2);
 	}
 	switch(ai.id) {
 	case Move:

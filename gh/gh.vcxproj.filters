@@ -159,6 +159,9 @@
     <ClCompile Include="scenario.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">

@@ -122,7 +122,7 @@ void actiona::parse(const commanda& source) {
 			auto true_condition = false;
 			auto parse_modifiers = true;
 			if(ce.id.type == Element) {
-				true_condition = map::is(element_s(ce.id.value));
+				true_condition = game.is(element_s(ce.id.value));
 				if(true_condition)
 					pa->consume.add(element_s(ce.id.value));
 			} else if(ce.id.type==Condition) {

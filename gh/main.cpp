@@ -82,8 +82,8 @@ static void test_play() {
 	//p1.choose_tactic();
 	//p1.addaction(1);
 	//p1.addaction(3);
-	map::set(Air, 2);
-	map::set(Fire, 1);
+	game.set(Air, 2);
+	game.set(Fire, 1);
 	map::play();
 }
 
@@ -136,6 +136,7 @@ int main() {
 		return 0;
 	if(!test_deck())
 		return 0;
+	return 0;
 	test_map();
 	setcamera(map::h2p(79));
 	draw::initialize();
@@ -144,7 +145,7 @@ int main() {
 	//test_movement();
 	//test_players();
 	//test_ability();
-	test_play();
+	//test_play();
 	//map::editor();
 	return 0;
 }
