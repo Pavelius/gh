@@ -1,6 +1,6 @@
 #include "main.h"
 
-regioni bsmeta<regioni>::elements[] = {{"Cooperneck Mountains", "Медные хребты", {610, 180}},
+INSTDATA(regioni) = {{"Cooperneck Mountains", "Медные хребты", {610, 180}},
 {"Dagger Forest", "Кинжальный лес", {180, 395}},
 {"Stone Road", "Каменистый тракт", {307, 680}},
 {"Still River", "Тихая река", {738, 390}},
@@ -13,4 +13,3 @@ regioni bsmeta<regioni>::elements[] = {{"Cooperneck Mountains", "Медные хребты",
 {"Merchants Bay", "Бухта торговцев", {0, 0}},
 {"Misty Sea", "Туманное море", {0, 0}},
 };
-assert_enum(region, MistySea);

@@ -740,7 +740,7 @@ static void paint_hilite_hexagon() {
 }
 
 static void paint_monsters() {
-	for(auto& e : bsmeta<creaturei>()) {
+	for(auto& e : bsdata<creaturei>()) {
 		if(!e)
 			continue;
 		if(!e.isalive())
@@ -750,12 +750,12 @@ static void paint_monsters() {
 }
 
 static void paint_figures() {
-	for(auto& e : bsmeta<figurei>())
+	for(auto& e : bsdata<figurei>())
 		e.paint();
 }
 
 static void paint_players() {
-	for(auto& e : bsmeta<playeri>()) {
+	for(auto& e : bsdata<playeri>()) {
 		if(!e)
 			continue;
 		if(!e.isalive())
@@ -765,7 +765,7 @@ static void paint_players() {
 }
 
 static void paint_floor() {
-	for(auto& e : bsmeta<drawable>())
+	for(auto& e : bsdata<drawable>())
 		e.paint();
 }
 

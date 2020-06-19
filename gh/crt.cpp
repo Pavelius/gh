@@ -1,4 +1,5 @@
 #include "crt.h"
+#include "io.h"
 
 extern "C" void* malloc(unsigned size);
 extern "C" void* realloc(void *ptr, unsigned size);
@@ -282,7 +283,7 @@ void array::clear() {
 		return;
 	count_maximum = 0;
 	if(data)
-		delete data;
+		delete (char*)data;
 	data = 0;
 }
 
@@ -314,6 +315,15 @@ int array::find(const char* value, unsigned offset) const {
 		if(!(*p))
 			continue;
 		if(strcmp(*p, value) == 0)
+			return i;
+	}
+	return -1;
+}
+
+int array::find(void* value, unsigned offset, unsigned size) const {
+	auto m = getcount();
+	for(unsigned i = 0; i < m; i++) {
+		if(memcmp(data, (char*)ptr(i) + offset, size) == 0)
 			return i;
 	}
 	return -1;

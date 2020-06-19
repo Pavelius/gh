@@ -1,7 +1,6 @@
 #include "main.h"
 
-playeri	bsmeta<playeri>::elements[4];
-DECLBASE(playeri);
+INSTDATAC(playeri, 4);
 
 static playeri* current_player;
 
@@ -25,7 +24,7 @@ void playeri::prepare() {
 
 static void ability_tips(stringbuilder& sb, int param) {
 	param = param & 0xFFF;
-	auto& ab = bsmeta<abilityi>::elements[param];
+	auto& ab = bsdata<abilityi>::elements[param];
 	actiona a1, a2;
 	a1.parse(ab.upper);
 	a2.parse(ab.lower);
@@ -42,13 +41,13 @@ void playeri::choose_abilities() {
 		if(count >= need_count)
 			break;
 		answeri an, an2;
-		for(auto& e : bsmeta<abilityi>()) {
-			auto index = bsmeta<abilityi>::indexof(e);
+		for(auto& e : bsdata<abilityi>()) {
+			auto index = bsdata<abilityi>::indexof(e);
 			if(!isallowability(index))
 				continue;
 			if(ability_hand.indexof(index) != -1)
 				continue;
-			auto& ab = bsmeta<abilityi>::elements[index];
+			auto& ab = bsdata<abilityi>::elements[index];
 			an.add(index, ab.name);
 		}
 		char temp[512]; stringbuilder sb(temp);
@@ -56,7 +55,7 @@ void playeri::choose_abilities() {
 		sb.adds("Вам осталось выбрать еще [%1i] способностей.", need_count - count);
 		an.sort();
 		for(auto index : ability_hand) {
-			auto& ab = bsmeta<abilityi>::elements[index];
+			auto& ab = bsdata<abilityi>::elements[index];
 			an2.add(0x8000 + index, ab.name);
 		}
 		an2.sort();
@@ -72,7 +71,7 @@ void playeri::choose_abilities() {
 }
 
 bool playeri::isallowability(int v) const {
-	auto& e = bsmeta<abilityi>::elements[v];
+	auto& e = bsdata<abilityi>::elements[v];
 	if(e.level == 0)
 		return false;
 	if(e.type != value)
@@ -100,7 +99,7 @@ void playeri::create(class_s v, int level) {
 void playeri::addactive(short unsigned i) {
 	if(!i)
 		return;
-	auto p = bsmeta<activei>::add();
+	auto p = bsdata<activei>::add();
 	if(!p)
 		return;
 }
@@ -141,7 +140,7 @@ static void combat_ability_tips(stringbuilder& sb, int param) {
 }
 
 static void addc(answeri& an, short unsigned i, int upper, int standart) {
-	auto& ab = bsmeta<abilityi>::elements[i];
+	auto& ab = bsdata<abilityi>::elements[i];
 	auto& ac = upper ? ab.upper : ab.lower;
 	abilityid id(i, upper, standart);
 	if(!standart) {
@@ -206,17 +205,17 @@ void playeri::choose_tactic() {
 		char temp[512]; stringbuilder sb(temp);
 		if(actions[0]) {
 			sb.adds("Первая способность [%1]. Ваша инициатива на этот ход будет [%2i]",
-				bsmeta<abilityi>::elements[actions[0]].name,
-				bsmeta<abilityi>::elements[actions[0]].initiative);
+				bsdata<abilityi>::elements[actions[0]].name,
+				bsdata<abilityi>::elements[actions[0]].initiative);
 			if(actions[1])
-				sb.adds("Вторая способность будет [%1].", bsmeta<abilityi>::elements[actions[1]].name);
+				sb.adds("Вторая способность будет [%1].", bsdata<abilityi>::elements[actions[1]].name);
 			else
 				sb.adds("Выбирайте вторую способность.");
 		} else
 			sb.adds("Каждый ход [%1] можете разыграть две свои способности из списка ниже. После этого они пойдут в сброс.", getclass().name);
 		answeri an;
 		for(auto index : ability_hand)
-			an.add(index, bsmeta<abilityi>::elements[index].name);
+			an.add(index, bsdata<abilityi>::elements[index].name);
 		auto index = choose(sb, an, ability_tips);
 		addaction(index);
 	}
@@ -224,15 +223,15 @@ void playeri::choose_tactic() {
 
 void playeri::setup_standart() {
 	ability_hand.clear();
-	auto cap = bsmeta<classi>::elements[value].abilities_cap;
-	for(auto& e : bsmeta<abilityi>()) {
+	auto cap = bsdata<classi>::elements[value].abilities_cap;
+	for(auto& e : bsdata<abilityi>()) {
 		if(!e)
 			continue;
 		if(e.level > getlevel())
 			continue;
 		if(e.type != value)
 			continue;
-		ability_hand.add(bsmeta<abilityi>::indexof(e));
+		ability_hand.add(bsdata<abilityi>::indexof(&e));
 		if(--cap <= 0)
 			break;
 	}

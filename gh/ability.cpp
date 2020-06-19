@@ -3,7 +3,7 @@
 static commanda standart_attack = {Attack2};
 static commanda standart_movement = {Move2};
 
-abilityi bsmeta<abilityi>::elements[] = {{},
+INSTDATA(abilityi) = {{},
 {Brute, 1, "Топот", 72, {Attack3, Pierce2}, {Jump4Attack2, Exp2, DiscardCard}},
 {Brute, 1, "Припасенный кинжал", 27, {Attack3, Range3, Exp1}, {Attack2}},
 {Brute, 1, "Рассечение", 27, {Attack3, Slash2, Exp1}, {Jump3, AddAir}},
@@ -46,10 +46,10 @@ abilityi bsmeta<abilityi>::elements[] = {{},
 {Tinkerer, 1, "Летучая смесь", 76, {Trap2, AddPoison}, {Special1}},
 {Tinkerer, 1, "Крепкие снадобья", 46, {HealBoost2, Use4, DiscardCard}, {Move3}},
 };
-DECLENUMX(abilityi);
+INSTELEM(abilityi);
 
 const commanda& abilityid::getability() const {
 	if(standart)
 		return upper ? standart_attack : standart_movement;
-	return upper ? bsmeta<abilityi>::elements[index].upper : bsmeta<abilityi>::elements[index].lower;
+	return upper ? bsdata<abilityi>::elements[index].upper : bsdata<abilityi>::elements[index].lower;
 }

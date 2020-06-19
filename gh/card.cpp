@@ -1,6 +1,6 @@
 #include "main.h"
 
-battlecardi bsmeta<battlecardi>::elements[] = {{Bonus0, 6},
+INSTDATA(battlecardi) = {{Bonus0, 6},
 {Bonus1, 5},
 {BonusM1, 5},
 {Bonus2, 1},
@@ -10,4 +10,4 @@ battlecardi bsmeta<battlecardi>::elements[] = {{Bonus0, 6},
 {BonusX2, 10, Bless},
 {BonusMiss, 10, Curse},
 };
-DECLENUMX(battlecardi);
+INSTELEM(battlecardi);

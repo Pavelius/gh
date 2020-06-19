@@ -1,6 +1,6 @@
 #include "main.h"
 
-actioni bsmeta<actioni>::elements[] = {{"Bonus", "Бонус"},
+INSTDATA(actioni) = {{"Bonus", "Бонус"},
 {"Shield", "Щит"},
 {"Retaliate", "Ответный удар"},
 {"Guard", "Принять урон на себя"},
@@ -27,10 +27,9 @@ actioni bsmeta<actioni>::elements[] = {{"Bonus", "Бонус"},
 {"Bless", "Благословение"},
 {"Curse", "Проклятие"},
 };
-assert_enum(action, Curse);
 
 static const commandi& getop(const command_s* pb) {
-	return bsmeta<commandi>::elements[*pb];
+	return bsdata<commandi>::elements[*pb];
 }
 
 static const command_s* modifiers(const command_s* pb, const command_s* pe, actionf* pa, actiona* pp, bool run, condition_s* pcd) {
@@ -144,9 +143,9 @@ static void add(stringbuilder& sb, action_s e, int b) {
 	if(b) {
 		sb.addsep(", ");
 		if(b>=InfiniteCount)
-			sb.add("%1 %2", bsmeta<actioni>::elements[e].name, bsmeta<action_counti>::elements[b-InfiniteCount].name);
+			sb.add("%1 %2", bsdata<actioni>::elements[e].name, bsdata<action_counti>::elements[b-InfiniteCount].name);
 		else
-			sb.add("%1 %2i", bsmeta<actioni>::elements[e].name, b);
+			sb.add("%1 %2i", bsdata<actioni>::elements[e].name, b);
 	}
 }
 
@@ -166,7 +165,7 @@ static void add(stringbuilder& sb, area_s a, int b) {
 		return;
 	if(sb)
 		sb.add(", ");
-	sb.add(bsmeta<areai>::elements[a].name);
+	sb.add(bsdata<areai>::elements[a].name);
 	if(b)
 		sb.add(":%1i", b);
 }
@@ -179,9 +178,9 @@ static void add(stringbuilder& sb_origin, condition_s a, const char* text, const
 	sb_origin.add(" ");
 	stringbuilder sb(sb_origin.get(), sb_origin.end());
 	if(e.vary_bonus[a]==10)
-		add(sb, bsmeta<actioni>::elements[e.id].name, "x2", 2, true);
+		add(sb, bsdata<actioni>::elements[e.id].name, "x2", 2, true);
 	else
-		add(sb, bsmeta<actioni>::elements[e.id].name, "%+1i", e.vary_bonus[a], true);
+		add(sb, bsdata<actioni>::elements[e.id].name, "%+1i", e.vary_bonus[a], true);
 	add(sb, "Опыт", " ", e.vary_exp[a]);
 	add(sb, "Пробой", " ", e.vary_pierce[a]);
 	sb.add("]");
@@ -210,21 +209,21 @@ static void add(stringbuilder& sb, const actionf& e) {
 		if(e.states.is(s)) {
 			if(sb)
 				sb.add(", ");
-			sb.add(bsmeta<statei>::elements[s].name);
+			sb.add(bsdata<statei>::elements[s].name);
 		}
 	}
 	for(auto s = Fire; s <= AnyElement; s = (element_s)(s + 1)) {
 		if(e.consume.is(s)) {
 			if(sb)
 				sb.add(", ");
-			sb.add("-%1", bsmeta<elementi>::elements[s].name);
+			sb.add("-%1", bsdata<elementi>::elements[s].name);
 		}
 	}
 	for(auto s = Fire; s <= AnyElement; s = (element_s)(s + 1)) {
 		if(e.elements.is(s)) {
 			if(sb)
 				sb.add(", ");
-			sb.add(bsmeta<elementi>::elements[s].name);
+			sb.add(bsdata<elementi>::elements[s].name);
 		}
 	}
 	add(sb, AllyNearTarget, "Если союзник рядом с целью", e);

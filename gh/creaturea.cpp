@@ -9,7 +9,7 @@ static int compare_initiative(const void* p1, const void* p2) {
 void creaturea::select() {
 	auto pb = data;
 	auto pe = endof();
-	for(auto& e : bsmeta<creaturei>()) {
+	for(auto& e : bsdata<creaturei>()) {
 		if(!e)
 			continue;
 		if(!e.isalive())
@@ -17,7 +17,7 @@ void creaturea::select() {
 		if(pb < pe)
 			*pb++ = &e;
 	}
-	for(auto& e : bsmeta<playeri>()) {
+	for(auto& e : bsdata<playeri>()) {
 		if(!e)
 			continue;
 		if(!e.isalive())

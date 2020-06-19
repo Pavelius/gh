@@ -1,6 +1,6 @@
 #include "main.h"
 
-elementi bsmeta<elementi>::elements[] = {{"Fire", "Огонь"},
+INSTDATA(elementi) = {{"Fire", "Огонь"},
 {"Ice", "Мороз"},
 {"Air", "Воздух"},
 {"Earth", "Земля"},
@@ -8,4 +8,3 @@ elementi bsmeta<elementi>::elements[] = {{"Fire", "Огонь"},
 {"Dark", "Тьма"},
 {"AnyElement", "Любой элемент"},
 };
-assert_enum(element, AnyElement);

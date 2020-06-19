@@ -1,5 +1,29 @@
 #pragma once
 
+#ifdef _MSC_VER
+namespace std {
+template<class T> class initializer_list {	// list of pointers to elements
+public:
+	typedef T				value_type;
+	typedef const T&		reference;
+	typedef const T&		const_reference;
+	typedef unsigned		size_type;
+	typedef const T*		iterator;
+	typedef const T*		const_iterator;
+	constexpr initializer_list() noexcept : first(0), last(0) {}
+	constexpr initializer_list(const T *first_arg, const T *last_arg) noexcept : first(first_arg), last(last_arg) {}
+	constexpr const T*		begin() const noexcept { return first; }
+	constexpr const T*		end() const noexcept { return last; }
+	constexpr unsigned		size() const noexcept { return last - first; }
+private:
+	const T*				first;
+	const T*				last;
+};
+}
+#else
+#include <initializer_list>
+#endif
+
 #ifdef _DEBUG
 #define assert(e) if(!(e)) {exit(255);}
 #else
@@ -7,8 +31,15 @@
 #endif
 #define maptbl(t, id) (t[imax((unsigned)0, imin((unsigned)id, (sizeof(t)/sizeof(t[0])-1)))])
 #define maprnd(t) t[rand()%(sizeof(t)/sizeof(t[0]))]
-#define lenghtof(t) (sizeof(t)/sizeof(t[0]))
-#define zendof(t) (t + sizeof(t)/sizeof(t[0]))
+#define lenof(t) (sizeof(t)/sizeof(t[0]))
+#define zendof(t) (t + sizeof(t)/sizeof(t[0]) - 1)
+#define INSTDATA(e) template<> e bsdata<e>::elements[]
+#define INSTDATAC(e, c) template<> e bsdata<e>::elements[c]; template<> array bsdata<e>::source(bsdata<e>::elements, sizeof(bsdata<e>::elements[0]), 0, sizeof(bsdata<e>::elements)/sizeof(bsdata<e>::elements[0]));
+#define INSTMETA(e) template<> const bsreq bsmeta<e>::meta[]
+#define INSTELEM(e) template<> array bsdata<e>::source(bsdata<e>::elements, sizeof(bsdata<e>::elements[0]), sizeof(bsdata<e>::elements)/sizeof(bsdata<e>::elements[0]));
+#define NOINSTDATA(e) template<> struct bsdata<e> : bsdata<int> {};
+#define DECLENUM(e) template<> struct bsmeta<e##_s> : bsmeta<e##i> {}; template<> struct bsdata<e##_s> : bsdata<e##i> {};
+#define BSINF(e) {#e, bsmeta<e##i>::meta, bsdata<e##i>::source}
 
 extern "C" int						atexit(void(*func)(void));
 extern "C" void*					bsearch(const void* key, const void *base, unsigned num, unsigned size, int(*compar)(const void *, const void *));
@@ -93,29 +124,6 @@ template<unsigned N> inline char*	zprint(char(&result)[N], const char* format, .
 template<class T> inline void		zshuffle(T* p, int count) { for(int i = 0; i < count; i++) iswap(p[i], p[rand() % count]); }
 template<class T> inline T*			zskipsp(T* p) { if(p) while(*p == 32 || *p == 9) p++; return p; }
 template<class T> inline T*			zskipspcr(T* p) { if(p) while(*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') p++; return p; }
-
-namespace std {
-template<class T> class initializer_list {	// list of pointers to elements
-public:
-	typedef T				value_type;
-	typedef const T&		reference;
-	typedef const T&		const_reference;
-	typedef unsigned		size_type;
-	typedef const T*		iterator;
-	typedef const T*		const_iterator;
-	constexpr initializer_list() noexcept : first(0), last(0) {}
-	constexpr initializer_list(const T *first_arg, const T *last_arg) noexcept : first(first_arg), last(last_arg) {}
-	constexpr const T*		begin() const noexcept { return first; }
-	constexpr const T*		end() const noexcept { return last; }
-	constexpr unsigned		size() const noexcept { return last - first; }
-private:
-	const T*				first;
-	const T*				last;
-};
-}
-// Untility structures
-template<typename T, T v> struct static_value { static constexpr T value = v; };
-template<int v> struct static_int : static_value<int, v> {};
 // Storge like vector
 template<class T, int count_max = 128>
 struct adat {
@@ -133,7 +141,7 @@ struct adat {
 	void					clear() { count = 0; }
 	T*						end() { return data + count; }
 	const T*				end() const { return data + count; }
-	T*						endof() { return data + count_max; }
+	const T*				endof() const { return data + count_max; }
 	int						getcount() const { return count; }
 	int						getmaximum() const { return count_max; }
 	int						indexof(const T* e) const { if(e >= data && e < data + count) return e - data; return -1; }
@@ -141,6 +149,7 @@ struct adat {
 	bool					is(const T t) const { return indexof(t) != -1; }
 	void					remove(int index, int remove_count = 1) { if(index < 0) return; if(index<int(count - 1)) memcpy(data + index, data + index + 1, sizeof(data[0])*(count - index - 1)); count--; }
 };
+typedef adat<void*, 64>		reflist;
 // Reference to array with dymanic size
 template<class T>
 struct aref {
@@ -167,7 +176,6 @@ template<class T>
 struct arem : aref<T> {
 	unsigned				count_maximum;
 	constexpr arem() : aref<T>(0, 0), count_maximum(0) {}
-	constexpr arem(T* source, unsigned count) : aref<T>(source, count), count_maximum(0) {}
 	~arem() { if(aref<T>::data && count_maximum) delete aref<T>::data; }
 	T*						add() { reserve(aref<T>::count + 1); return &aref<T>::data[aref<T>::count++]; }
 	void					add(const T& e) { *(add()) = e; }
@@ -177,11 +185,12 @@ struct arem : aref<T> {
 };
 // Abstract flag data bazed on enumerator
 template<typename T, typename DT = unsigned>
-struct cflags {
+class cflags {
 	DT						data;
+public:
 	constexpr cflags() : data(0) {}
 	constexpr cflags(const std::initializer_list<T>& list) : data() { for(auto e : list) add(e); }
-	constexpr explicit operator bool() const { return data != 0; }
+	constexpr operator bool() const { return data != 0; }
 	constexpr void			add(const T id) { data |= 1 << id; }
 	constexpr void			clear() { data = 0; }
 	constexpr bool			is(const T id) const { return (data & (1 << id)) != 0; }
@@ -189,37 +198,31 @@ struct cflags {
 };
 // Abstract array vector
 class array {
-	void*					data;
 	unsigned				size;
-	unsigned				count;
 	unsigned				count_maximum;
 	bool					growable;
 public:
-	array(const array& e) = default;
-	constexpr array() : data(0), size(0), count_maximum(0), count(0), growable(true) {}
-	constexpr array(unsigned size) : data(0), size(size), count_maximum(0), count(0), growable(true) {}
-	constexpr array(void* data, unsigned size, unsigned count) : data(data), size(size), count_maximum(0), count(count), growable(false) {}
-	constexpr array(void* data, unsigned size, unsigned count, unsigned count_maximum) : data(data), size(size), count_maximum(count_maximum), count(count), growable(false) {}
-	template<typename T, unsigned N> constexpr array(T(&e)[N]) : array(e, sizeof(T), N) {}
-	template<typename T> constexpr array(T& e) : array(&e, sizeof(T), 1) {}
-	template<> constexpr array(array& e) : data(e.data), size(e.size), count(e.count), count_maximum(e.count_maximum), growable(e.growable) {}
-	template<> constexpr array(const array& e) : data(e.data), size(e.size), count(e.count), count_maximum(e.count_maximum), growable(e.growable) {}
+	void*					data;
+	unsigned				count;
+	constexpr array() : data(0), size(0), count(0), count_maximum(0), growable(true) {}
+	constexpr array(unsigned size) : data(0), size(size), count(0), count_maximum(0), growable(true) {}
+	constexpr array(void* data, unsigned size, unsigned count) : data(data), size(size), count(count), count_maximum(0), growable(false) {}
+	constexpr array(void* data, unsigned size, unsigned count, unsigned count_maximum) : data(data), size(size), count(count), count_maximum(count_maximum), growable(false) {}
 	~array();
 	void*					add();
 	void*					add(const void* element);
-	char*					begin() { return (char*)data; }
-	const char*				begin() const { return (char*)data; }
+	char*					begin() const { return (char*)data; }
 	void					clear();
-	char*					end() { return (char*)data + size * count; }
-	const char*				end() const { return (char*)data + size * count; }
+	char*					end() const { return (char*)data + size * count; }
 	int						find(const char* value, unsigned offset) const;
-	constexpr unsigned		getmaxcount() const { return count_maximum; }
-	constexpr unsigned		getcount() const { return count; }
-	constexpr unsigned		getsize() const { return size; }
+	int						find(void* value, unsigned offset, unsigned size) const;
+	unsigned				getmaximum() const { return count_maximum; }
+	unsigned				getcount() const { return count; }
+	unsigned				getsize() const { return size; }
 	int						indexof(const void* element) const;
 	void*					insert(int index, const void* element);
-	constexpr bool			isgrowable() const { return growable; }
-	constexpr void*			ptr(int index) const { return (char*)data + size * index; }
+	bool					isgrowable() const { return growable; }
+	void*					ptr(int index) const { return (char*)data + size * index; }
 	void					remove(int index, int elements_count);
 	void					setcount(unsigned value) { count = value; }
 	void					setup(unsigned size);
@@ -228,22 +231,74 @@ public:
 	void					swap(int i1, int i2);
 	void					reserve(unsigned count);
 };
+template<class T> struct vector : public array {
+	constexpr vector() : array(sizeof(T)) {}
+	~vector() { for(auto& e : *this) e.~T(); }
+	T*						add() { return (T*)array::add(); }
+	const T*				begin() const { return (T*)data; }
+	T*						begin() { return (T*)data; }
+	const T*				end() const { return (T*)data + count; }
+	T*						end() { return (T*)data + count; }
+	T*						ptr(int index) const { return (T*)data + index; }
+};
 struct bsreq;
-// Common access to data types
-template<typename T>
-struct bsmeta {
-	typedef T				data_type;
+// Abstract data source descriptor
+struct bsinf {
+	const char*				id; // Identifier of data source
+	const bsreq*			meta; // Type descriptor of data source
+	array&					source; // Data source content
+};
+// Abstract data access class
+template<typename T> struct bsdata {
 	static T				elements[];
-	static const bsreq		meta[];
 	static array			source;
+	static constexpr array*	source_ptr = &source;
 	//
 	static T*				add() { return (T*)source.add(); }
-	static T*				begin() { return (T*)source.begin(); }
-	static T*				end() { return (T*)source.end(); }
-	static int				indexof(T& e) { return &e - elements; }
+	static constexpr T*		begin() { return elements; }
+	static constexpr T*		end() { return elements + source.getcount(); }
+	static constexpr int	indexof(const T* e) { return source.indexof(e); }
+	static constexpr int	indexof(const T& v) { auto p1 = begin(), p2 = end(); while(p1 < p2) { if(*p1 == v) return p1 - begin(); p1++; } return -1; }
 };
-#define DECLENUMX(e) array bsmeta<e>::source(bsmeta<e>::elements, sizeof(bsmeta<e>::elements[0]), sizeof(bsmeta<e>::elements)/sizeof(bsmeta<e>::elements[0]))
-#define DECLBASE(e) array bsmeta<e>::source(bsmeta<e>::elements, sizeof(bsmeta<e>::elements[0]), 0, sizeof(bsmeta<e>::elements)/sizeof(bsmeta<e>::elements[0]))
-#define DECLENUM(e) template<> struct bsmeta<e##_s> : bsmeta<e##i> {}
-#define assert_enum(e, last) static_assert(sizeof(bsmeta<e##i>::elements) / sizeof(bsmeta<e##i>::elements[0]) == last + 1, "Invalid count of " #e " elements");\
-array bsmeta<e##i>::source(bsmeta<e##i>::elements, sizeof(bsmeta<e##i>::elements[0]), sizeof(bsmeta<e##i>::elements)/sizeof(bsmeta<e##i>::elements[0]));
+template<> struct bsdata<int> { static constexpr array*	source_ptr = 0; };
+NOINSTDATA(unsigned)
+NOINSTDATA(short)
+NOINSTDATA(unsigned short)
+NOINSTDATA(char)
+NOINSTDATA(unsigned char)
+NOINSTDATA(const char*)
+NOINSTDATA(bool)
+NOINSTDATA(bsreq)
+// Abstract metadata class
+template<typename T> struct bsmeta {
+	typedef T				data_type;
+	static const bsreq		meta[];
+};
+template<> struct bsmeta<unsigned char> : bsmeta<int> {};
+template<> struct bsmeta<char> : bsmeta<int> {};
+template<> struct bsmeta<unsigned short> : bsmeta<int> {};
+template<> struct bsmeta<short> : bsmeta<int> {};
+template<> struct bsmeta<unsigned> : bsmeta<int> {};
+template<> struct bsmeta<bool> : bsmeta<int> {};
+// Get object presentation
+template<class T> const char* getstr(const T e) { return bsdata<T>::elements[e].name; }
+// Untility structures
+template<typename T, T v> struct static_value { static constexpr T value = v; };
+template<int v> struct static_int : static_value<int, v> {};
+// Get array elments
+template<class T> struct meta_count : static_int<1> {};
+template<class T, unsigned N> struct meta_count<T[N]> : static_int<N> {};
+template<class T> struct meta_count<T[]> : static_int<0> {};
+template<class T, unsigned N> struct meta_count<adat<T, N>> : static_int<N> {};
+// Get base type
+template<class T> struct meta_decoy { typedef T value; };
+template<> struct meta_decoy<const char*> { typedef const char* value; };
+template<class T> struct meta_decoy<T*> : meta_decoy<T> {};
+template<class T> struct meta_decoy<const T*> : meta_decoy<T> {};
+template<class T, unsigned N> struct meta_decoy<T[N]> : meta_decoy<T> {};
+template<class T> struct meta_decoy<T[]> : meta_decoy<T> {};
+template<class T> struct meta_decoy<const T> : meta_decoy<T> {};
+template<class T> struct meta_decoy<aref<T>> : meta_decoy<T> {};
+template<class T> struct meta_decoy<arem<T>> : meta_decoy<T> {};
+template<class T, unsigned N> struct meta_decoy<adat<T, N>> : meta_decoy<T> {};
+template<class T, class DT> struct meta_decoy<cflags<T, DT>> : meta_decoy<T> {};

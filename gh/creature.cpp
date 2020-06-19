@@ -1,7 +1,6 @@
 #include "main.h"
 
-creaturei bsmeta<creaturei>::elements[32];
-DECLBASE(creaturei);
+INSTDATAC(creaturei, 32);
 
 static state_s state_hostile[] = {Disarmed, Immobilize, Wound, Muddle, Poison, Stun};
 static state_s state_friendly[] = {Invisibility, Strenght};
@@ -65,7 +64,7 @@ void creaturei::create(variant v, int level) {
 	this->type = v.type;
 	this->value = v.value;
 	this->level = level;
-	auto& mn = bsmeta<monsteri>::elements[value];
+	auto& mn = bsdata<monsteri>::elements[value];
 	hp = mn.levels[level][0].hits;
 	hp_max = mn.levels[level][0].hits;
 	res = MONSTERS;
@@ -274,7 +273,7 @@ void creaturei::heal(int bonus) {
 }
 
 void creaturei::loot(int range) {
-	for(auto& e : bsmeta<figurei>()) {
+	for(auto& e : bsdata<figurei>()) {
 		if(e.type != Object)
 			continue;
 		if(e.value == Coin) {
@@ -301,7 +300,7 @@ void creaturei::turnend() {
 
 int creaturei::getactive(action_s id) const {
 	auto r = 0;
-	for(auto& e : bsmeta<activei>()) {
+	for(auto& e : bsdata<activei>()) {
 		if(e.is(*this))
 			r += e.get(id);
 	}
@@ -311,7 +310,7 @@ int creaturei::getactive(action_s id) const {
 int	creaturei::get(action_s id) const {
 	auto r = 0;
 	if(type == Monster) {
-		auto& mn = bsmeta<monsteri>::elements[value];
+		auto& mn = bsdata<monsteri>::elements[value];
 		auto& lv = mn.levels[level][0];
 		switch(id) {
 		case Move: r = lv.movement; break;
@@ -326,7 +325,7 @@ int	creaturei::get(action_s id) const {
 	} else if(type == Class) {
 
 	} else if(type == MonsterSummon) {
-		auto& lv = bsmeta<summoni>::elements[value];
+		auto& lv = bsdata<summoni>::elements[value];
 		switch(id) {
 		case Move: r = lv.move; break;
 		case Fly: case Jump: r = 0; break;
@@ -368,7 +367,7 @@ void creaturei::playturn() {
 monstermovei* creaturei::getmonstermove() const {
 	if(isplayer())
 		return 0;
-	return bsmeta<monsteri>::elements[value].deck;
+	return bsdata<monsteri>::elements[value].deck;
 }
 
 playeri* creaturei::getplayer() const {

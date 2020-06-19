@@ -12,10 +12,10 @@ unsigned short deck::get() {
 
 void deck::create() {
 	clear();
-	for(auto& e : bsmeta<battlecardi>()) {
+	for(auto& e : bsdata<battlecardi>()) {
 		if(e.cless)
 			continue;
-		auto i = &e - bsmeta<battlecardi>::elements;
+		auto i = &e - bsdata<battlecardi>::elements;
 		add(i, e.count);
 	}
 	shuffle();
@@ -24,9 +24,9 @@ void deck::create() {
 void deck::modify(actionf& ai) {
 	char temp[512]; stringbuilder sb(temp);
 	auto i = get();
-	auto& ce = bsmeta<battlecardi>::elements[i];
+	auto& ce = bsdata<battlecardi>::elements[i];
 	while(true) {
-		auto b = bsmeta<commandi>::elements[ce.command].bonus;
+		auto b = bsdata<commandi>::elements[ce.command].bonus;
 		ai.bonus += b;
 		answeri an;
 		sb.addn("Вы вытянули %+1i", b);

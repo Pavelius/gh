@@ -23,7 +23,7 @@ static monstermovei zombie_actions[] = {66, {Move0, Attack0},
 static monstermovei fire_demon_actions[] = {30, {Move0, Attack0},
 };
 
-monsteri bsmeta<monsteri>::elements[] = {{"ќжившие кости", Move, 2, skeleton_actions,
+INSTDATA(monsteri) = {{"ќжившие кости", Move, 2, skeleton_actions,
 {{{5, 2, 1, 0, {Target2}}, {6, 4, 2, 0, {Target2}}},
 {{5, 3, 1, 0, {Target2, Shield1}}, {6, 4, 2, 0, {Target3, Shield1}}},
 }},
@@ -48,4 +48,3 @@ monsteri bsmeta<monsteri>::elements[] = {{"ќжившие кости", Move, 2, skeleton_act
 {{16, 5, 4}, {14, 3, 5, 0, {Shield3, AddMuddle}}},
 }},
 };
-assert_enum(monster, BanditGuard);

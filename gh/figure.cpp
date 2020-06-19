@@ -1,7 +1,6 @@
 #include "main.h"
 
-figurei bsmeta<figurei>::elements[32];
-DECLBASE(figurei);
+INSTDATAC(figurei, 32);
 
 void drawable::slide(indext i ) {
 	slide(map::h2p(i), 0);

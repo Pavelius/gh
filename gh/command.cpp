@@ -1,6 +1,6 @@
 #include "main.h"
 
-commandi bsmeta<commandi>::elements[] = {{},
+INSTDATA(commandi) = {{},
 {Action, Special, 1},
 // Атака
 {Action, Attack, -2},
@@ -169,7 +169,6 @@ commandi bsmeta<commandi>::elements[] = {{},
 // Действия с картами
 {Modifier, DiscardableCard},
 };
-assert_enum(command, DiscardCard);
 
 bool commanda::is(command_s i) const {
 	for(auto e : data) {

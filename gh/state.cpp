@@ -1,6 +1,6 @@
 #include "main.h"
 
-statei bsmeta<statei>::elements[] = {{"Disarm", "Разоружение"},
+INSTDATA(statei) = {{"Disarm", "Разоружение"},
 {"Immobilize", "Паралич"},
 {"Wound", "Ранение"},
 {"Muddle", "Сметение"},
@@ -9,4 +9,3 @@ statei bsmeta<statei>::elements[] = {{"Disarm", "Разоружение"},
 {"Stun", "Оглушение"},
 {"Strenght", "Усиление"},
 };
-assert_enum(state, Strenght);

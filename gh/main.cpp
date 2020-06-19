@@ -3,7 +3,7 @@
 using namespace map;
 
 static bool test_abilities() {
-	for(auto& e : bsmeta<abilityi>()) {
+	for(auto& e : bsdata<abilityi>()) {
 		if(!e)
 			continue;
 		actiona a1, a2;
@@ -46,14 +46,14 @@ static void test_answer() {
 	char temp[260]; stringbuilder sb(temp);
 	sb.add("Внезапно все потемнело и вы увидели свет в дальнем краю прохода.");
 	creaturei m1;
-	auto p2 = bsmeta<playeri>::add();
+	auto p2 = bsdata<playeri>::add();
 	p2->type = Class;
 	p2->value = Brute;
 	p2->res = FURN;
 	p2->frame = 0;
 	p2->setpos(142);
 	answeri an;
-	actiona actions; actions.parse(bsmeta<abilityi>::elements[2].upper);
+	actiona actions; actions.parse(bsdata<abilityi>::elements[2].upper);
 	char tem1[260]; stringbuilder sa(tem1); tem1[0] = 0;
 	actions.tostring(sa);
 	an.add(1, tem1);
@@ -68,16 +68,16 @@ static void test_players() {
 }
 
 static void test_ability() {
-	auto& p1 = bsmeta<playeri>::elements[0];
+	auto& p1 = bsdata<playeri>::elements[0];
 	p1.setup_standart();
 	p1.choose_tactic();
 	p1.turn();
 }
 
 static void test_play() {
-	auto& p1 = bsmeta<playeri>::elements[0];
+	auto& p1 = bsdata<playeri>::elements[0];
 	p1.setup_standart();
-	auto& p2 = bsmeta<playeri>::elements[1];
+	auto& p2 = bsdata<playeri>::elements[1];
 	p2.setup_standart();
 	//p1.choose_tactic();
 	//p1.addaction(1);
@@ -120,7 +120,7 @@ static void test_actionf() {
 	actiona a;
 	auto s = sizeof(a.data[0]);
 	a.clear();
-	a.parse(bsmeta<abilityi>::elements[16].upper);
+	a.parse(bsdata<abilityi>::elements[16].upper);
 	a.tostring(sb);
 	a.clear();
 }
@@ -136,16 +136,14 @@ int main() {
 		return 0;
 	if(!test_deck())
 		return 0;
-	return 0;
 	test_map();
 	setcamera(map::h2p(79));
 	draw::initialize();
 	draw::create(-1, -1, 900, 600, 0, 32);
 	draw::setcaption("Gloomhaven board game");
-	//test_movement();
 	//test_players();
 	//test_ability();
-	//test_play();
+	test_play();
 	//map::editor();
 	return 0;
 }

@@ -84,13 +84,13 @@ void map::setmovecost(indext i, indext v) {
 }
 
 void map::block(reaction_s i) {
-	for(auto& e : bsmeta<creaturei>()) {
+	for(auto& e : bsdata<creaturei>()) {
 		if(!e)
 			continue;
 		if(e.getreaction() == i)
 			movement_rate[e.getindex()] = Blocked;
 	}
-	for(auto& e : bsmeta<playeri>()) {
+	for(auto& e : bsdata<playeri>()) {
 		if(!e)
 			continue;
 		if(e.getreaction() == i)
@@ -152,19 +152,19 @@ void map::wave(indext start_index) {
 }
 
 static void add_monster(variant v, indext i, int level) {
-	auto p = bsmeta<creaturei>::add();
+	auto p = bsdata<creaturei>::add();
 	p->create(v, 1);
 	p->setpos(i);
 }
 
 static void add_class(class_s v, indext i, int level) {
-	auto p = bsmeta<playeri>::add();
+	auto p = bsdata<playeri>::add();
 	p->create(v, 1);
 	p->setpos(i);
 }
 
 void map::add(res_s r, indext i, int frame, int c, direction_s d) {
-	auto p = bsmeta<figurei>::add();
+	auto p = bsdata<figurei>::add();
 	p->res = r;
 	p->setpos(i);
 	for(auto n = 0; n < c; n++) {
@@ -179,7 +179,7 @@ void map::add(res_s r, indext i, int frame, int c, direction_s d) {
 
 void map::add(res_s r, indext i, int frame) {
 	auto pt = map::h2p(i);
-	auto p = bsmeta<drawable>::add();
+	auto p = bsdata<drawable>::add();
 	p->res = r;
 	p->frame = frame;
 	p->x = pt.x;
@@ -267,14 +267,14 @@ static void round_begin() {
 	creaturea combatants; setup(combatants);
 	for(auto p : combatants) {
 		if(p->isplayer())
-			p->setinitiative(bsmeta<abilityi>::elements[p->getplayer()->getaction(0)].initiative);
+			p->setinitiative(bsdata<abilityi>::elements[p->getplayer()->getaction(0)].initiative);
 		else
 			p->setinitiative(p->getmonstermove()->initiative);
 	}
 }
 
 static void choose_cards() {
-	for(auto& e : bsmeta<playeri>()) {
+	for(auto& e : bsdata<playeri>()) {
 		if(!e)
 			continue;
 		e.choose_tactic();
@@ -311,7 +311,7 @@ static void lower_elements() {
 }
 
 static void clear_activity() {
-	for(auto& e : bsmeta<activei>()) {
+	for(auto& e : bsdata<activei>()) {
 		if(!e)
 			continue;
 		if(e.getduration() == DurationRound) {
@@ -344,7 +344,7 @@ void map::playround() {
 }
 
 static bool is_players_alive() {
-	for(auto& e : bsmeta<playeri>()) {
+	for(auto& e : bsdata<playeri>()) {
 		if(!e)
 			continue;
 		if(e.isalive())
@@ -354,7 +354,7 @@ static bool is_players_alive() {
 }
 
 static bool is_enemy_alive() {
-	for(auto& e : bsmeta<playeri>()) {
+	for(auto& e : bsdata<playeri>()) {
 		if(!e)
 			continue;
 		if(e.isalive())
@@ -370,7 +370,7 @@ static bool is_allow_play() {
 }
 
 static void prepare_decks() {
-	for(auto& e : bsmeta<playeri>()) {
+	for(auto& e : bsdata<playeri>()) {
 		if(!e)
 			continue;
 		e.getcombatcards().shuffle();

@@ -1,7 +1,6 @@
 #include "main.h"
 
-activei bsmeta<activei>::elements[16];
-DECLBASE(activei);
+INSTDATAC(activei, 16);
 
 bool activei::markuse(action_s id) {
 	auto result = false;
@@ -15,8 +14,8 @@ bool activei::markuse(action_s id) {
 }
 
 playeri* activei::getplayer() const {
-	auto type = bsmeta<abilityi>::elements[card.index].type;
-	return bsmeta<playeri>::elements + type;
+	auto type = bsdata<abilityi>::elements[card.index].type;
+	return bsdata<playeri>::elements + type;
 }
 
 int activei::get(action_s id) const {

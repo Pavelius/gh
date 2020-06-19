@@ -4,6 +4,9 @@
 
 #pragma once
 
+#define assert_enum(e, last) static_assert(sizeof(bsdata<e>::elements) / sizeof(bsdata<e>::elements[0]) == last + 1, "Invalid count of " #e " elements");\
+DECLFULL(e)
+
 const unsigned short Blocked = 0xFFFF;
 
 enum command_s : unsigned char {
@@ -472,7 +475,7 @@ public:
 	unsigned					getabilitiesmax() const { return getclass().abilities_cap; }
 	int							getbonus(int bonus, const creaturei* target) const;
 	deck&						getcombatcards() { return combat_deck; }
-	constexpr const classi&		getclass() const { return bsmeta<classi>::elements[value]; }
+	constexpr const classi&		getclass() const { return bsdata<classi>::elements[value]; }
 	static playeri*				getcurrent();
 	const char*					getname() const { return name; }
 	bool						isallowability(int v) const;
